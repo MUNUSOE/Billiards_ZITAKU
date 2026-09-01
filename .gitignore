@@ -104,3 +104,4 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+Assets/Scripts/BallMove/Some of this projects source files refer to API that has changed. These can be automatically updated. It is recommended to have a backup of the project before updating. Do you want these files to be updated  AssetsScriptsBallMoveNewMonoBehaviourScript.cs
