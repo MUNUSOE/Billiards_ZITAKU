@@ -753,11 +753,11 @@ MonoBehaviour:
   loopSeSource: {fileID: 1085737586}
   bgmList:
   - type: 0
-    clip: {fileID: 8300000, guid: 125a5275832cffb478de4bd2acb92a5f, type: 3}
-    volume: 0.2
+    clip: {fileID: 8300000, guid: 8f5b8c640402d8c42a615a93f7fcf064, type: 3}
+    volume: 0.05
   - type: 1
-    clip: {fileID: 8300000, guid: 1b462940b18e0c641ac9d69e27c31705, type: 3}
-    volume: 0.2
+    clip: {fileID: 8300000, guid: 74eaa733d052fca4181196e6732288c0, type: 3}
+    volume: 0.05
   seList:
   - type: 0
     clip: {fileID: 8300000, guid: 33d1748e925561f439f8fb436c79014a, type: 3}
