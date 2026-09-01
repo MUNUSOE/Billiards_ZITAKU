@@ -99,21 +99,15 @@ public class MagicPotion : MonoBehaviour
             _ => firePotionColor,
         };
 
-        // 実行時（Game View）はインスタンス化した material を変更し、
-        // 編集時（Scene View / Inspector）は sharedMaterial を安全に使用・更新する
-        if (Application.isPlaying)
-        {
-            if (potionRenderer.material != null)
-            {
-                potionRenderer.material.color = color;
-            }
-        }
-        else
-        {
-            if (potionRenderer.sharedMaterial != null)
-            {
-                potionRenderer.sharedMaterial.color = color;
-            }
-        }
+        // Renderer.material に一切触れず、MaterialPropertyBlock で色を適用する
+        // これによりプレハブ編集時・OnValidate実行時・ゲーム実行時のいずれでもエラーが発生しません
+        MaterialPropertyBlock block = new MaterialPropertyBlock();
+        potionRenderer.GetPropertyBlock(block);
+
+        // Standard Shader (_Color) と URP/Lit Shader (_BaseColor) の両方のプロパティ名を更新
+        block.SetColor("_Color", color);
+        block.SetColor("_BaseColor", color);
+
+        potionRenderer.SetPropertyBlock(block);
     }
 }
