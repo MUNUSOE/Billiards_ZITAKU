@@ -15677,6 +15677,46 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: arrowWeakObj
+      value: 
+      objectReference: {fileID: 3621838022422841165}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: arrowMiddleObj
+      value: 
+      objectReference: {fileID: 3621838022422841164}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: arrowStrongObj
+      value: 
+      objectReference: {fileID: 3621838022422841163}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: fireEffectPrefab
+      value: 
+      objectReference: {fileID: 2415447811048438670, guid: 8c28330643085194e9ee8987a0dc873d, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: windEffectPrefab
+      value: 
+      objectReference: {fileID: 4915863843663251042, guid: 9ba5c59aab8437a4f9a41fca9b2c4634, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: fireEffectOffsetY
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterEffectPrefab
+      value: 
+      objectReference: {fileID: 6762456411764577992, guid: e81193babb79e6b498da7828df5693fd, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: windEffectOffsetY
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterEffectOffsetY
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterCastEffectPrefab
+      value: 
+      objectReference: {fileID: 5551718882146614446, guid: ca5678a67971360408484fc2051d9d2e, type: 3}
     - target: {fileID: 6909284985459379488, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
       propertyPath: m_SizeDelta.y
       value: 2
@@ -15702,6 +15742,21 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+--- !u!1 &3621838022422841163 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 882763960925830904, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3621838022422841164 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6193213582981666842, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3621838022422841165 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7692609940416772802, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5670231100176327309
 PrefabInstance:
   m_ObjectHideFlags: 0

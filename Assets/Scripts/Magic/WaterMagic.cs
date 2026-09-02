@@ -27,7 +27,10 @@ public static class WaterMagic
     /// ショット球の停止位置を中心に、8方向の最も手前にある対象球を周囲1マスへ引き寄せます。
     /// 壁、三角壁、木箱、マス間壁、未消火の炎マスは遮蔽物として扱います。
     /// </summary>
-    public static IEnumerator ApplyPull(GameObject centerBall)
+    /// <param name="centerBall">中心となる主ボール</param>
+    /// <param name="effectPrefab">発動時に生成するエフェクトのプレハブ（省略可）</param>
+    /// <param name="offsetY">エフェクト表示位置のY軸オフセット（省略可）</param>
+    public static IEnumerator ApplyPull(GameObject centerBall, GameObject effectPrefab = null, float offsetY = 0f)
     {
         if (centerBall == null) yield break;
 
@@ -51,6 +54,22 @@ public static class WaterMagic
             reservedCells.Add(destination);
         }
 
+        // 引き寄せる対象が存在する場合、発動エフェクトを生成
+        if (moves.Count > 0 && effectPrefab != null)
+        {
+            Vector3 effectPos = centerCell + new Vector3(0f, offsetY, 0f);
+            GameObject effectInstance = Object.Instantiate(effectPrefab, effectPos, Quaternion.identity);
+
+            // 自動破棄コンポーネントがない場合に備えて5秒後に削除保護
+            Object.Destroy(effectInstance, 5f);
+        }
+
+        // 引き寄せる対象が存在する場合、スライド開始前に1秒待機（エフェクトの演出用）
+        if (moves.Count > 0)
+        {
+            yield return new WaitForSeconds(1.5f);
+        }
+
         // 確定した移動先へ、対象の球を「同時に」スライドさせます。
         // 各球のコルーチンを1フレームずつ並行して進め、全員の完了を待ちます。
         // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
@@ -60,7 +79,7 @@ public static class WaterMagic
 
         foreach (WaterMove move in moves)
         {
-            // ★ オブジェクトが既に破棄（Destroy）されていないか事前にチェック
+            // オブジェクトが既に破棄（Destroy）されていないか事前にチェック
             if (move.ball == null) continue;
 
             Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);

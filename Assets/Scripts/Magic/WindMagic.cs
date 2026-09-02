@@ -43,10 +43,13 @@ public static class WindMagic
     }
 
     /// <summary>
-    /// 全ての移動先を先に確定してから、対象球を順番にスライドさせます。
+    /// 全ての移動先を先に確定してから、対象球を同時にスライドさせます。
     /// 同一直線上に1マス目・2マス目の2球がある場合は、外側の2マス目の球だけを3マス目へ移動します。
     /// </summary>
-    public static IEnumerator ApplyPush(GameObject centerBall)
+    /// <param name="centerBall">中心となる主ボール</param>
+    /// <param name="effectPrefab">発動時に生成するエフェクトのプレハブ（省略可）</param>
+    /// <param name="offsetY">エフェクト表示位置のY軸オフセット（省略可）</param>
+    public static IEnumerator ApplyPush(GameObject centerBall, GameObject effectPrefab = null, float offsetY = 0f)
     {
         if (centerBall == null) yield break;
 
@@ -91,6 +94,22 @@ public static class WindMagic
 
         Debug.Log($"[WindMagic] === 判定終了。実際に動く球の数={moves.Count} ===");
 
+        // 吹き飛ばす対象が存在する場合、発動エフェクトを生成
+        if (moves.Count > 0 && effectPrefab != null)
+        {
+            Vector3 effectPos = centerCell + new Vector3(0f, offsetY, 0f);
+            GameObject effectInstance = Object.Instantiate(effectPrefab, effectPos, Quaternion.identity);
+
+            // 自動破棄コンポーネントがない場合に備えて5秒後に削除保護
+            Object.Destroy(effectInstance, 5f);
+        }
+
+        // 吹き飛ばす対象が存在する場合、スライド開始前に1秒待機（エフェクトの演出用）
+        if (moves.Count > 0)
+        {
+            yield return new WaitForSeconds(1f);
+        }
+
         // 確定した移動先へ、対象の球を「同時に」スライドさせます。
         // 各球のコルーチンを1フレームずつ並行して進め、全員の完了を待ちます。
         // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
@@ -100,7 +119,7 @@ public static class WindMagic
 
         foreach (WindMove move in moves)
         {
-            // ★【修正】オブジェクトが既に破棄（Destroy）されていないか安全チェック
+            // オブジェクトが既に破棄（Destroy）されていないか安全チェック
             if (move.ball == null) continue;
 
             Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);
@@ -110,7 +129,6 @@ public static class WindMagic
             bool burns = BallPath.TryGetMagicPathBurnCell(
                 fromCell, move.destination, moveDirection, panelSize, out Vector3 stopCell);
 
-            // ★【修正】安全な名前参照（すでに破棄されている場合を回避）
             string ballName = move.ball != null ? move.ball.name : "DestroyedBall";
             Debug.Log($"[WindMagic] 移動判定 球={ballName} 現在={fromCell} 目的地={move.destination} "
                     + $"方向={moveDirection} 炎接触={burns} 停止位置={stopCell}");
