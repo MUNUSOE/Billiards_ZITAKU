@@ -317,6 +317,11 @@ public static class BallPath
         // 斜め入射でも既存ルールが三角壁の斜辺反射とする場合は、風による進入を許可しない。
         if (TryGetTriangleWallAdjacentDiagonalReflection(triangleCell, fromCell, direction, panelSize, out _)) return false;
 
+        // [変更] そのマスをその進行方向のまま通り抜けられる場合は、ここで停止させない。
+        // 三角壁が進行方向を反射するとき（＝これ以上進めないとき）だけ停止位置とする。
+        // これを見ていないと、素通りできる角度なのに三角壁のマスで止まってしまう。
+        if (!TryGetTriangleWallReflection(triangleCell, direction, panelSize, out _)) return false;
+
         return true;
     }
 
