@@ -420,9 +420,15 @@ public static class BallPath
                 Debug.Log($"[BallPath] IsWaterPullLineBlocked: {nextCell} の三角壁の進入前反射で遮断（終点免除対象外）");
                 return true;
             }
-            if (!ignoreTerminalTriangle && HasTriangleWallAtCell(nextCell, panelSize))
+            // [変更] 三角壁のマスがあるというだけでは遮断しない。
+            // そのマスをその進行方向で「通り抜けられるか」で判定する。
+            // 進入時の反射（隣接斜め・進入前）は上で既に判定済みなので、
+            // ここでは「マス内で塗りつぶし側へ向かって反射するか」だけを見る。
+            // 反射しない角度＝そのまま素通りできる角度なので、遮断しない。
+            if (!ignoreTerminalTriangle && HasTriangleWallAtCell(nextCell, panelSize) &&
+                TryGetTriangleWallReflection(nextCell, direction, panelSize, out _))
             {
-                Debug.Log($"[BallPath] IsWaterPullLineBlocked: {nextCell} に三角壁そのものが存在し遮断（終点免除対象外）");
+                Debug.Log($"[BallPath] IsWaterPullLineBlocked: {nextCell} の三角壁が進行方向{direction}を反射するため遮断");
                 return true;
             }
             if (TryGetActiveFlameTilesOnMove(currentCell, direction, panelSize, out _))
@@ -442,7 +448,10 @@ public static class BallPath
     /// </summary>
     public static bool IsWaterPullDestinationBlocked(Vector3 destination, GameObject movingBall, HashSet<Vector3> reservedCells, float panelSize)
     {
-        return IsMagicMoveDestinationBlocked(destination, movingBall, reservedCells, panelSize);
+        // 球と三角壁は同じマスに共存できるため、引き寄せ先が三角壁のマスでも塞がっているとは扱わない。
+        // 対象球がそのマスへ入れる方向かどうかは、呼び出し側(WaterMagic)が
+        // CanMagicBallLeaveTriangleWall / IsWaterPullLineBlocked で既に確認している。
+        return IsMagicMoveDestinationBlocked(destination, movingBall, reservedCells, panelSize, allowTriangleWall: true);
     }
 
     /// <summary>
