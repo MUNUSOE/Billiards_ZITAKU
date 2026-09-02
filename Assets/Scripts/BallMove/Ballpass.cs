@@ -11,6 +11,8 @@ public static class BallPath
         public bool skipAnimation;
         // 最初のターゲット接触時に炎魔法を終了させるためのフラグです。
         public bool consumeFireOnHit;
+        // 壁・三角壁・マス間壁・（炎以外での）木箱で反射した経路点です。到達時に反射音を鳴らします。
+        public bool isWallHit;
         // この経路点の到達時エフェクトを既に適用したか（同じ点で二重に発火させないため）。
         private bool pendingEffectsApplied;
         // 物理コライダーの状態に依存せず、主ボールのポケット到達を伝えるフラグです。
@@ -963,7 +965,7 @@ public static class BallPath
 
             if (TryGetTriangleWallReflection(currentCell, currentDir, panelSize, out Vector3 triangleReflected))
             {
-                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)));
+                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)) { isWallHit = true });
                 path.Add(new PathPoint(currentCell, skipAnimation: true));
 
                 currentDir = triangleReflected;
@@ -978,7 +980,7 @@ public static class BallPath
             {
                 Vector3 reflected = ReflectDir(currentDir, wallNormal);
 
-                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)));
+                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)) { isWallHit = true });
                 path.Add(new PathPoint(currentCell, skipAnimation: true));
 
                 currentDir = reflected;
@@ -1023,7 +1025,7 @@ public static class BallPath
                 }
                 else
                 {
-                    path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)));
+                    path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)) { isWallHit = true });
                     path.Add(new PathPoint(currentCell, skipAnimation: true));
 
                     currentDir = ReflectDir(currentDir, burnableNormal);
@@ -1037,7 +1039,7 @@ public static class BallPath
 
             if (TryGetDiagonalSideTriangleReflection(currentCell, currentDir, panelSize, out Vector3 sideReflected))
             {
-                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)));
+                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)) { isWallHit = true });
                 path.Add(new PathPoint(currentCell, skipAnimation: true));
 
                 currentDir = sideReflected;
@@ -1050,7 +1052,7 @@ public static class BallPath
 
             if (TryGetTriangleWallAdjacentDiagonalReflection(nextCell, currentCell, currentDir, panelSize, out Vector3 adjacentReflected))
             {
-                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)));
+                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)) { isWallHit = true });
                 path.Add(new PathPoint(currentCell, skipAnimation: true));
 
                 currentDir = adjacentReflected;
@@ -1063,7 +1065,7 @@ public static class BallPath
 
             if (TryGetTriangleWallEntryReflection(nextCell, currentDir, panelSize, out Vector3 entryReflected))
             {
-                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)));
+                path.Add(new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius)) { isWallHit = true });
                 path.Add(new PathPoint(currentCell, skipAnimation: true));
 
                 currentDir = entryReflected;
@@ -1387,10 +1389,22 @@ public static class BallPath
 
     private static void PlayHitSE(PathPoint point, bool[] sePlayed, int index)
     {
-        if (point == null || !point.isBallHit) return;
+        if (point == null) return;
         if (index < 0 || index >= sePlayed.Length) return;
+        if (!point.isBallHit && !point.isWallHit) return;
         if (sePlayed[index]) return;
         sePlayed[index] = true;
+
+        // 壁・三角壁・マス間壁・（炎以外での）木箱による反射音。
+        if (point.isWallHit)
+        {
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySE(SEType.WallHit);
+            }
+
+            if (!point.isBallHit) return;
+        }
 
         // 視覚的に最初のターゲットへ接触した瞬間、炎魔法を一度だけ終了します。
         if (point.consumeFireOnHit && MagicManager.Instance != null)

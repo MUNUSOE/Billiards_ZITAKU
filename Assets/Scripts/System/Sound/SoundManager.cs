@@ -23,7 +23,7 @@ public enum SEType
     FrameTile,
     GetPotion,
     FrameBallHit,
-    HitWall,
+    WallHit,
     UseFrame,
     UseWater,
     UseWind,

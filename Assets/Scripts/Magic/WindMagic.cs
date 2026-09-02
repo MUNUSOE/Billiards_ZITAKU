@@ -106,7 +106,7 @@ public static class WindMagic
 
             if (SoundManager.Instance != null)
             {
-                SoundManager.Instance.PlaySE(SEType.WindMagic);
+                SoundManager.Instance.PlaySE(SEType.UseWind);
             }
 
             yield return new WaitForSeconds(1f);
