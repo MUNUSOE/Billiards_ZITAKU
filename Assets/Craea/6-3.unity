@@ -12997,7 +12997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0ce02c8cc392940b4105f4bcac09b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 3-3
+  sceneName: 6-4
   cooldownTime: 1
 --- !u!114 &1957357196
 MonoBehaviour:

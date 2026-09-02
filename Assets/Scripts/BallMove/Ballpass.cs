@@ -11,6 +11,8 @@ public static class BallPath
         public bool skipAnimation;
         // 最初のターゲット接触時に炎魔法を終了させるためのフラグです。
         public bool consumeFireOnHit;
+        // この経路点の到達時エフェクトを既に適用したか（同じ点で二重に発火させないため）。
+        private bool pendingEffectsApplied;
         // 物理コライダーの状態に依存せず、主ボールのポケット到達を伝えるフラグです。
         public bool isPocket;
         // 未消火の炎マスに到達し、ゲームオーバーになる経路点です。
@@ -31,9 +33,19 @@ public static class BallPath
             this.isHazard = isHazard;
         }
 
-        /// <summary>この経路点に到達したときの破壊・消火をまとめて実行します。</summary>
+        /// <summary>この経路点に到達したときの破壊・消火・エフェクトをまとめて実行します。</summary>
         public void ApplyPendingEffects()
         {
+            if (pendingEffectsApplied) return;
+            pendingEffectsApplied = true;
+
+            // 炎魔法をまとったショット球が球に命中した瞬間のエフェクトと効果音。
+            // プレハブはシーン上の MagicEffectSettings の Inspector で設定する。
+            if (consumeFireOnHit && MagicEffectSettings.Instance != null)
+            {
+                MagicEffectSettings.Instance.PlayFireHitEffect(position);
+            }
+
             if (burnablesToDestroy != null)
             {
                 foreach (GameObject burnable in burnablesToDestroy)
@@ -324,11 +336,10 @@ public static class BallPath
         // 斜め入射でも既存ルールが三角壁の斜辺反射とする場合は、風による進入を許可しない。
         if (TryGetTriangleWallAdjacentDiagonalReflection(triangleCell, fromCell, direction, panelSize, out _)) return false;
 
-        // [変更] そのマスをその進行方向のまま通り抜けられる場合は、ここで停止させない。
-        // 三角壁が進行方向を反射するとき（＝これ以上進めないとき）だけ停止位置とする。
-        // これを見ていないと、素通りできる角度なのに三角壁のマスで止まってしまう。
-        if (!TryGetTriangleWallReflection(triangleCell, direction, panelSize, out _)) return false;
-
+        // 風魔法は、通常移動なら反射する方向でも三角壁マスへの進入を許可する。
+        // 三角壁のあるマスに到達した時点で停止し、三角壁を反射したり通過したりしない。
+        // ただし、進入前反射・隣接斜め反射に該当する方向は通常規則上の進入不可として、
+        // 上の判定で false を返している。
         return true;
     }
 
@@ -475,9 +486,6 @@ public static class BallPath
         return false;
     }
 
-    /// <summary>
-    /// 水魔法で球を引き寄せる周囲1マスが、安全に配置可能かを確認します。
-    /// </summary>
     /// <summary>
     /// 魔法（水・風）で球を fromCell から toCell へ移動させたとき、最初に炎へ触れる位置を返します。
     /// 魔法の効果は炎マスを遮蔽物として無視しますが、触れた球は通常移動と同じく焼失するため、
@@ -678,9 +686,12 @@ public static class BallPath
     private static bool IsAxisBlocked(Vector3 fromCell, Vector3 axisDir, float panelSize, GameObject self = null, SimState state = null, bool includeBurnable = false)
     {
         Vector3 neighbor = fromCell + axisDir * panelSize;
-        if (OverlapHasTag(neighbor, panelSize * 0.2f, "Reflect", null, null, out _))
+        if (OverlapHasTag(neighbor, panelSize * 0.2f, "Reflect", null, null, out GameObject reflectObj))
         {
-            return true;
+            if (reflectObj == null || reflectObj.GetComponentInParent<TriangleWall>() == null)
+            {
+                return true;
+            }
         }
 
         if (TryGetInterCellWallBlock(fromCell, axisDir, panelSize, out _))
@@ -725,8 +736,15 @@ public static class BallPath
             if (blockedZ) { normal = new Vector3(0f, 0f, -dz); return true; }
 
             Vector3 diagCell = cell + new Vector3(dx * panelSize, 0f, dz * panelSize);
-            if (OverlapHasTag(diagCell, panelSize * 0.2f, "Reflect", null, null, out _) ||
-                (includeBurnable && TryGetTaggedObjectAtGridCell(diagCell, panelSize, "Burnable", self, state, out _)))
+            if (OverlapHasTag(diagCell, panelSize * 0.2f, "Reflect", null, null, out GameObject reflectObj))
+            {
+                if (reflectObj == null || reflectObj.GetComponentInParent<TriangleWall>() == null)
+                {
+                    normal = new Vector3(-dx, 0f, -dz).normalized;
+                    return true;
+                }
+            }
+            if (includeBurnable && TryGetTaggedObjectAtGridCell(diagCell, panelSize, "Burnable", self, state, out _))
             {
                 normal = new Vector3(-dx, 0f, -dz).normalized;
                 return true;
