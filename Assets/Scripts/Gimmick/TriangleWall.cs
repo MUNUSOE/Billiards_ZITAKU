@@ -189,6 +189,15 @@ public sealed class TriangleWall : MonoBehaviour
             return true;
         }
 
+        // 直角の角（UpperLeft なら左上）へ斜めに突っ込む方向は、
+        // マスへ入ると塗りつぶし部分の内側に入ってしまうため、進入前に跳ね返す。
+        // 角に正面から当たる形なので、来た方向へそのまま戻す。
+        if (incoming == new Vector2Int(1, -1))
+        {
+            reflected = new Vector2Int(-1, 1);
+            return true;
+        }
+
         reflected = Vector2Int.zero;
         return false;
     }
