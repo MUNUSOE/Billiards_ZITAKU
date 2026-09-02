@@ -1406,11 +1406,10 @@ public static class BallPath
             if (!point.isBallHit) return;
         }
 
-        // 視覚的に最初のターゲットへ接触した瞬間、炎魔法を一度だけ終了します。
-        if (point.consumeFireOnHit && MagicManager.Instance != null)
-        {
-            MagicManager.Instance.ConsumeMagic(MagicType.Fire);
-        }
+        // [変更] ここでの炎魔法の消費を削除しました。
+        // 消費は ShotBall.RunChain の最後（1ショットにつき1回）だけで行います。
+        // 以前は命中時とショット終了時の2箇所から ConsumeMagic が呼ばれており、
+        // 炎魔法の使用回数が1回のショットで2つ減っていました。
 
         if (SoundManager.Instance != null)
         {
