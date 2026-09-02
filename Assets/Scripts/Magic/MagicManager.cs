@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem; 
 using TMPro;
 
 public enum MagicType
@@ -52,6 +53,28 @@ public class MagicManager : MonoBehaviour
         if (windMagicButton != null) windMagicButton.onClick.AddListener(() => ToggleMagic(MagicType.Wind));
 
         UpdateUI();
+    }
+
+    private void Update()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null) return; // キーボードが接続されていない場合はスキップ
+
+        // Qキーで炎魔法の選択・解除
+        if (keyboard.qKey.wasPressedThisFrame)
+        {
+            ToggleMagic(MagicType.Fire);
+        }
+        // Wキーで水魔法の選択・解除
+        else if (keyboard.wKey.wasPressedThisFrame)
+        {
+            ToggleMagic(MagicType.Water);
+        }
+        // Eキーで風魔法の選択・解除
+        else if (keyboard.eKey.wasPressedThisFrame)
+        {
+            ToggleMagic(MagicType.Wind);
+        }
     }
 
     /// <summary>

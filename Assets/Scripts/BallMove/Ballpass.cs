@@ -38,7 +38,14 @@ public static class BallPath
             {
                 foreach (GameObject burnable in burnablesToDestroy)
                 {
-                    if (burnable != null) Object.Destroy(burnable);
+                    if (burnable == null) continue;
+
+                    // 破壊エフェクトは木箱自身が持つ（BurnableEffect のInspectorで設定）。
+                    // Destroy の直前に呼ぶことで、木箱の位置にエフェクトを残せる。
+                    BurnableEffect effect = burnable.GetComponentInParent<BurnableEffect>();
+                    if (effect != null) effect.PlayDestroyEffect();
+
+                    Object.Destroy(burnable);
                 }
                 burnablesToDestroy = null;
             }

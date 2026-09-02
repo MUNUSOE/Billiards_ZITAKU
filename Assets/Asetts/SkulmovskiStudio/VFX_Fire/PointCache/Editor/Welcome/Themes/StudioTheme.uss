@@ -1,0 +1,20 @@
+:root {
+    --accent: #4FC3DD;
+    --accent-text: #0B0E14;
+    --bg: #070C14;
+    --bg-studio-bar: #0B0E14;
+    --bg-header: #0D1420;
+    --bg-card: #0D1420;
+    --bg-card-hover: #131C2C;
+    --bg-card-reminder: #0A0F18;
+    --border: #1A2434;
+    --border-strong: #2C3548;
+    --text-primary: #E8ECF4;
+    --text-secondary: #8996A8;
+    --text-title: #E8ECF4;
+    --text-muted: #5C6678;
+    --status-ok: #6BCF7F;
+    --status-warning: #F2C94C;
+    --status-error: #FF6B4A;
+    --status-manual: #1E40E0;
+}
