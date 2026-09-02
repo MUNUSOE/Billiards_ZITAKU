@@ -37,7 +37,7 @@ public class BurnableEffect : MonoBehaviour
 
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.PlaySE(SEType.FrameMagic);
+            SoundManager.Instance.PlaySE(SEType.DestroyBox);
         }
 
         if (effectLifetime > 0f)

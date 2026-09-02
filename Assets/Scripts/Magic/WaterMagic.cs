@@ -66,7 +66,7 @@ public static class WaterMagic
 
             if (SoundManager.Instance != null)
             {
-                SoundManager.Instance.PlaySE(SEType.WaterMagic);
+                SoundManager.Instance.PlaySE(SEType.UseWater);
             }
 
             yield return new WaitForSeconds(1f);
