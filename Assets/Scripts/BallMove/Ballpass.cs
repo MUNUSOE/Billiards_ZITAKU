@@ -965,11 +965,6 @@ public static class BallPath
 
             Vector3 nextCell = currentCell + StepOffset(currentDir, panelSize);
 
-            // このステップで球が到達したときに破壊／消火するものの予約。
-            // 経路計算の時点では消さず、実際の適用は PlayChain の再生時に行う。
-            List<GameObject> pendingBurnables = null;
-            List<FlameTile> pendingFlames = null;
-
             // 燃える障害物（Burnableタグ）は、炎魔法中の主ボールだけが破壊して通過します。
             // ターゲットボール、および炎魔法未使用時は通常壁と同じ反射規則です。
             if (TryGetBurnableBlock(currentCell, currentDir, panelSize, self, state, out GameObject targetBurnable, out Vector3 burnableNormal))
@@ -985,11 +980,15 @@ public static class BallPath
                         MarkBurnableDestroyedForCurrentShot(burnable, state);
                     }
 
-                    // 実際の破壊は、球が到達したときに行う。ここでは予約するだけで、
-                    // 移動そのものは下の通常処理（三角壁判定などを含む）にそのまま任せる。
+                    // 破壊は「球が木箱に触れた瞬間」に行う。
+                    // 接触位置（マス境界の手前）に経路点を追加し、そこへ破壊をひも付ける。
+                    // この位置は本来の移動線上にあるため軌道は変わらず、
+                    // 以降で反射や衝突が起きても破壊が取りこぼされない。
                     if (burnablesOnMove.Count > 0)
                     {
-                        pendingBurnables = burnablesOnMove;
+                        PathPoint contactPoint = new PathPoint(currentCell + currentDir * (panelSize * 0.5f - ballRadius));
+                        contactPoint.burnablesToDestroy = burnablesOnMove;
+                        path.Add(contactPoint);
                     }
                 }
                 else
@@ -1050,10 +1049,11 @@ public static class BallPath
                 if (isWaterActive)
                 {
                     // 水魔法中は、斜め移動で横切る炎マスも含めて消火して通過します。
-                    // [変更] 以前はここで即座に Extinguish していたためショットの瞬間に炎が消えていました。
-                    // 実際の消火は球が到達したときに行うため、ここでは予約するだけにして、
-                    // 移動そのものは下の通常処理にそのまま任せます。
-                    pendingFlames = new List<FlameTile>(flameTiles);
+                    // [変更] 以前はショット時に即 Extinguish していたため一瞬で消えていました。
+                    // 消火は「球が炎に触れた瞬間」に行うため、接触位置の経路点へひも付ける。
+                    PathPoint extinguishPoint = new PathPoint(GetFlameContactPoint(currentCell, currentDir, panelSize, ballRadius));
+                    extinguishPoint.flamesToExtinguish = new List<FlameTile>(flameTiles);
+                    path.Add(extinguishPoint);
                 }
                 else
                 {
@@ -1150,13 +1150,7 @@ public static class BallPath
             }
 
             currentCell = nextCell;
-
-            // このマスへ到達したときに破壊／消火するものを、その経路点に紐づける。
-            PathPoint movePoint = new PathPoint(currentCell);
-            movePoint.burnablesToDestroy = pendingBurnables;
-            movePoint.flamesToExtinguish = pendingFlames;
-            path.Add(movePoint);
-
+            path.Add(new PathPoint(currentCell));
             remaining--;
             bounceGuard = 0;
             finalDir = currentDir;

@@ -227,7 +227,8 @@ public class ShotBall : MonoBehaviour
         // 移動アニメーションと連鎖が完了するまで待機します。
         yield return BallPath.PlayChain(steps);
 
-        if (this == null) yield break;
+        // ★ 移動完了時に対象オブジェクトが既に破棄されていれば処理中断
+        if (this == null || gameObject == null) yield break;
         if (GameManager.Instance != null && GameManager.Instance.IsGameOver) yield break;
 
         // 主ボールの経路上にポケット到達が記録されていれば、反射経路でも確実にゲームオーバーにします。
@@ -266,6 +267,9 @@ public class ShotBall : MonoBehaviour
             yield return WindMagic.ApplyPush(gameObject);
         }
 
+        // ★ 魔法処理後に対象オブジェクトが破棄された場合はここで中断（ゲームオーバー等で消滅した場合）
+        if (this == null || gameObject == null) yield break;
+
         // 水・風魔法を含め、ショット後に未消費の魔法を消費します。
         if (MagicManager.Instance != null && usedMagic != MagicType.None)
         {
@@ -301,7 +305,7 @@ public class ShotBall : MonoBehaviour
 
         yield return BallPath.PushBallRoutine(gameObject, pushDirection, totalPanels);
 
-        if (this == null) yield break;
+        if (this == null || gameObject == null) yield break;
 
         isMoving = false;
 

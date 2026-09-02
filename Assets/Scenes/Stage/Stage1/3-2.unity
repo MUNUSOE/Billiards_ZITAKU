@@ -1053,7 +1053,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1065,7 +1065,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1105,7 +1105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5494456088903433895, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: lengthInCells
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6548241826067412538, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -6663,6 +6663,10 @@ PrefabInstance:
       propertyPath: extinguished
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7171538656280432277, guid: 7d8af486de605774f8f945ee816fe7c4, type: 3}
+      propertyPath: extinguishEffectPrefab
+      value: 
+      objectReference: {fileID: 5137123306192418792, guid: 2ac89557c7527f94c99c81f50d677a9d, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
