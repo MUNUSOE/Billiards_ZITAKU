@@ -20,10 +20,24 @@ public class GameManager : MonoBehaviour
     // 手数が0になった時・落ちた時のイベント
     public event Action OnGameOver;
 
-    private bool gameOverPending; // ゲームオーバー表示待機中（まだ確定していない）
+    private bool ballLostToHazard; // 炎マスなどで球を失ったか（この場合クリアにはできない）
 
     public int CurrentMoves => currentMoves;
     public bool IsGameOver => gameOverTriggered;
+
+    /// <summary>炎マスなどで球を失っている場合 true。クリア判定を抑制するために使う。</summary>
+    public bool HasLostBallToHazard => ballLostToHazard;
+
+    /// <summary>
+    /// 炎マスで球が焼失したことを通知します。
+    /// 焼失した球も盤面から消えるため、これを記録しておかないと
+    /// 「全ターゲットが消えた＝クリア」と誤判定されてしまいます。
+    /// </summary>
+    public void NotifyBallLostToHazard()
+    {
+        ballLostToHazard = true;
+        Debug.Log("[GameManager] 球が炎で焼失しました。以降クリア判定は成立しません。");
+    }
 
     private void Awake()
     {
@@ -72,40 +86,22 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void TriggerGameOver()
     {
-        if (gameOverTriggered || gameOverPending) return;
+        if (gameOverTriggered) return;
 
-        gameOverPending = true;
+        gameOverTriggered = true;
         StartCoroutine(GameOverRoutine());
     }
 
     /// <summary>
-    /// 指定秒数待機してからゲームオーバーUIを表示するコルーチン。
-    /// [変更] 待機している間、毎フレーム「全ターゲットクリア済みか」を確認し続ける。
-    /// ターゲット消滅の演出などで判定が多少遅れても、この待機時間内にクリアが成立すれば
-    /// ゲームオーバーの表示自体を中止し、クリアを優先する。
+    /// 指定秒数待機してからゲームオーバーUIを表示するコルーチン
     /// </summary>
     private IEnumerator GameOverRoutine()
     {
-        Debug.Log($"ゲームオーバー判定発生。{gameOverDelay}秒後に表示します（その間もクリア成立を監視）。");
-
-        float elapsed = 0f;
-        while (elapsed < gameOverDelay)
-        {
-            if (GameClear.Instance != null && GameClear.Instance.AreAllTargetsCleared())
-            {
-                Debug.Log("[GameManager] 表示待機中に全ターゲットクリアを検知。ゲームオーバー表示を中止し、クリアを優先します。");
-                gameOverPending = false;
-                yield break;
-            }
-
-            yield return null;
-            elapsed += Time.deltaTime;
-        }
-
-        // ここまで来て初めてゲームオーバーを確定する。
-        gameOverTriggered = true;
-        gameOverPending = false;
+        Debug.Log($"ゲームオーバー判定発生。{gameOverDelay}秒後に表示します。");
         OnGameOver?.Invoke();
+
+        // 指定した秒数（1秒）待機
+        yield return new WaitForSeconds(gameOverDelay);
 
         if (GameOverUI != null)
         {
@@ -122,7 +118,7 @@ public class GameManager : MonoBehaviour
         maxMoves = moves;
         currentMoves = moves;
         gameOverTriggered = false;
-        gameOverPending = false;
+        ballLostToHazard = false;
         OnMovesChanged?.Invoke(currentMoves);
     }
 }

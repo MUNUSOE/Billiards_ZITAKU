@@ -8,10 +8,6 @@ using UnityEngine;
 /// </summary>
 public class GameClear : MonoBehaviour
 {
-    // [追加] GameManager 側から「手数0と同時に全ターゲットが消えているか」を
-    // フレームのポーリングを待たず同期的に確認できるようにするための参照。
-    public static GameClear Instance { get; private set; }
-
     [Header("Clear Settings")]
     [Tooltip("クリア対象のターゲット球をすべて登録する。登録順は判定に影響しない。")]
     [SerializeField] private List<GameObject> targetObjects = new List<GameObject>();
@@ -23,16 +19,6 @@ public class GameClear : MonoBehaviour
     [SerializeField, Min(0f)] private float clearDelay = 0.5f;
 
     private bool clearTriggered;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    private void OnDestroy()
-    {
-        if (Instance == this) Instance = null;
-    }
 
     private void Start()
     {
@@ -62,11 +48,18 @@ public class GameClear : MonoBehaviour
                 yield break;
             }
 
+            // 炎マスで球を失っている場合、球が盤面から消えていてもクリアではない。
+            if (GameManager.Instance != null && GameManager.Instance.HasLostBallToHazard)
+            {
+                yield break;
+            }
+
             if (AreAllTargetsDestroyed())
             {
                 yield return new WaitForSeconds(clearDelay);
 
-                if (GameManager.Instance == null || !GameManager.Instance.IsGameOver)
+                if (GameManager.Instance == null ||
+                    (!GameManager.Instance.IsGameOver && !GameManager.Instance.HasLostBallToHazard))
                 {
                     OpenClearUI();
                 }
@@ -81,16 +74,6 @@ public class GameClear : MonoBehaviour
     private bool AreAllTargetsDestroyed()
     {
         return targetObjects.TrueForAll(target => target == null);
-    }
-
-    /// <summary>
-    /// [追加] 全ターゲット球が既に消滅済みかどうかを外部（GameManager）から同期的に確認するための公開メソッド。
-    /// Destroy() されたオブジェクトは呼び出し直後から == null になるため、
-    /// このチェックは WatchTargetsRoutine のフレーム経過を待たずに正しい結果を返す。
-    /// </summary>
-    public bool AreAllTargetsCleared()
-    {
-        return AreAllTargetsDestroyed();
     }
 
     /// <summary>
