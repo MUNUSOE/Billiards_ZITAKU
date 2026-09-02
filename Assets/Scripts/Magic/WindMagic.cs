@@ -6,10 +6,6 @@ using UnityEngine;
 /// 風魔法のショット後効果です。
 /// ショット球を中心に8方向・2マス以内にある可視なターゲット球を、
 /// 同じ方向の3マス目へ放射状に吹き飛ばします。
-///
-/// [DEBUG] 不発の原因を切り分けるため、各方向・各判定ステップで
-/// Debug.Log を出すように計装しています。ロジック自体は元のコードから変更していません。
-/// 問題が再現したら Console の "[WindMagic]" ログをそのまま貼ってください。
 /// </summary>
 public static class WindMagic
 {
@@ -68,7 +64,7 @@ public static class WindMagic
             string dirName = DirectionNames[i];
 
             GameObject target = FindOutermostVisibleBall(centerBall, centerCell, direction, panelSize, dirName);
-            if (target == null) continue; // 理由は FindOutermostVisibleBall 内でログ済み
+            if (target == null) continue;
 
             if (reservedBalls.Contains(target))
             {
@@ -78,12 +74,12 @@ public static class WindMagic
 
             if (!TryResolveWindDestination(target, centerCell, direction, panelSize, dirName, out Vector3 destination, out bool stopsOnTriangleWall))
             {
-                continue; // 理由は TryResolveWindDestination 内でログ済み
+                continue;
             }
 
             if (BallPath.IsMagicMoveDestinationBlocked(destination, target, reservedCells, panelSize, allowTriangleWall: stopsOnTriangleWall))
             {
-                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} の着地予定セル {destination} が塞がっているため不発（予約済み/他の球/炎マス/壁/木箱のいずれか。詳細はBallPath側のログ参照）");
+                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} の着地予定セル {destination} が塞がっているため不発");
                 continue;
             }
 
@@ -98,20 +94,36 @@ public static class WindMagic
         // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
         foreach (WindMove move in moves)
         {
+            // ★【修正】オブジェクトが既に破棄（Destroy）されていないか安全チェック
             if (move.ball == null) continue;
 
             Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);
             Vector3 moveDirection = BallPath.Get8Direction((move.destination - fromCell).normalized);
 
-            // 炎に触れる場合は、その位置で移動を打ち切る（炎マスを通り過ぎてから止まらないようにする）。
+            // 炎に触れる場合は、その位置で移動を打ち切る
             bool burns = BallPath.TryGetMagicPathBurnCell(
                 fromCell, move.destination, moveDirection, panelSize, out Vector3 stopCell);
 
-            Debug.Log($"[WindMagic] 移動判定 球={move.ball.name} 現在={fromCell} 目的地={move.destination} "
+            // ★【修正】安全な名前参照（すでに破棄されている場合を回避）
+            string ballName = move.ball != null ? move.ball.name : "DestroyedBall";
+            Debug.Log($"[WindMagic] 移動判定 球={ballName} 現在={fromCell} 目的地={move.destination} "
                     + $"方向={moveDirection} 炎接触={burns} 停止位置={stopCell}");
 
-            // 炎への接触点で止める場合はマスの中間座標になりうるため、グリッド吸着を無効にする。
+            // スライドアニメーション実行
             yield return MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns);
+
+            // ★【修正】スライド後に対象球が消滅（Destroy）しているか再度チェック
+            if (move.ball == null)
+            {
+                Debug.Log($"[WindMagic] スライド中に球が消失しました（炎接触または破棄）");
+                if (burns)
+                {
+                    for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
+                    if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
+                    yield break;
+                }
+                continue;
+            }
 
             Debug.Log($"[WindMagic] スライド完了 球={move.ball.name} 実際の位置={move.ball.transform.position}");
 
@@ -119,7 +131,6 @@ public static class WindMagic
             {
                 Debug.Log($"[WindMagic] 吹き飛ばした球が炎マスに触れたためゲームオーバー: {stopCell}");
 
-                // 停止した瞬間にゲームオーバーへ移ると唐突なので、少し間を置く。
                 for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
 
                 if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
@@ -129,8 +140,7 @@ public static class WindMagic
     }
 
     /// <summary>
-    /// 風による移動先を決定します。進行中に進入可能な三角壁マスがあれば、
-    /// そのマスを終点として停止し、反射・通過は行いません。
+    /// 風による移動先を決定します。
     /// </summary>
     private static bool TryResolveWindDestination(GameObject target, Vector3 centerCell, Vector3 direction, float panelSize, string dirName, out Vector3 destination, out bool stopsOnTriangleWall)
     {
@@ -140,10 +150,9 @@ public static class WindMagic
 
         Vector3 currentCell = BallPath.SnapToGrid(target.transform.position, panelSize);
 
-        // 三角壁マス内にいる対象球も、既存の通常移動規則上で出られる方向だけ移動可能にする。
         if (!BallPath.CanMagicBallLeaveTriangleWall(currentCell, direction, panelSize))
         {
-            Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は現在セル {currentCell} が三角壁で、その方向には出られないため不発（詳細はBallPath側のログ参照）");
+            Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は現在セル {currentCell} が三角壁で、その方向には出られないため不発");
             return false;
         }
 
@@ -155,7 +164,6 @@ public static class WindMagic
         {
             Vector3 nextCell = centerCell + direction * panelSize * distance;
 
-            // 三角壁へ入れる面から押されたときは、その三角壁マスで停止する。
             if (BallPath.CanWindStopOnTriangleWall(currentCell, nextCell, direction, panelSize))
             {
                 destination = nextCell;
@@ -164,13 +172,10 @@ public static class WindMagic
                 return true;
             }
 
-            // 進入できない三角壁、通常壁、木箱、間壁、炎マスは風を遮る。
-            // [変更] 3マス目まで届かない場合でも丸ごと不発にはせず、遮られる手前のマスで止める
-            // （3マス以内で動かせる最大距離まで移動する）。
             if (BallPath.IsWaterPullLineBlocked(currentCell, nextCell, direction, panelSize))
             {
                 destination = currentCell;
-                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は{distance}マス目手前（{currentCell}→{nextCell}）で遮られたため、{currentCell}で停止（動けるところまで移動、{distance - startDistance - 1}マス分）");
+                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は{distance}マス目手前で遮られたため、{currentCell}で停止");
                 return true;
             }
 
@@ -181,8 +186,7 @@ public static class WindMagic
     }
 
     /// <summary>
-    /// 1～2マス目を調べます。両方に球がある場合は、外側（2マス目）を返します。
-    /// 壁・三角壁・木箱・マス間壁・炎マスが間にあれば、その方向には効果を及ぼしません。
+    /// 1〜2マス目を調べます。両方に球がある場合は、外側（2マス目）を返します。
     /// </summary>
     private static GameObject FindOutermostVisibleBall(GameObject centerBall, Vector3 centerCell, Vector3 direction, float panelSize, string dirName)
     {
@@ -191,15 +195,10 @@ public static class WindMagic
         for (int distance = 1; distance <= 2; distance++)
         {
             Vector3 cell = centerCell + direction * panelSize * distance;
-            // 終点が三角壁マスでも、そこにいる対象球自体は探索対象に含める。
-            // 実際に三角壁から出られるかは TryResolveWindDestination 側で確認する。
+
             if (BallPath.IsWaterPullLineBlocked(centerCell, cell, direction, panelSize, allowTriangleAtEnd: true))
             {
-                // [BUGFIX] 以前はここで return null しており、1マス目で正しく見つかっていた
-                // 対象球（例：三角壁マスにちょうど乗っている球）まで巻き添えで消えていた。
-                // 2マス目の視線が塞がれても、それより手前で確定していた発見は保持し、
-                // 単に「これ以上遠くは探さない」だけにする。
-                Debug.Log($"[WindMagic] {dirName}: {distance}マス目（{cell}）から先の視線が遮られたため探索を打ち切り（{(outermost != null ? "手前で発見済みの対象は維持" : "対象なし")}）");
+                Debug.Log($"[WindMagic] {dirName}: {distance}マス目（{cell}）から先の視線が遮られたため探索を打ち切り");
                 break;
             }
 

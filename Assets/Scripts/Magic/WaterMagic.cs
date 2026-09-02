@@ -55,6 +55,7 @@ public static class WaterMagic
         // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
         foreach (WaterMove move in moves)
         {
+            // ★ オブジェクトが既に破棄（Destroy）されていないか事前にチェック
             if (move.ball == null) continue;
 
             Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);
@@ -69,6 +70,19 @@ public static class WaterMagic
 
             // 炎への接触点で止める場合はマスの中間座標になりうるため、グリッド吸着を無効にする。
             yield return MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns);
+
+            // ★ スライド処理中に対象球が消滅（Destroy）しているか判定
+            if (move.ball == null)
+            {
+                Debug.Log($"[WaterMagic] スライド中に球が消失しました（炎接触または破棄）");
+                if (burns)
+                {
+                    for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
+                    if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
+                    yield break;
+                }
+                continue;
+            }
 
             Debug.Log($"[WaterMagic] スライド完了 球={move.ball.name} 実際の位置={move.ball.transform.position}");
 

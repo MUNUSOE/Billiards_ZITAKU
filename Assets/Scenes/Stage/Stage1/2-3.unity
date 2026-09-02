@@ -760,6 +760,10 @@ PrefabInstance:
       propertyPath: extinguished
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7171538656280432277, guid: 7d8af486de605774f8f945ee816fe7c4, type: 3}
+      propertyPath: extinguishEffectPrefab
+      value: 
+      objectReference: {fileID: 5137123306192418792, guid: 2ac89557c7527f94c99c81f50d677a9d, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

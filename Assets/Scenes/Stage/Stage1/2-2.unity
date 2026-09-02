@@ -8022,6 +8022,14 @@ PrefabInstance:
       propertyPath: extinguished
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7171538656280432277, guid: 7d8af486de605774f8f945ee816fe7c4, type: 3}
+      propertyPath: effectSpawnPoint
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171538656280432277, guid: 7d8af486de605774f8f945ee816fe7c4, type: 3}
+      propertyPath: extinguishEffectPrefab
+      value: 
+      objectReference: {fileID: 5137123306192418792, guid: 2ac89557c7527f94c99c81f50d677a9d, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -16544,11 +16552,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 3eb19fa5b8658a94197f12394f6e9d44, type: 2}
     - target: {fileID: 3062124409504209540, guid: 366e5312369094643bcd744a61656c71, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5
+      value: -6
       objectReference: {fileID: 0}
     - target: {fileID: 3062124409504209540, guid: 366e5312369094643bcd744a61656c71, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5761396165142870335, guid: 366e5312369094643bcd744a61656c71, type: 3}
       propertyPath: m_IsActive
