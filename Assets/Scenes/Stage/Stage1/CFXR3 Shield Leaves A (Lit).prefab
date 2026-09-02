@@ -223,8 +223,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.25454548, g: 0.35, b: 0.10181819, a: 1}
-      maxColor: {r: 0.39215687, g: 0.54901963, b: 0.16078432, a: 1}
+      minColor: {r: 0.3987776, g: 0.899371, b: 0.64129215, a: 1}
+      maxColor: {r: 0, g: 1, b: 0.0919404, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -4864,7 +4864,7 @@ Transform:
   m_GameObject: {fileID: 1375482959219806787}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: -0.1}
+  m_LocalPosition: {x: 0.3, y: 0, z: 0}
   m_LocalScale: {x: 0.65, y: 0.65, z: 0.65}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -5059,8 +5059,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.25454548, g: 0.35, b: 0.10181819, a: 1}
-      maxColor: {r: 0.39215687, g: 0.54901963, b: 0.16078432, a: 1}
+      minColor: {r: 0.3987776, g: 0.899371, b: 0.64129215, a: 1}
+      maxColor: {r: 0, g: 1, b: 0.0919404, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -9716,14 +9716,14 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8538051858000053040}
   serializedVersion: 8
-  lengthInSec: 1
-  simulationSpeed: 1
+  lengthInSec: 10
+  simulationSpeed: 5
   stopAction: 0
   cullingMode: 0
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 0
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
@@ -9731,7 +9731,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 0.5
+    scalar: 0
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -9791,8 +9791,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1.3
-      minScalar: 1
+      scalar: 0.5
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -9897,8 +9897,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.4210465, g: 0.51, b: 0.2905814, a: 1}
-      maxColor: {r: 0.2781078, g: 0.336, b: 0.192528, a: 1}
+      minColor: {r: 0.73718464, g: 0.84276724, b: 0.5856967, a: 1}
+      maxColor: {r: 0.5945946, g: 1, b: 0, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
