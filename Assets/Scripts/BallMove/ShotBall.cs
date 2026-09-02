@@ -27,7 +27,35 @@ public class ShotBall : MonoBehaviour
     [SerializeField] private Color normalColor = Color.white; // 通常（白）
     [SerializeField] private Color fireColor = Color.red;     // 炎（赤）
     [SerializeField] private Color waterColor = Color.blue;   // 水（青）
-    [SerializeField] private Color windColor = Color.green;   // 風（緑）
+    [SerializeField] private Color windColor = Color.green;  // 風（緑）
+
+    [Header("Magic Select Effect Prefabs (選択中)")]
+    [Tooltip("炎魔法選択時にボールに付与するエフェクト")]
+    [SerializeField] private GameObject fireEffectPrefab;
+    [SerializeField] private float fireEffectOffsetY = 0f;
+
+    [Tooltip("水魔法選択時にボールに付与するエフェクト")]
+    [SerializeField] private GameObject waterEffectPrefab;
+    [SerializeField] private float waterEffectOffsetY = 0f;
+
+    [Tooltip("風魔法選択時にボールに付与するエフェクト")]
+    [SerializeField] private GameObject windEffectPrefab;
+    [SerializeField] private float windEffectOffsetY = 0f;
+
+    [Header("Magic Action Effect Prefabs (発動時)")]
+    [Tooltip("水魔法発動（引き寄せ）時に発生させる専用エフェクト")]
+    [SerializeField] private GameObject waterCastEffectPrefab;
+    [Tooltip("水魔法発動時エフェクトのY軸オフセット調整")]
+    [SerializeField] private float waterCastEffectOffsetY = 0f;
+
+    [Tooltip("風魔法発動（押し出し）時に発生させる専用エフェクト")]
+    [SerializeField] private GameObject windCastEffectPrefab;
+    [Tooltip("風魔法発動時エフェクトのY軸オフセット調整")]
+    [SerializeField] private float windCastEffectOffsetY = 0f;
+
+    // 現在ボールに追従・表示している選択中エフェクトのインスタンス
+    private GameObject currentMagicEffectObj;
+    private MagicType currentActiveMagic = MagicType.None;
 
     private Transform arrow;
     private bool isMoving = false;
@@ -54,9 +82,13 @@ public class ShotBall : MonoBehaviour
     void OnDestroy()
     {
         clickAction.Disable();
+
+        if (currentMagicEffectObj != null)
+        {
+            Destroy(currentMagicEffectObj);
+        }
     }
 
-    // 主ボールが実際にポケットへ入った瞬間にゲームオーバーを通知します。
     private void OnTriggerEnter(Collider other)
     {
         if (other != null && other.CompareTag("Pocket"))
@@ -65,7 +97,6 @@ public class ShotBall : MonoBehaviour
         }
     }
 
-    // 経路予測ではなく実際のポケット接触を基準に、一度だけゲームオーバーを実行します。
     public void TriggerGameOverFromPocket()
     {
         if (gameOverTriggered) return;
@@ -90,10 +121,8 @@ public class ShotBall : MonoBehaviour
 
     void Update()
     {
-        // 選択中の魔法に応じて主ボールの色を変更します。
-        UpdateBallColor();
+        UpdateBallColorAndEffect();
 
-        // 移動中、または残り手数が0以下の場合は操作できません。
         bool canOperate = !isMoving && (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0);
 
         if (canOperate)
@@ -108,26 +137,69 @@ public class ShotBall : MonoBehaviour
         }
     }
 
-    private void UpdateBallColor()
+    private void UpdateBallColorAndEffect()
     {
-        if (ballRenderer == null || MagicManager.Instance == null) return;
+        if (MagicManager.Instance == null) return;
 
         MagicType active = MagicManager.Instance.ActiveMagic;
+
+        if (currentActiveMagic != active)
+        {
+            currentActiveMagic = active;
+            ChangeMagicEffect(active);
+        }
+
+        if (ballRenderer != null)
+        {
+            switch (active)
+            {
+                case MagicType.Fire:
+                    ballRenderer.material.color = fireColor;
+                    break;
+                case MagicType.Water:
+                    ballRenderer.material.color = waterColor;
+                    break;
+                case MagicType.Wind:
+                    ballRenderer.material.color = windColor;
+                    break;
+                default:
+                    ballRenderer.material.color = normalColor;
+                    break;
+            }
+        }
+    }
+
+    private void ChangeMagicEffect(MagicType active)
+    {
+        if (currentMagicEffectObj != null)
+        {
+            Destroy(currentMagicEffectObj);
+            currentMagicEffectObj = null;
+        }
+
+        GameObject prefabToInstantiate = null;
+        float offsetY = 0f;
 
         switch (active)
         {
             case MagicType.Fire:
-                ballRenderer.material.color = fireColor;
+                prefabToInstantiate = fireEffectPrefab;
+                offsetY = fireEffectOffsetY;
                 break;
             case MagicType.Water:
-                ballRenderer.material.color = waterColor;
+                prefabToInstantiate = waterEffectPrefab;
+                offsetY = waterEffectOffsetY;
                 break;
             case MagicType.Wind:
-                ballRenderer.material.color = windColor;
+                prefabToInstantiate = windEffectPrefab;
+                offsetY = windEffectOffsetY;
                 break;
-            default:
-                ballRenderer.material.color = normalColor;
-                break;
+        }
+
+        if (prefabToInstantiate != null)
+        {
+            currentMagicEffectObj = Instantiate(prefabToInstantiate, transform.position, Quaternion.identity, transform);
+            currentMagicEffectObj.transform.localPosition = new Vector3(0f, offsetY, 0f);
         }
     }
 
@@ -224,14 +296,11 @@ public class ShotBall : MonoBehaviour
         isMoving = true;
         if (arrow != null) arrow.gameObject.SetActive(false);
 
-        // 移動アニメーションと連鎖が完了するまで待機します。
         yield return BallPath.PlayChain(steps);
 
-        // ★ 移動完了時に対象オブジェクトが既に破棄されていれば処理中断
         if (this == null || gameObject == null) yield break;
         if (GameManager.Instance != null && GameManager.Instance.IsGameOver) yield break;
 
-        // 主ボールの経路上にポケット到達が記録されていれば、反射経路でも確実にゲームオーバーにします。
         bool fellIntoPocket = false;
         if (steps != null && steps.Count > 0)
         {
@@ -249,28 +318,24 @@ public class ShotBall : MonoBehaviour
             }
         }
 
-        // 主ボールがポケットへ入った場合の処理です。
         if (fellIntoPocket)
         {
             TriggerGameOverFromPocket();
             yield break;
         }
 
-        // 水・風魔法はショット球と連鎖が停止した後、一度だけ発動します。
-        // 魔法で動くターゲット球は、瞬間移動ではなくスライド完了まで待機します。
+        // 水・風魔法ともに専用の発動時エフェクトとY座標オフセットを渡して呼び出し
         if (usedMagic == MagicType.Water)
         {
-            yield return WaterMagic.ApplyPull(gameObject);
+            yield return WaterMagic.ApplyPull(gameObject, waterCastEffectPrefab, waterCastEffectOffsetY);
         }
         else if (usedMagic == MagicType.Wind)
         {
-            yield return WindMagic.ApplyPush(gameObject);
+            yield return WindMagic.ApplyPush(gameObject, windCastEffectPrefab, windCastEffectOffsetY);
         }
 
-        // ★ 魔法処理後に対象オブジェクトが破棄された場合はここで中断（ゲームオーバー等で消滅した場合）
         if (this == null || gameObject == null) yield break;
 
-        // 水・風魔法を含め、ショット後に未消費の魔法を消費します。
         if (MagicManager.Instance != null && usedMagic != MagicType.None)
         {
             MagicManager.Instance.ConsumeMagic(usedMagic);
@@ -278,7 +343,6 @@ public class ShotBall : MonoBehaviour
 
         isMoving = false;
 
-        // 移動完了後に手数を消費します。
         if (GameManager.Instance != null)
         {
             GameManager.Instance.ConsumeMove();

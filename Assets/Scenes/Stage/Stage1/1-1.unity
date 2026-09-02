@@ -12511,6 +12511,54 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: arrowWeakObj
+      value: 
+      objectReference: {fileID: 3621838022422841165}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: arrowMiddleObj
+      value: 
+      objectReference: {fileID: 3621838022422841164}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: arrowStrongObj
+      value: 
+      objectReference: {fileID: 3621838022422841163}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: fireEffectPrefab
+      value: 
+      objectReference: {fileID: 2415447811048438670, guid: 8c28330643085194e9ee8987a0dc873d, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: windEffectPrefab
+      value: 
+      objectReference: {fileID: 4915863843663251042, guid: 9ba5c59aab8437a4f9a41fca9b2c4634, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: fireEffectOffsetY
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterEffectPrefab
+      value: 
+      objectReference: {fileID: 6762456411764577992, guid: e81193babb79e6b498da7828df5693fd, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: windEffectOffsetY
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterEffectOffsetY
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: windCastEffectPrefab
+      value: 
+      objectReference: {fileID: 8538051858000053040, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterCastEffectPrefab
+      value: 
+      objectReference: {fileID: 5551718882146614446, guid: ca5678a67971360408484fc2051d9d2e, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: waterCastEffectOffsetY
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6909284985459379488, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
       propertyPath: m_SizeDelta.y
       value: 2
@@ -12536,6 +12584,21 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+--- !u!1 &3621838022422841163 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 882763960925830904, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3621838022422841164 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6193213582981666842, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3621838022422841165 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7692609940416772802, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5670231100176327309
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12692,6 +12755,67 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 65c7d32d353eaad41afa11d2d6cdc675, type: 3}
+--- !u!1001 &8467256716858243361
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.7976613
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.765443
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6765598324118698104, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8538051858000053040, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_Name
+      value: CFXR3 Shield Leaves A (Lit)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8538051858000053040, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -12707,3 +12831,4 @@ SceneRoots:
   - {fileID: 488099956}
   - {fileID: 1590512932}
   - {fileID: 1690280294}
+  - {fileID: 8467256716858243361}
