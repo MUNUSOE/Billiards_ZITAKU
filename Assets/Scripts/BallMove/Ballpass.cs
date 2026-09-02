@@ -15,6 +15,11 @@ public static class BallPath
         public bool isPocket;
         // 未消火の炎マスに到達し、ゲームオーバーになる経路点です。
         public bool isHazard;
+        // この経路点へ球が到達した時点で破壊する木箱です。
+        // 経路計算の時点で消すとショットの瞬間に消えてしまうため、再生時まで遅延させます。
+        public List<GameObject> burnablesToDestroy;
+        // この経路点へ球が到達した時点で消火する炎マスです。
+        public List<FlameTile> flamesToExtinguish;
 
         public PathPoint(Vector3 position, bool isBallHit = false, bool skipAnimation = false, bool consumeFireOnHit = false, bool isPocket = false, bool isHazard = false)
         {
@@ -24,6 +29,28 @@ public static class BallPath
             this.consumeFireOnHit = consumeFireOnHit;
             this.isPocket = isPocket;
             this.isHazard = isHazard;
+        }
+
+        /// <summary>この経路点に到達したときの破壊・消火をまとめて実行します。</summary>
+        public void ApplyPendingEffects()
+        {
+            if (burnablesToDestroy != null)
+            {
+                foreach (GameObject burnable in burnablesToDestroy)
+                {
+                    if (burnable != null) Object.Destroy(burnable);
+                }
+                burnablesToDestroy = null;
+            }
+
+            if (flamesToExtinguish != null)
+            {
+                foreach (FlameTile tile in flamesToExtinguish)
+                {
+                    if (tile != null) tile.Extinguish();
+                }
+                flamesToExtinguish = null;
+            }
         }
     }
 
@@ -331,11 +358,7 @@ public static class BallPath
             Debug.Log($"[BallPath] CanMagicBallLeaveTriangleWall: 隣接セル{nextCell}の三角壁の進入前反射に阻まれ出られない");
             return false;
         }
-        if (TryGetActiveFlameTilesOnMove(fromCell, direction, panelSize, out _))
-        {
-            Debug.Log($"[BallPath] CanMagicBallLeaveTriangleWall: {fromCell}→{direction}方向の移動線上に未消火の炎マスがあり出られない");
-            return false;
-        }
+        // [変更] 魔法の効果では炎マスを遮蔽物として扱わない。
 
         return true;
     }
@@ -431,11 +454,8 @@ public static class BallPath
                 Debug.Log($"[BallPath] IsWaterPullLineBlocked: {nextCell} の三角壁が進行方向{direction}を反射するため遮断");
                 return true;
             }
-            if (TryGetActiveFlameTilesOnMove(currentCell, direction, panelSize, out _))
-            {
-                Debug.Log($"[BallPath] IsWaterPullLineBlocked: {currentCell}→{direction}方向の移動線上に未消火の炎マスがあり遮断");
-                return true;
-            }
+            // [変更] 魔法の効果では炎マスを遮蔽物として扱わない（素通りさせる）。
+            // 炎マスに触れた場合の焼失判定は、移動確定後に呼び出し側が行う。
 
             currentCell = nextCell;
         }
@@ -446,6 +466,62 @@ public static class BallPath
     /// <summary>
     /// 水魔法で球を引き寄せる周囲1マスが、安全に配置可能かを確認します。
     /// </summary>
+    /// <summary>
+    /// 魔法（水・風）で球を fromCell から toCell へ移動させたとき、最初に炎へ触れる位置を返します。
+    /// 魔法の効果は炎マスを遮蔽物として無視しますが、触れた球は通常移動と同じく焼失するため、
+    /// 呼び出し側はこの位置で移動を打ち切ってゲームオーバーにします。
+    /// 斜め移動で横のマスの炎に触れる場合は、その手前のマス（触れる直前の位置）を停止位置とします。
+    /// </summary>
+    /// <param name="burnCell">炎に触れて停止する位置。斜めに角をかすめる場合はマスの中間座標になる。触れない場合は toCell。</param>
+    /// <returns>経路上または終点で炎に触れる場合 true。</returns>
+    public static bool TryGetMagicPathBurnCell(Vector3 fromCell, Vector3 toCell, Vector3 direction, float panelSize, out Vector3 burnCell)
+    {
+        burnCell = toCell;
+
+        int steps = Mathf.RoundToInt(Mathf.Max(
+            Mathf.Abs(toCell.x - fromCell.x),
+            Mathf.Abs(toCell.z - fromCell.z)) / panelSize);
+
+        Vector3 step = StepOffset(direction, panelSize);
+        Vector3 currentCell = fromCell;
+
+        for (int i = 0; i < steps; i++)
+        {
+            Vector3 nextCell = currentCell + step;
+
+            Debug.Log($"[BallPath] 炎経路走査 {i}歩目 現在={currentCell} 次={nextCell} "
+                + $"次が炎={TryGetActiveFlameTile(nextCell, panelSize, out _)} "
+                + $"斜め横が炎={TryGetActiveFlameTilesOnMove(currentCell, direction, panelSize, out _)}");
+
+            // 進行先のマス自体が炎なら、そのマスへ入った時点で焼失する。
+            if (TryGetActiveFlameTile(nextCell, panelSize, out _))
+            {
+                burnCell = nextCell;
+                return true;
+            }
+
+            // 斜めに横切る隣のマスが炎の場合、接触点は currentCell と nextCell のちょうど中間
+            // （マスの角をかすめる位置）にある。currentCell を返すと球が動かず、
+            // nextCell を返すと炎を通り過ぎてから止まって見えるため、中間位置で止める。
+            if (TryGetActiveFlameTilesOnMove(currentCell, direction, panelSize, out _))
+            {
+                burnCell = Vector3.Lerp(currentCell, nextCell, 0.5f);
+                return true;
+            }
+
+            currentCell = nextCell;
+        }
+
+        // 始点がすでに炎の上（移動距離0を含む）。
+        if (TryGetActiveFlameTile(toCell, panelSize, out _))
+        {
+            burnCell = toCell;
+            return true;
+        }
+
+        return false;
+    }
+
     public static bool IsWaterPullDestinationBlocked(Vector3 destination, GameObject movingBall, HashSet<Vector3> reservedCells, float panelSize)
     {
         // 球と三角壁は同じマスに共存できるため、引き寄せ先が三角壁のマスでも塞がっているとは扱わない。
@@ -469,11 +545,8 @@ public static class BallPath
             Debug.Log($"[BallPath] IsMagicMoveDestinationBlocked: {destination} に既に別の球がいる");
             return true;
         }
-        if (TryGetActiveFlameTile(destination, panelSize, out _))
-        {
-            Debug.Log($"[BallPath] IsMagicMoveDestinationBlocked: {destination} は未消火の炎マス");
-            return true;
-        }
+        // [変更] 移動先が炎マスでも配置は許可する（遮蔽物として扱わない）。
+        // その結果球が焼失するかどうかは、呼び出し側が HasActiveFlameOnMagicPath で判定する。
         if (OverlapHasTag(destination, panelSize * 0.3f, "Reflect", null, null, out GameObject reflectObject))
         {
             // 風で進入可能な三角壁マスを終点にする場合だけ、三角壁自身のReflectタグを許可する。
@@ -766,7 +839,12 @@ public static class BallPath
         }
     }
 
-    private static void DestroyBurnableForCurrentShot(GameObject burnable, SimState state)
+    /// <summary>
+    /// 木箱を「このショットでは破壊済み」として経路計算上だけ無効化します。
+    /// [変更] 以前はここで Object.Destroy を呼んでいたため、ショットした瞬間に木箱が消えていました。
+    /// 実際の破壊は、球がその位置へ到達したときに PathPoint.ApplyPendingEffects が行います。
+    /// </summary>
+    private static void MarkBurnableDestroyedForCurrentShot(GameObject burnable, SimState state)
     {
         if (burnable == null) return;
 
@@ -774,11 +852,6 @@ public static class BallPath
         if (state != null)
         {
             state.destroyedBurnables.Add(burnable);
-        }
-
-        if (Application.isPlaying)
-        {
-            Object.Destroy(burnable);
         }
     }
 
@@ -892,6 +965,11 @@ public static class BallPath
 
             Vector3 nextCell = currentCell + StepOffset(currentDir, panelSize);
 
+            // このステップで球が到達したときに破壊／消火するものの予約。
+            // 経路計算の時点では消さず、実際の適用は PlayChain の再生時に行う。
+            List<GameObject> pendingBurnables = null;
+            List<FlameTile> pendingFlames = null;
+
             // 燃える障害物（Burnableタグ）は、炎魔法中の主ボールだけが破壊して通過します。
             // ターゲットボール、および炎魔法未使用時は通常壁と同じ反射規則です。
             if (TryGetBurnableBlock(currentCell, currentDir, panelSize, self, state, out GameObject targetBurnable, out Vector3 burnableNormal))
@@ -904,7 +982,14 @@ public static class BallPath
 
                     foreach (GameObject burnable in burnablesOnMove)
                     {
-                        DestroyBurnableForCurrentShot(burnable, state);
+                        MarkBurnableDestroyedForCurrentShot(burnable, state);
+                    }
+
+                    // 実際の破壊は、球が到達したときに行う。ここでは予約するだけで、
+                    // 移動そのものは下の通常処理（三角壁判定などを含む）にそのまま任せる。
+                    if (burnablesOnMove.Count > 0)
+                    {
+                        pendingBurnables = burnablesOnMove;
                     }
                 }
                 else
@@ -965,10 +1050,10 @@ public static class BallPath
                 if (isWaterActive)
                 {
                     // 水魔法中は、斜め移動で横切る炎マスも含めて消火して通過します。
-                    foreach (FlameTile flameTile in flameTiles)
-                    {
-                        flameTile.Extinguish();
-                    }
+                    // [変更] 以前はここで即座に Extinguish していたためショットの瞬間に炎が消えていました。
+                    // 実際の消火は球が到達したときに行うため、ここでは予約するだけにして、
+                    // 移動そのものは下の通常処理にそのまま任せます。
+                    pendingFlames = new List<FlameTile>(flameTiles);
                 }
                 else
                 {
@@ -1065,7 +1150,13 @@ public static class BallPath
             }
 
             currentCell = nextCell;
-            path.Add(new PathPoint(currentCell));
+
+            // このマスへ到達したときに破壊／消火するものを、その経路点に紐づける。
+            PathPoint movePoint = new PathPoint(currentCell);
+            movePoint.burnablesToDestroy = pendingBurnables;
+            movePoint.flamesToExtinguish = pendingFlames;
+            path.Add(movePoint);
+
             remaining--;
             bounceGuard = 0;
             finalDir = currentDir;
@@ -1177,6 +1268,8 @@ public static class BallPath
                 PathPoint segment = path[pathIndex];
                 if (segment.skipAnimation)
                 {
+                    // 演出は飛ばすが、その位置での破壊・消火は適用する。
+                    segment.ApplyPendingEffects();
                     pathIndex++;
                     continue;
                 }
@@ -1186,6 +1279,7 @@ public static class BallPath
                 if (distToNext <= 0.0001f)
                 {
                     tr.position = segmentEnd;
+                    segment.ApplyPendingEffects();
                     PlayHitSE(segment, sePlayed, pathIndex);
                     if (HandlePocketArrival(step.ball, segment)) yield break;
                     if (HandleHazardArrival(step.ball, segment)) yield break;
@@ -1197,6 +1291,7 @@ public static class BallPath
                 if (remainingFrameSpeed >= distToNext)
                 {
                     tr.position = segmentEnd;
+                    segment.ApplyPendingEffects();
                     PlayHitSE(segment, sePlayed, pathIndex);
                     if (HandlePocketArrival(step.ball, segment)) yield break;
                     if (HandleHazardArrival(step.ball, segment)) yield break;
@@ -1221,6 +1316,7 @@ public static class BallPath
         if (path.Count > 0)
         {
             tr.position = SnapToGrid(path[path.Count - 1].position, panelSize);
+            path[path.Count - 1].ApplyPendingEffects();
             if (HandlePocketArrival(step.ball, path[path.Count - 1])) yield break;
             if (HandleHazardArrival(step.ball, path[path.Count - 1])) yield break;
             MagicPotion.TryCollectAtBall(step.ball);

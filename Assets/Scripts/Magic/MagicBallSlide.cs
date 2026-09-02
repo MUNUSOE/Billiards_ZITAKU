@@ -9,15 +9,17 @@ public static class MagicBallSlide
     /// <summary>
     /// 球を移動先まで一定速度でスライドさせ、完了時にグリッドへ正確に合わせます。
     /// </summary>
-    public static IEnumerator SlideTo(GameObject ball, Vector3 destination)
+    /// <param name="snapToGrid">
+    /// true ならグリッドへ吸着させる。炎への接触点など、マスの中間で止めたい場合は false を指定する。
+    /// </param>
+    public static IEnumerator SlideTo(GameObject ball, Vector3 destination, bool snapToGrid = true)
     {
         if (ball == null) yield break;
 
         BallPath.GetBallSettings(ball, out float panelSize, out _, out float shotSpeed, out _);
         Transform transform = ball.transform;
-        Vector3 start = transform.position;
-        Vector3 target = BallPath.SnapToGrid(destination, panelSize);
-        float distance = Vector3.Distance(start, target);
+        Vector3 target = snapToGrid ? BallPath.SnapToGrid(destination, panelSize) : destination;
+        float distance = Vector3.Distance(transform.position, target);
 
         if (distance < 0.0001f)
         {
@@ -27,18 +29,16 @@ public static class MagicBallSlide
 
         // 魔法移動は通常ショットと同じ速度感を保ちつつ、短距離でも見える速度にします。
         float speed = Mathf.Max(shotSpeed, panelSize * 4f);
-        float elapsed = 0f;
-        float duration = distance / speed;
-
-        while (elapsed < duration)
+        // [変更] 通常ショット(BallPath.PlayChain)と同じ等速移動にそろえる。
+        // 以前は Lerp + イージング(始終端で減速)だったため、通常ショットと見た目が異なっていた。
+        // 通常ショットは Vector3.MoveTowards による完全な等速移動なので、ここでも同じ方式にする。
+        while (true)
         {
             if (ball == null) yield break;
 
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            // 始終端を少し滑らかにする補間。移動経路は直線のままです。
-            t = t * t * (3f - 2f * t);
-            transform.position = Vector3.Lerp(start, target, t);
+            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
+            if (Vector3.Distance(transform.position, target) <= 0.0001f) break;
+
             yield return null;
         }
 

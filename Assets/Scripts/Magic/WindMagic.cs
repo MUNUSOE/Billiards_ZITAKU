@@ -13,6 +13,9 @@ using UnityEngine;
 /// </summary>
 public static class WindMagic
 {
+    /// <summary>炎マスに触れて停止してから、ゲームオーバーへ移るまでの待機フレーム数。</summary>
+    private const int GameOverDelayFrames = 10;
+
     private static readonly Vector3[] Directions =
     {
         new Vector3(-1f, 0f, -1f),
@@ -92,10 +95,36 @@ public static class WindMagic
 
         Debug.Log($"[WindMagic] === 判定終了。実際に動く球の数={moves.Count} ===");
 
+        // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
         foreach (WindMove move in moves)
         {
             if (move.ball == null) continue;
-            yield return MagicBallSlide.SlideTo(move.ball, move.destination);
+
+            Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);
+            Vector3 moveDirection = BallPath.Get8Direction((move.destination - fromCell).normalized);
+
+            // 炎に触れる場合は、その位置で移動を打ち切る（炎マスを通り過ぎてから止まらないようにする）。
+            bool burns = BallPath.TryGetMagicPathBurnCell(
+                fromCell, move.destination, moveDirection, panelSize, out Vector3 stopCell);
+
+            Debug.Log($"[WindMagic] 移動判定 球={move.ball.name} 現在={fromCell} 目的地={move.destination} "
+                    + $"方向={moveDirection} 炎接触={burns} 停止位置={stopCell}");
+
+            // 炎への接触点で止める場合はマスの中間座標になりうるため、グリッド吸着を無効にする。
+            yield return MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns);
+
+            Debug.Log($"[WindMagic] スライド完了 球={move.ball.name} 実際の位置={move.ball.transform.position}");
+
+            if (burns)
+            {
+                Debug.Log($"[WindMagic] 吹き飛ばした球が炎マスに触れたためゲームオーバー: {stopCell}");
+
+                // 停止した瞬間にゲームオーバーへ移ると唐突なので、少し間を置く。
+                for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
+
+                if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
+                yield break;
+            }
         }
     }
 
