@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
 using TMPro;
 
 public enum MagicType
@@ -33,6 +33,17 @@ public class MagicManager : MonoBehaviour
     // 現在選択されている魔法
     public MagicType ActiveMagic { get; private set; } = MagicType.None;
 
+    // ショットや魔法の演出中は選択を変更できないようにするためのロック。
+    // 演出中に選択を切り替えられると、消費処理と表示がずれてしまうため。
+    private bool selectionLocked;
+
+    /// <summary>魔法の選択操作をロック／解除します。ショットの演出中は true にします。</summary>
+    public void SetSelectionLocked(bool locked)
+    {
+        selectionLocked = locked;
+        UpdateButtonInteractable();
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -58,7 +69,8 @@ public class MagicManager : MonoBehaviour
     private void Update()
     {
         Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return; // キーボードが接続されていない場合はスキップ
+        if (keyboard == null) return;
+        if (selectionLocked) return;  // 演出中はキーでの切り替えも受け付けない // キーボードが接続されていない場合はスキップ
 
         // Qキーで炎魔法の選択・解除
         if (keyboard.qKey.wasPressedThisFrame)
@@ -82,6 +94,9 @@ public class MagicManager : MonoBehaviour
     /// </summary>
     public void ToggleMagic(MagicType type)
     {
+        // 演出中の選択変更は、消費処理とのずれ（回数が減らないまま効果だけ出る）の原因になるため受け付けない。
+        if (selectionLocked) return;
+
         int remaining = GetMagicCount(type);
         if (remaining <= 0) return; // 残り回数0なら選択不可
 
@@ -116,15 +131,15 @@ public class MagicManager : MonoBehaviour
     /// </summary>
     public bool ConsumeMagic(MagicType type)
     {
-        if (ActiveMagic != type) return false;
-
+        // [変更] 以前は ActiveMagic != type で弾いていたため、演出中に選択を切り替えられると
+        // 回数が減らないまま効果だけ発生していた。消費は「実際に使った魔法の種類」だけで判断する。
         switch (type)
         {
             case MagicType.Fire:
                 if (fireMagicCount > 0)
                 {
                     fireMagicCount--;
-                    ActiveMagic = MagicType.None;
+                    if (ActiveMagic == MagicType.Fire) ActiveMagic = MagicType.None;
                     UpdateUI();
                     return true;
                 }
@@ -134,7 +149,7 @@ public class MagicManager : MonoBehaviour
                 if (waterMagicCount > 0)
                 {
                     waterMagicCount--;
-                    ActiveMagic = MagicType.None;
+                    if (ActiveMagic == MagicType.Water) ActiveMagic = MagicType.None;
                     UpdateUI();
                     return true;
                 }
@@ -144,7 +159,7 @@ public class MagicManager : MonoBehaviour
                 if (windMagicCount > 0)
                 {
                     windMagicCount--;
-                    ActiveMagic = MagicType.None;
+                    if (ActiveMagic == MagicType.Wind) ActiveMagic = MagicType.None;
                     UpdateUI();
                     return true;
                 }
@@ -191,10 +206,20 @@ public class MagicManager : MonoBehaviour
         };
     }
 
+    /// <summary>残り回数とロック状態に応じて、魔法ボタンの押下可否を更新します。</summary>
+    private void UpdateButtonInteractable()
+    {
+        if (fireMagicButton != null) fireMagicButton.interactable = !selectionLocked && fireMagicCount > 0;
+        if (waterMagicButton != null) waterMagicButton.interactable = !selectionLocked && waterMagicCount > 0;
+        if (windMagicButton != null) windMagicButton.interactable = !selectionLocked && windMagicCount > 0;
+    }
+
     private void UpdateUI()
     {
         if (fireCountText != null) fireCountText.text = fireMagicCount.ToString();
         if (waterCountText != null) waterCountText.text = waterMagicCount.ToString();
         if (windCountText != null) windCountText.text = windMagicCount.ToString();
+
+        UpdateButtonInteractable();
     }
 }
