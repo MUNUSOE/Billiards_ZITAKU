@@ -1,0 +1,43 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:ww="SkulmovskiStudio.VFX_Fire.PointCache.Editor.Welcome"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements" editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="True">
+
+    <Style src="AssistantWindow.uss" />
+
+    <ui:VisualElement name="root" class="root">
+        <ui:VisualElement name="studio-bar" class="studio-bar">
+            <ui:VisualElement name="studio-logo-slot" class="studio-logo" />
+            <ui:Label name="studio-name" text="Studio Name" class="studio-name" />
+            <ui:VisualElement class="spacer" />
+            <ui:VisualElement name="social-links" class="social-links" />
+            <ui:VisualElement name="theme-toggle-button" class="theme-toggle" tooltip="Switch theme">
+                <ui:VisualElement name="theme-icon-light" class="theme-toggle-icon" />
+                <ui:VisualElement name="theme-icon-dark" class="theme-toggle-icon" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="header" class="header">
+            <ww:RingProgressElement name="progress-ring" class="ring" />
+            <ui:VisualElement class="header-text">
+                <ui:Label name="asset-title" text="Asset Name" class="title" />
+                <ui:Label name="asset-tagline" text="Setup Checklist" class="subtitle" />
+            </ui:VisualElement>
+            <ui:VisualElement name="refresh-button" class="refresh-button" tooltip="Rescan environment">
+                <ui:VisualElement name="refresh-icon" class="refresh-icon" />
+                <ui:Label text="Refresh State" class="refresh-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:ScrollView name="checklist-scroll" class="scroll" vertical-scroller-visibility="Auto">
+            <ui:VisualElement name="checklist-container" class="list" />
+        </ui:ScrollView>
+        <ui:VisualElement name="footer" class="footer">
+            <ui:Label name="footer-disclaimer" text="" class="footer-disclaimer" />
+            <ui:VisualElement class="footer-buttons-row">
+                <ui:Button name="docs-button" text="Open PDF Documentation" class="footer-link" />
+                <ui:VisualElement class="footer-spacer" />
+                <ui:Button name="close-button" text="Close" class="footer-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

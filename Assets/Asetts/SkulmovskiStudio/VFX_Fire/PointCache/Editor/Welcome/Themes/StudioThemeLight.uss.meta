@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 6be5070df06e89b469e21b82a5c4f695
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 12385, guid: 0000000000000000e000000000000000, type: 0}
+  disableValidation: 0
+AssetOrigin:
+  serializedVersion: 1
+  productId: 402478
+  packageName: "Fire VFX \u2014 Lite Edition \xB7 Wraps Any Mesh \xB7 Point Cache
+    \xB7 URP"
+  packageVersion: 1.0.4
+  assetPath: Assets/SkulmovskiStudio/VFX_Fire/PointCache/Editor/Welcome/Themes/StudioThemeLight.uss
+  uploadId: 981106

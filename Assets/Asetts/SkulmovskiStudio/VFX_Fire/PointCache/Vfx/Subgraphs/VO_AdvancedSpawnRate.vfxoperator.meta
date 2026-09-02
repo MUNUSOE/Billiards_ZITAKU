@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 24222339340c1ef4185f226bc16ebc0b
+VisualEffectImporter:
+  externalObjects: {}
+  serializedVersion: 1
+  template:
+    name: 
+    category: 
+    description: 
+    icon: {instanceID: 0}
+    thumbnail: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 402478
+  packageName: "Fire VFX \u2014 Lite Edition \xB7 Wraps Any Mesh \xB7 Point Cache
+    \xB7 URP"
+  packageVersion: 1.0.4
+  assetPath: Assets/SkulmovskiStudio/VFX_Fire/PointCache/Vfx/Subgraphs/VO_AdvancedSpawnRate.vfxoperator
+  uploadId: 981106
