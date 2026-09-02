@@ -51,8 +51,13 @@ public static class WaterMagic
             reservedCells.Add(destination);
         }
 
-        // 瞬間移動ではなく、確定した経路を1球ずつスライドさせます。
+        // 確定した移動先へ、対象の球を「同時に」スライドさせます。
+        // 各球のコルーチンを1フレームずつ並行して進め、全員の完了を待ちます。
         // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
+        List<IEnumerator> slides = new List<IEnumerator>();
+        bool anyBurned = false;
+        Vector3 burnedAt = Vector3.zero;
+
         foreach (WaterMove move in moves)
         {
             // ★ オブジェクトが既に破棄（Destroy）されていないか事前にチェック
@@ -68,34 +73,37 @@ public static class WaterMagic
             Debug.Log($"[WaterMagic] 移動判定 球={move.ball.name} 現在={fromCell} 目的地={move.destination} "
                     + $"方向={moveDirection} 炎接触={burns} 停止位置={stopCell}");
 
-            // 炎への接触点で止める場合はマスの中間座標になりうるため、グリッド吸着を無効にする。
-            yield return MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns);
-
-            // ★ スライド処理中に対象球が消滅（Destroy）しているか判定
-            if (move.ball == null)
-            {
-                Debug.Log($"[WaterMagic] スライド中に球が消失しました（炎接触または破棄）");
-                if (burns)
-                {
-                    for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
-                    if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
-                    yield break;
-                }
-                continue;
-            }
-
-            Debug.Log($"[WaterMagic] スライド完了 球={move.ball.name} 実際の位置={move.ball.transform.position}");
-
             if (burns)
             {
-                Debug.Log($"[WaterMagic] 引き寄せた球が炎マスに触れたためゲームオーバー: {stopCell}");
-
-                // 停止した瞬間にゲームオーバーへ移ると唐突なので、少し間を置く。
-                for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
-
-                if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
-                yield break;
+                anyBurned = true;
+                burnedAt = stopCell;
             }
+
+            // 炎への接触点で止める場合はマスの中間座標になりうるため、グリッド吸着を無効にする。
+            // ここでは実行せずコルーチンを貯めておき、後でまとめて並行実行する。
+            slides.Add(MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns));
+        }
+
+        // 全ての球を1フレームずつ並行して進め、最後の1つが終わるまで待つ。
+        // MagicBallSlide.SlideTo は内部で球のnullチェックを行うため、
+        // スライド中に球が破棄されてもここで例外にはならない。
+        while (slides.Count > 0)
+        {
+            for (int i = slides.Count - 1; i >= 0; i--)
+            {
+                if (!slides[i].MoveNext()) slides.RemoveAt(i);
+            }
+            yield return null;
+        }
+
+        if (anyBurned)
+        {
+            Debug.Log($"[WaterMagic] 引き寄せた球が炎マスに触れたためゲームオーバー: {burnedAt}");
+
+            // 停止した瞬間にゲームオーバーへ移ると唐突なので、少し間を置く。
+            for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
+
+            if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
         }
     }
 
