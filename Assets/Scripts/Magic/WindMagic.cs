@@ -24,7 +24,6 @@ public static class WindMagic
         new Vector3( 1f, 0f,  1f),
     };
 
-    // Directions と同じ並び順のラベル（ログ表示用）
     private static readonly string[] DirectionNames =
     {
         "左上", "上", "右上", "左", "右", "左下", "下", "右下",
@@ -43,7 +42,7 @@ public static class WindMagic
     }
 
     /// <summary>
-    /// 全ての移動先を先に確定してから、対象球を同時にスライドさせます。
+    /// 全ての移動先を先に確定してから、対象球を順番にスライドさせます。
     /// 同一直線上に1マス目・2マス目の2球がある場合は、外側の2マス目の球だけを3マス目へ移動します。
     /// </summary>
     /// <param name="centerBall">中心となる主ボール</param>
@@ -94,38 +93,36 @@ public static class WindMagic
 
         Debug.Log($"[WindMagic] === 判定終了。実際に動く球の数={moves.Count} ===");
 
-        // 吹き飛ばす対象が存在する場合、発動エフェクトを生成
-        if (moves.Count > 0 && effectPrefab != null)
-        {
-            Vector3 effectPos = centerCell + new Vector3(0f, offsetY, 0f);
-            GameObject effectInstance = Object.Instantiate(effectPrefab, effectPos, Quaternion.identity);
-
-            // 自動破棄コンポーネントがない場合に備えて5秒後に削除保護
-            Object.Destroy(effectInstance, 5f);
-        }
-
-        // 吹き飛ばす対象が存在する場合、スライド開始前に1秒待機（エフェクトの演出用）
+        // 吹き飛ばす対象が存在する場合、発動エフェクト生成・SE再生・1秒ディレイを実行
         if (moves.Count > 0)
         {
+            if (effectPrefab != null)
+            {
+                Vector3 effectPos = centerCell + new Vector3(0f, offsetY, 0f);
+                GameObject effectInstance = Object.Instantiate(effectPrefab, effectPos, Quaternion.identity);
+                Object.Destroy(effectInstance, 5f);
+            }
+
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySE(SEType.WindMagic);
+            }
+
             yield return new WaitForSeconds(1f);
         }
 
         // 確定した移動先へ、対象の球を「同時に」スライドさせます。
-        // 各球のコルーチンを1フレームずつ並行して進め、全員の完了を待ちます。
-        // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
         List<IEnumerator> slides = new List<IEnumerator>();
         bool anyBurned = false;
         Vector3 burnedAt = Vector3.zero;
 
         foreach (WindMove move in moves)
         {
-            // オブジェクトが既に破棄（Destroy）されていないか安全チェック
             if (move.ball == null) continue;
 
             Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);
             Vector3 moveDirection = BallPath.Get8Direction((move.destination - fromCell).normalized);
 
-            // 炎に触れる場合は、その位置で移動を打ち切る
             bool burns = BallPath.TryGetMagicPathBurnCell(
                 fromCell, move.destination, moveDirection, panelSize, out Vector3 stopCell);
 
@@ -139,13 +136,9 @@ public static class WindMagic
                 burnedAt = stopCell;
             }
 
-            // ここでは実行せずコルーチンを貯めておき、後でまとめて並行実行する。
             slides.Add(MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns));
         }
 
-        // 全ての球を1フレームずつ並行して進め、最後の1つが終わるまで待つ。
-        // MagicBallSlide.SlideTo は内部で球のnullチェックを行うため、
-        // スライド中に球が破棄されてもここで例外にはならない。
         while (slides.Count > 0)
         {
             for (int i = slides.Count - 1; i >= 0; i--)
@@ -165,9 +158,6 @@ public static class WindMagic
         }
     }
 
-    /// <summary>
-    /// 風による移動先を決定します。
-    /// </summary>
     private static bool TryResolveWindDestination(GameObject target, Vector3 centerCell, Vector3 direction, float panelSize, string dirName, out Vector3 destination, out bool stopsOnTriangleWall)
     {
         destination = centerCell + direction * panelSize * 3f;
@@ -211,9 +201,6 @@ public static class WindMagic
         return true;
     }
 
-    /// <summary>
-    /// 1〜2マス目を調べます。両方に球がある場合は、外側（2マス目）を返します。
-    /// </summary>
     private static GameObject FindOutermostVisibleBall(GameObject centerBall, Vector3 centerCell, Vector3 direction, float panelSize, string dirName)
     {
         GameObject outermost = null;

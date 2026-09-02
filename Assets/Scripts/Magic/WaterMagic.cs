@@ -54,38 +54,36 @@ public static class WaterMagic
             reservedCells.Add(destination);
         }
 
-        // 引き寄せる対象が存在する場合、発動エフェクトを生成
-        if (moves.Count > 0 && effectPrefab != null)
-        {
-            Vector3 effectPos = centerCell + new Vector3(0f, offsetY, 0f);
-            GameObject effectInstance = Object.Instantiate(effectPrefab, effectPos, Quaternion.identity);
-
-            // 自動破棄コンポーネントがない場合に備えて5秒後に削除保護
-            Object.Destroy(effectInstance, 5f);
-        }
-
-        // 引き寄せる対象が存在する場合、スライド開始前に1秒待機（エフェクトの演出用）
+        // 引き寄せる対象が存在する場合、発動エフェクト生成・SE再生・1秒ディレイを実行
         if (moves.Count > 0)
         {
-            yield return new WaitForSeconds(1.5f);
+            if (effectPrefab != null)
+            {
+                Vector3 effectPos = centerCell + new Vector3(0f, offsetY, 0f);
+                GameObject effectInstance = Object.Instantiate(effectPrefab, effectPos, Quaternion.identity);
+                Object.Destroy(effectInstance, 5f);
+            }
+
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySE(SEType.WaterMagic);
+            }
+
+            yield return new WaitForSeconds(1f);
         }
 
         // 確定した移動先へ、対象の球を「同時に」スライドさせます。
-        // 各球のコルーチンを1フレームずつ並行して進め、全員の完了を待ちます。
-        // 魔法の効果は炎マスを遮蔽物として無視しますが、経路上の炎に触れた球は焼失します。
         List<IEnumerator> slides = new List<IEnumerator>();
         bool anyBurned = false;
         Vector3 burnedAt = Vector3.zero;
 
         foreach (WaterMove move in moves)
         {
-            // オブジェクトが既に破棄（Destroy）されていないか事前にチェック
             if (move.ball == null) continue;
 
             Vector3 fromCell = BallPath.SnapToGrid(move.ball.transform.position, panelSize);
             Vector3 moveDirection = BallPath.Get8Direction((move.destination - fromCell).normalized);
 
-            // 炎に触れる場合は、その位置で移動を打ち切る（炎マスを通り過ぎてから止まらないようにする）。
             bool burns = BallPath.TryGetMagicPathBurnCell(
                 fromCell, move.destination, moveDirection, panelSize, out Vector3 stopCell);
 
@@ -98,14 +96,9 @@ public static class WaterMagic
                 burnedAt = stopCell;
             }
 
-            // 炎への接触点で止める場合はマスの中間座標になりうるため、グリッド吸着を無効にする。
-            // ここでは実行せずコルーチンを貯めておき、後でまとめて並行実行する。
             slides.Add(MagicBallSlide.SlideTo(move.ball, stopCell, snapToGrid: !burns));
         }
 
-        // 全ての球を1フレームずつ並行して進め、最後の1つが終わるまで待つ。
-        // MagicBallSlide.SlideTo は内部で球のnullチェックを行うため、
-        // スライド中に球が破棄されてもここで例外にはならない。
         while (slides.Count > 0)
         {
             for (int i = slides.Count - 1; i >= 0; i--)
@@ -119,7 +112,6 @@ public static class WaterMagic
         {
             Debug.Log($"[WaterMagic] 引き寄せた球が炎マスに触れたためゲームオーバー: {burnedAt}");
 
-            // 停止した瞬間にゲームオーバーへ移ると唐突なので、少し間を置く。
             for (int i = 0; i < GameOverDelayFrames; i++) yield return null;
 
             if (GameManager.Instance != null) GameManager.Instance.TriggerGameOver();
@@ -144,8 +136,6 @@ public static class WaterMagic
         {
             Vector3 cell = centerCell + direction * panelSize * distance;
 
-            // 終点が三角壁マスでも、そのマスにいる対象球自体は探索対象に含める。
-            // ただし、後段で対象球が三角壁から実際に出られる方向かを必ず確認する。
             if (BallPath.IsWaterPullLineBlocked(centerCell, cell, direction, panelSize, allowTriangleAtEnd: true))
             {
                 return null;
@@ -157,7 +147,6 @@ public static class WaterMagic
                 Vector3 targetCell = BallPath.SnapToGrid(found.transform.position, panelSize);
                 Vector3 pullDirection = -direction;
 
-                // 対象球から中心側への退出が、既存の三角壁規則で許される場合だけ引き寄せる。
                 if (!BallPath.CanMagicBallLeaveTriangleWall(targetCell, pullDirection, panelSize))
                 {
                     return null;

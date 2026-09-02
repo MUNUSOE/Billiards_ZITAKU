@@ -13002,6 +13002,10 @@ PrefabInstance:
       value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: windCastEffectPrefab
+      value: 
+      objectReference: {fileID: 8538051858000053040, guid: e1a12a44febd03c4894dd8db4cda8455, type: 3}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
       propertyPath: waterCastEffectPrefab
       value: 
       objectReference: {fileID: 5551718882146614446, guid: ca5678a67971360408484fc2051d9d2e, type: 3}
