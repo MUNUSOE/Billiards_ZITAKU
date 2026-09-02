@@ -1357,6 +1357,9 @@ public static class BallPath
 
         if (GameManager.Instance != null)
         {
+            // 焼失した球も盤面から消えるため、先に「炎で失った」と記録しておく。
+            // これがないと GameClear 側が「全ターゲットが消えた＝クリア」と誤判定する。
+            GameManager.Instance.NotifyBallLostToHazard();
             GameManager.Instance.TriggerGameOver();
         }
 
