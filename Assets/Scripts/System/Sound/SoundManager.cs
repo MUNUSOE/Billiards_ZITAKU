@@ -7,7 +7,7 @@ public enum BGMType
     MainTheme,
     Stage,
     Clear,
-    GameOver
+    GameOver,
 }
 
 public enum SEType
@@ -20,7 +20,15 @@ public enum SEType
     FrameMagic,
     WaterMagic,
     WindMagic,
-    FrameTile
+    FrameTile,
+    GetPotion,
+    FrameBallHit,
+    HitWall,
+    UseFrame,
+    UseWater,
+    UseWind,
+    FireExtinguishing,
+    DestroyBox,
 }
 
 public class SoundManager : MonoBehaviour
