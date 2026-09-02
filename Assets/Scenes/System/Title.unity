@@ -786,6 +786,30 @@ MonoBehaviour:
   - type: 8
     clip: {fileID: 8300000, guid: 9ff8742a7fa12e9469e00e739498486d, type: 3}
     volume: 1
+  - type: 9
+    clip: {fileID: 8300000, guid: 33d1748e925561f439f8fb436c79014a, type: 3}
+    volume: 0.1
+  - type: 10
+    clip: {fileID: 8300000, guid: 0d3b01658141a8c42996adea904343c9, type: 3}
+    volume: 1
+  - type: 11
+    clip: {fileID: 8300000, guid: dfdc3c1b01a2bbd4fabf3b1d6b99c6e4, type: 3}
+    volume: 1
+  - type: 12
+    clip: {fileID: 8300000, guid: 0d3b01658141a8c42996adea904343c9, type: 3}
+    volume: 1
+  - type: 13
+    clip: {fileID: 8300000, guid: c4e3733bca334d44fb408214c3c776ca, type: 3}
+    volume: 1
+  - type: 14
+    clip: {fileID: 8300000, guid: b20e903c59f477a458a420f1c5216f64, type: 3}
+    volume: 1
+  - type: 15
+    clip: {fileID: 8300000, guid: c4e3733bca334d44fb408214c3c776ca, type: 3}
+    volume: 1
+  - type: 16
+    clip: {fileID: 8300000, guid: c7c8f5bb3163fdb42bfa8ef69d406263, type: 3}
+    volume: 1
   userBGMVolume: 1
   userSEVolume: 1
   masterVolumeBoost: 2.5
