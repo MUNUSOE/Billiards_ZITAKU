@@ -9,6 +9,21 @@ public class Pocket : MonoBehaviour
 
     private bool isPocketed = false; // 二重発動防止用
 
+    // 現在ポケットへの吸い込み演出中の球の数。
+    // 演出中はまだ球が Destroy されておらず、クリア判定が成立しません。
+    // その隙にショットされると手数が減ってしまうため、
+    // ShotBall 側はこの数が 0 でない間、操作を受け付けません。
+    private static int activeSuckCount = 0;
+
+    /// <summary>ポケットへの吸い込み演出中の球があるか。</summary>
+    public static bool IsAnyBallBeingPocketed => activeSuckCount > 0;
+
+    /// <summary>シーン切り替え時などにカウントをリセットします。</summary>
+    public static void ResetPocketingState()
+    {
+        activeSuckCount = 0;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         // 接触した相手のタグが "Pocket" かどうか判定
@@ -21,6 +36,9 @@ public class Pocket : MonoBehaviour
 
     private IEnumerator SuckIntoPocketRoutine()
     {
+        // 演出が終わって Destroy されるまでの間、ショット操作を止める。
+        activeSuckCount++;
+
         // 演出中に他の当たり判定が残らないようコライダーをオフにする
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
@@ -56,6 +74,10 @@ public class Pocket : MonoBehaviour
         {
             SoundManager.Instance.PlaySE(SEType.Pocket);
         }
+
+        // 演出が終わったのでカウントを戻す。
+        // Destroy 直前に戻すことで、GameClear 側の消滅検知と入れ替わりに解除される。
+        activeSuckCount = Mathf.Max(0, activeSuckCount - 1);
 
         // ボールを消去（非表示に留めたい場合は gameObject.SetActive(false); に変更）
         Destroy(gameObject);

@@ -12462,6 +12462,7 @@ MonoBehaviour:
   windMagicButton: {fileID: 289287881}
   windCountText: {fileID: 189624066}
   windMagicCount: 100
+  shotBall: {fileID: 3621838022422841172}
 --- !u!114 &2071874469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12924,6 +12925,17 @@ MonoBehaviour:
   fireHitEffectPrefab: {fileID: 2371290950745193278, guid: 2a020b353a8ca0d468aceed2b54be0c2, type: 3}
   fireHitEffectOffsetY: 0
   fireHitEffectLifetime: 10
+--- !u!114 &3621838022422841172 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+  m_PrefabInstance: {fileID: 3621838022422841162}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3621838022422841166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb590d152b63f084dbcd2c88401a6ea1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &5670231100176327309
 PrefabInstance:
   m_ObjectHideFlags: 0

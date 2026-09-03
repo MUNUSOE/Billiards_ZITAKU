@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Collider), typeof(MeshFilter), typeof(MeshRenderer))]
+[RequireComponent(typeof(Collider))]
 public sealed class TriangleWall : MonoBehaviour
 {
     public enum Corner
@@ -11,14 +11,27 @@ public sealed class TriangleWall : MonoBehaviour
         LowerLeft = 3,
     }
 
-    [Tooltip("塗りつぶされる三角形の角。UpperLeft は共有された図と同じ向きです。")]
+    [Tooltip("塗りつぶされる三角形の角。直角部分がこの角に合うように配置されます。")]
     [SerializeField] private Corner corner = Corner.UpperLeft;
 
-    [Tooltip("見た目の三角形をマスより小さくする倍率です。判定範囲には影響しません。直角の角（マスの角）を基準に縮小します。")]
-    [Range(0.25f, 1f)]
-    [SerializeField] private float visualScale = 0.5f;
+    [Header("Visual")]
+    [Tooltip("表示に使う三角形の3Dオブジェクト。直角部分がマスの角に合うように配置されます。")]
+    [SerializeField] private GameObject visualPrefab;
 
-    private Mesh generatedMesh;
+    [Tooltip("1マスの大きさ。直角の角の位置を求めるのに使います。")]
+    [SerializeField] private float cellSize = 1f;
+
+    [Tooltip("配置後の微調整用オフセット（プレハブ側の原点のズレを吸収します）。")]
+    [SerializeField] private Vector3 visualOffset = Vector3.zero;
+
+    [Tooltip("プレハブに適用する追加の回転（度）。プレハブの向きが揃っていない場合に使います。")]
+    [SerializeField] private Vector3 visualRotationOffset = Vector3.zero;
+
+    [Tooltip("プレハブに適用するスケール。")]
+    [SerializeField] private Vector3 visualScale = Vector3.one;
+
+    // 生成した見た目のインスタンス。Corner を変えるたびに作り直します。
+    private GameObject visualInstance;
 
     public Corner WallCorner
     {
@@ -37,90 +50,80 @@ public sealed class TriangleWall : MonoBehaviour
 
     private void OnValidate()
     {
-        RebuildVisual();
-    }
-
-    private void OnDestroy()
-    {
-        if (generatedMesh == null) return;
-
-        if (Application.isPlaying) Destroy(generatedMesh);
-        else DestroyImmediate(generatedMesh);
-    }
-
-    private void RebuildVisual()
-    {
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter == null) return;
-
-        if (generatedMesh != null)
+        // OnValidate から直接 Instantiate / Destroy はできないため、エディタでは次のタイミングに回す。
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.delayCall += () =>
         {
-            if (Application.isPlaying) Destroy(generatedMesh);
-            else DestroyImmediate(generatedMesh);
-        }
-
-        // [変更] 直角の角（マスの角＝固定点）を基準に、そこから伸びる2辺の長さを visualScale で
-        // 縮小する方式に変更。以前はマス中心(0,0)を基準に全頂点を等比縮小していたため、
-        // 直角の角自体もマス中心へ寄ってしまっていた。
-        Vector3[] vertices = GetTriangleVertices(visualScale);
-
-        generatedMesh = new Mesh
-        {
-            name = "TriangleWallVisual",
-            hideFlags = HideFlags.DontSave,
-            vertices = vertices,
-            triangles = new[] { 0, 1, 2, 2, 1, 0 },
-            uv = new[] { Vector2.zero, Vector2.up, Vector2.right },
+            if (this == null) return;
+            RebuildVisual();
         };
-        generatedMesh.RecalculateNormals();
-        generatedMesh.RecalculateBounds();
-        meshFilter.sharedMesh = generatedMesh;
+#endif
     }
 
     /// <summary>
-    /// 直角の角をマスの角に固定したまま、そこから伸びる2辺(leg)の長さだけを
-    /// visualScale(0〜1、1でマス全体)に応じて変化させて三角形の頂点を求めます。
+    /// 見た目のオブジェクトを作り直します。
+    /// 直角の角がマスの角に来るように配置し、Corner に応じてY軸で90度ずつ回転させます。
     /// </summary>
-    /// <param name="leg">直角の角から各辺方向へ伸ばす長さ（1.0でマス全体＝元のUpperLeft基準の挙動と一致）。</param>
-    private Vector3[] GetTriangleVertices(float leg)
+    [ContextMenu("見た目を再構築")]
+    public void RebuildVisual()
     {
-        const float y = 0.06f;
-        const float full = 0.5f; // マス半分の距離。直角の角はここに固定し、スケールでは動かさない。
+        // 自前のメッシュ表示は使わないため、付いていれば非表示にする。
+        MeshRenderer ownRenderer = GetComponent<MeshRenderer>();
+        if (ownRenderer != null) ownRenderer.enabled = false;
+
+        DestroyVisualInstance();
+
+        if (visualPrefab == null) return;
+
+        visualInstance = Instantiate(visualPrefab, transform);
+        visualInstance.name = "TriangleWallVisual";
+        visualInstance.hideFlags = HideFlags.DontSave;
+
+        visualInstance.transform.localPosition = GetRightAngleCornerPosition() + visualOffset;
+        visualInstance.transform.localRotation = Quaternion.Euler(visualRotationOffset) * GetCornerRotation();
+        visualInstance.transform.localScale = visualScale;
+    }
+
+    private void DestroyVisualInstance()
+    {
+        if (visualInstance == null)
+        {
+            // 再コンパイル後などで参照が切れている場合に備え、子から探して消す。
+            Transform existing = transform.Find("TriangleWallVisual");
+            if (existing != null) visualInstance = existing.gameObject;
+        }
+
+        if (visualInstance == null) return;
+
+        if (Application.isPlaying) Destroy(visualInstance);
+        else DestroyImmediate(visualInstance);
+
+        visualInstance = null;
+    }
+
+    /// <summary>
+    /// 直角の角にあたるマスの角の位置（ローカル座標）を返します。
+    /// </summary>
+    private Vector3 GetRightAngleCornerPosition()
+    {
+        float half = cellSize * 0.5f;
 
         switch (corner)
         {
-            case Corner.UpperRight:
-                {
-                    Vector3 c = new Vector3(full, y, full);
-                    Vector3 xLeg = new Vector3(full - leg, y, full);
-                    Vector3 zLeg = new Vector3(full, y, full - leg);
-                    return new[] { c, xLeg, zLeg };
-                }
-
-            case Corner.LowerRight:
-                {
-                    Vector3 c = new Vector3(full, y, -full);
-                    Vector3 zLeg = new Vector3(full, y, -full + leg);
-                    Vector3 xLeg = new Vector3(full - leg, y, -full);
-                    return new[] { c, zLeg, xLeg };
-                }
-
-            case Corner.LowerLeft:
-                {
-                    Vector3 c = new Vector3(-full, y, -full);
-                    Vector3 xLeg = new Vector3(-full + leg, y, -full);
-                    Vector3 zLeg = new Vector3(-full, y, -full + leg);
-                    return new[] { c, xLeg, zLeg };
-                }
-
-            default: // UpperLeft
-                {
-                    Vector3 c = new Vector3(-full, y, full);
-                    Vector3 zLeg = new Vector3(-full, y, full - leg);
-                    Vector3 xLeg = new Vector3(-full + leg, y, full);
-                    return new[] { c, zLeg, xLeg };
-                }
+            case Corner.UpperRight: return new Vector3(half, 0f, half);
+            case Corner.LowerRight: return new Vector3(half, 0f, -half);
+            case Corner.LowerLeft: return new Vector3(-half, 0f, -half);
+            default: return new Vector3(-half, 0f, half); // UpperLeft
         }
+    }
+
+    /// <summary>
+    /// Corner に応じた回転を返します。UpperLeft を基準に、90度ずつ時計回りに回します。
+    /// これは反射規則の回転（RotateClockwise）と同じ向きです。
+    /// </summary>
+    private Quaternion GetCornerRotation()
+    {
+        return Quaternion.Euler(0f, 90f * (int)corner, 0f);
     }
 
     /// <summary>

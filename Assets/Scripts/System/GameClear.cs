@@ -8,6 +8,8 @@ using UnityEngine;
 /// </summary>
 public class GameClear : MonoBehaviour
 {
+    public static GameClear Instance { get; private set; }
+
     [Header("Clear Settings")]
     [Tooltip("クリア対象のターゲット球をすべて登録する。登録順は判定に影響しない。")]
     [SerializeField] private List<GameObject> targetObjects = new List<GameObject>();
@@ -19,6 +21,24 @@ public class GameClear : MonoBehaviour
     [SerializeField, Min(0f)] private float clearDelay = 0.5f;
 
     private bool clearTriggered;
+
+    // 全ターゲットが消えてから、クリアUIが出るまでの待機中を表します。
+    // この間にショットされると手数が減ってゲームオーバーになってしまうため、
+    // ShotBall 側はこのフラグが立っている間、操作を受け付けません。
+    private bool clearPending;
+
+    /// <summary>クリアが確定済み、または確定待ちの状態か。</summary>
+    public bool IsClearPendingOrTriggered => clearPending || clearTriggered;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
 
     private void Start()
     {
@@ -56,6 +76,9 @@ public class GameClear : MonoBehaviour
 
             if (AreAllTargetsDestroyed())
             {
+                // 待機に入る前にフラグを立て、この間の追加ショットを止める。
+                clearPending = true;
+
                 yield return new WaitForSeconds(clearDelay);
 
                 if (GameManager.Instance == null ||

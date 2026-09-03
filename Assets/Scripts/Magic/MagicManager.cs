@@ -37,10 +37,37 @@ public class MagicManager : MonoBehaviour
     // 演出中に選択を切り替えられると、消費処理と表示がずれてしまうため。
     private bool selectionLocked;
 
-    /// <summary>魔法の選択操作をロック／解除します。ショットの演出中は true にします。</summary>
+    [Header("操作ロック")]
+    [Tooltip("ショット球。演出中は魔法ボタンを押せないようにするため、操作可能かどうかを参照します。")]
+    [SerializeField] private ShotBall shotBall;
+
+    /// <summary>魔法の選択操作をロック／解除します。外部から明示的に制御したい場合に使います。</summary>
     public void SetSelectionLocked(bool locked)
     {
         selectionLocked = locked;
+        UpdateButtonInteractable();
+    }
+
+    /// <summary>
+    /// ショット球が操作可能かどうか。演出中や手数切れのときは false。
+    /// shotBall が未設定の場合はロックしません。
+    /// </summary>
+    private bool IsShotBallOperable()
+    {
+        if (shotBall == null) return true;
+        return shotBall.IsOperable;
+    }
+
+    /// <summary>
+    /// ショット球の状態にあわせてロックを自動更新します。
+    /// 演出の途中で抜ける経路があっても取り残されないよう、毎フレーム状態を見ます。
+    /// </summary>
+    private void RefreshSelectionLock()
+    {
+        bool shouldLock = !IsShotBallOperable();
+        if (shouldLock == selectionLocked) return;
+
+        selectionLocked = shouldLock;
         UpdateButtonInteractable();
     }
 
@@ -68,6 +95,9 @@ public class MagicManager : MonoBehaviour
 
     private void Update()
     {
+        // ショット球が操作可能になるまで、魔法の選択をロックする。
+        RefreshSelectionLock();
+
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
         if (selectionLocked) return;  // 演出中はキーでの切り替えも受け付けない // キーボードが接続されていない場合はスキップ

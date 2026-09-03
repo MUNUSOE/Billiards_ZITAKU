@@ -1302,6 +1302,15 @@ public static class BallPath
                 Vector3 segmentEnd = segment.position;
                 float distToNext = Vector3.Distance(tr.position, segmentEnd);
 
+                // [変更] 反射音は接触位置へ到達する前に鳴らす。
+                // 到達を待つと、壁際で減速する分だけ実際の接触より遅れて聞こえるため、
+                // 「このフレームで到達する」か「十分近づいた」時点で先に鳴らしておく。
+                if (segment.isWallHit &&
+                    (distToNext <= WallHitSELeadDistance || remainingFrameSpeed >= distToNext))
+                {
+                    PlayHitSE(segment, sePlayed, pathIndex);
+                }
+
                 if (distToNext <= 0.0001f)
                 {
                     tr.position = segmentEnd;
@@ -1386,6 +1395,12 @@ public static class BallPath
         Object.Destroy(ball);
         return true;
     }
+
+    /// <summary>
+    /// 反射音を鳴らし始める、接触位置までの距離。
+    /// この距離まで近づいた時点で鳴らすことで、到達を待つことによる音の遅れをなくします。
+    /// </summary>
+    private const float WallHitSELeadDistance = 0.45f;
 
     private static void PlayHitSE(PathPoint point, bool[] sePlayed, int index)
     {
