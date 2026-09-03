@@ -60,6 +60,20 @@ public class ShotBall : MonoBehaviour
     private Transform arrow;
     private bool isMoving = false;
     private bool gameOverTriggered = false;
+
+    /// <summary>
+    /// 矢印の操作やショットが可能な状態か。
+    /// Update 内の canOperate と同じ条件で、魔法ボタンの押下可否の判定にも使います。
+    /// </summary>
+    public bool IsOperable =>
+        !isMoving
+        && (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0)
+        // 最後のターゲットが落ちてクリア確定を待っている間に撃たれると、
+        // 手数が減ってゲームオーバーになってしまうため操作を止める。
+        && (GameClear.Instance == null || !GameClear.Instance.IsClearPendingOrTriggered)
+        // ポケットへの吸い込み演出中は、まだ球が消えておらずクリア判定が成立しないため、
+        // その隙に撃たれて手数が減らないよう操作を止める。
+        && !Pocket.IsAnyBallBeingPocketed;
     private Vector3 moveDir;
     private InputAction clickAction;
     private Renderer ballRenderer;
@@ -123,7 +137,7 @@ public class ShotBall : MonoBehaviour
     {
         UpdateBallColorAndEffect();
 
-        bool canOperate = !isMoving && (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0);
+        bool canOperate = IsOperable;
 
         if (canOperate)
         {
