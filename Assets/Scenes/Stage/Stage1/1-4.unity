@@ -12767,7 +12767,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   corner: 1
-  visualPrefab: {fileID: 0}
+  visualPrefab: {fileID: 3999634623222448666, guid: 96f1c02f7c61e674c889f983f72865fa, type: 3}
   cellSize: 1
   visualOffset: {x: 0, y: 0, z: 0}
   visualRotationOffset: {x: 0, y: 0, z: 0}

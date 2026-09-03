@@ -5716,7 +5716,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   corner: 0
-  visualPrefab: {fileID: 0}
+  visualPrefab: {fileID: 3999634623222448666, guid: 96f1c02f7c61e674c889f983f72865fa, type: 3}
   cellSize: 1
   visualOffset: {x: 0, y: 0, z: 0}
   visualRotationOffset: {x: 0, y: 0, z: 0}
@@ -6310,6 +6310,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 482775150}
+  - {fileID: 1340839431}
   - {fileID: 2087862787}
   - {fileID: 1741336756}
   m_Father: {fileID: 504298406}
@@ -7219,6 +7220,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: InterCellWall
       objectReference: {fileID: 0}
+    - target: {fileID: 4734570272542786046, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5494456088903433895, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: orientation
       value: 0
@@ -7415,6 +7420,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1312117373}
   m_CullTransparentMesh: 1
+--- !u!4 &1340839431 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+  m_PrefabInstance: {fileID: 2018255211}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1358022449
 GameObject:
   m_ObjectHideFlags: 0
@@ -12615,6 +12625,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1884174017997686454, guid: 255cba8425b8fb849b23eede426f56ed, type: 3}
   m_PrefabInstance: {fileID: 2012972955}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2018255211
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1133222245}
+    m_Modifications:
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.2099996
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 684982498648635561, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4734570272542786046, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
+      propertyPath: m_Name
+      value: InterCellWall
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
 --- !u!1 &2018332561
 GameObject:
   m_ObjectHideFlags: 0
