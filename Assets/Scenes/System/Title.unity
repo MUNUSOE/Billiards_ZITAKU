@@ -787,29 +787,29 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 9ff8742a7fa12e9469e00e739498486d, type: 3}
     volume: 1
   - type: 9
-    clip: {fileID: 8300000, guid: 33d1748e925561f439f8fb436c79014a, type: 3}
-    volume: 0.1
+    clip: {fileID: 8300000, guid: 7af151a2620cdf040a0a4c523b96f73e, type: 3}
+    volume: 0.2
   - type: 10
     clip: {fileID: 8300000, guid: 0d3b01658141a8c42996adea904343c9, type: 3}
     volume: 1
   - type: 11
-    clip: {fileID: 8300000, guid: dfdc3c1b01a2bbd4fabf3b1d6b99c6e4, type: 3}
-    volume: 1
+    clip: {fileID: 8300000, guid: 65ea4e68056520242b5bbaca40a82ec2, type: 3}
+    volume: 0.1
   - type: 12
-    clip: {fileID: 8300000, guid: 0d3b01658141a8c42996adea904343c9, type: 3}
-    volume: 1
+    clip: {fileID: 8300000, guid: c3b7f93978871564fa470f9167fd2c8d, type: 3}
+    volume: 0.35
   - type: 13
-    clip: {fileID: 8300000, guid: c4e3733bca334d44fb408214c3c776ca, type: 3}
-    volume: 1
+    clip: {fileID: 8300000, guid: 154861f9b637b1c4aba79150de5b2ab2, type: 3}
+    volume: 0.25
   - type: 14
-    clip: {fileID: 8300000, guid: b20e903c59f477a458a420f1c5216f64, type: 3}
-    volume: 1
+    clip: {fileID: 8300000, guid: 2d7e4a7cc77bc474a920646d2befbf5d, type: 3}
+    volume: 0.35
   - type: 15
-    clip: {fileID: 8300000, guid: c4e3733bca334d44fb408214c3c776ca, type: 3}
-    volume: 1
+    clip: {fileID: 8300000, guid: 16761a4073a99f14ea428cba0aefe8a5, type: 3}
+    volume: 0.5
   - type: 16
-    clip: {fileID: 8300000, guid: c7c8f5bb3163fdb42bfa8ef69d406263, type: 3}
-    volume: 1
+    clip: {fileID: 8300000, guid: c62e57fd4acdea049b7af9f4b91d1688, type: 3}
+    volume: 0.5
   userBGMVolume: 1
   userSEVolume: 1
   masterVolumeBoost: 2.5
