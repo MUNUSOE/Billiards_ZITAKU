@@ -770,10 +770,10 @@ MonoBehaviour:
     volume: 1
   - type: 3
     clip: {fileID: 8300000, guid: dfe0faef927ca454bb8d1f52da824fec, type: 3}
-    volume: 0.1
+    volume: 0.2
   - type: 4
     clip: {fileID: 8300000, guid: c7c8f5bb3163fdb42bfa8ef69d406263, type: 3}
-    volume: 0.1
+    volume: 0.2
   - type: 5
     clip: {fileID: 8300000, guid: 0d3b01658141a8c42996adea904343c9, type: 3}
     volume: 0.2
