@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
@@ -219,6 +220,55 @@ public class MagicManager : MonoBehaviour
                 break;
             default:
                 return false;
+        }
+
+        UpdateUI();
+        return true;
+    }
+
+    // ポーション取得による回復の予約。
+    // ポーションはショットの移動中に取得されますが、そのショットで使った魔法の消費は
+    // 移動が終わったあとに行われます。取得時点で判定すると「使った魔法のポーションを
+    // 取っても残り回数が0になっておらず回復しない」ため、消費後にまとめて適用します。
+    private readonly List<MagicType> pendingPotionRestores = new List<MagicType>();
+
+    /// <summary>ポーション取得を予約します。実際の回復は ApplyPendingPotionRestores で行います。</summary>
+    public void RegisterPotionRestore(MagicType type)
+    {
+        if (type == MagicType.None) return;
+        pendingPotionRestores.Add(type);
+    }
+
+    /// <summary>
+    /// 予約されたポーションの回復を適用します。
+    /// 残り回数が0の魔法だけを1回に回復します。ショットの消費処理が終わったあとに呼びます。
+    /// </summary>
+    public void ApplyPendingPotionRestores()
+    {
+        if (pendingPotionRestores.Count == 0) return;
+
+        foreach (MagicType type in pendingPotionRestores)
+        {
+            RestoreMagicIfEmpty(type);
+        }
+
+        pendingPotionRestores.Clear();
+    }
+
+    /// <summary>
+    /// 指定属性の残り回数が0の場合だけ、1回に回復します。
+    /// すでに1回以上残っている場合は何もしません。
+    /// </summary>
+    public bool RestoreMagicIfEmpty(MagicType type)
+    {
+        if (GetMagicCount(type) > 0) return false;
+
+        switch (type)
+        {
+            case MagicType.Fire: fireMagicCount = 1; break;
+            case MagicType.Water: waterMagicCount = 1; break;
+            case MagicType.Wind: windMagicCount = 1; break;
+            default: return false;
         }
 
         UpdateUI();

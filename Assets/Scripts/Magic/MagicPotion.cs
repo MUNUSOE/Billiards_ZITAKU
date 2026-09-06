@@ -10,6 +10,7 @@ public class MagicPotion : MonoBehaviour
 {
     [Header("Potion Settings")]
     [SerializeField] private MagicType potionType = MagicType.Fire;
+    [Tooltip("旧仕様の回復量。現在は「残り0回のときだけ1回に回復」する仕様のため使用していません。")]
     [Min(1)]
     [SerializeField] private int restoreAmount = 1;
 
@@ -91,7 +92,13 @@ public class MagicPotion : MonoBehaviour
     private bool Collect()
     {
         if (collected || MagicManager.Instance == null) return false;
-        if (!MagicManager.Instance.AddMagic(potionType, restoreAmount)) return false;
+
+        // [変更] 取得した時点では回復せず、予約だけします。
+        // このショットで使った魔法の消費は移動が終わったあとに行われるため、
+        // ここで回復判定をすると「使った魔法のポーションを取っても残り回数が
+        // まだ0になっておらず回復しない」ことになります。
+        // 実際の回復は MagicManager.ApplyPendingPotionRestores で行います。
+        MagicManager.Instance.RegisterPotionRestore(potionType);
 
         collected = true;
 
