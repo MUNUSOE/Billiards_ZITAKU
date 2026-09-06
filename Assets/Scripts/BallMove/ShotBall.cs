@@ -407,9 +407,16 @@ public class ShotBall : MonoBehaviour
 
         if (this == null || gameObject == null) yield break;
 
-        if (MagicManager.Instance != null && usedMagic != MagicType.None)
+        if (MagicManager.Instance != null)
         {
-            MagicManager.Instance.ConsumeMagic(usedMagic);
+            if (usedMagic != MagicType.None)
+            {
+                MagicManager.Instance.ConsumeMagic(usedMagic);
+            }
+
+            // 消費が終わったあとに、このショットで取得したポーションの回復を適用する。
+            // 順序を逆にすると、使った魔法のポーションを取っても回復しない。
+            MagicManager.Instance.ApplyPendingPotionRestores();
         }
 
         isMoving = false;
