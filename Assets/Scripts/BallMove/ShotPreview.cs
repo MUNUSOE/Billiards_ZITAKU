@@ -116,14 +116,31 @@ public class ShotPreview : MonoBehaviour
         BallPath.ChainStep shotStep = steps[0];
         if (shotStep == null || shotStep.path == null || shotStep.path.Count == 0) return;
 
+        Vector3 startCell = BallPath.SnapToGrid(shotBall.transform.position, panelSize);
+
         // 経路点をマス単位にまとめる。反射点はマスの途中にあるため、
         // グリッドへ丸めたうえで重複を除く。
+        // あわせて、いったん開始マスを離れたあとに再び戻ってくるか（＝開始マスも経路の一部か）を調べる。
         List<Vector3> cells = new List<Vector3>();
+        bool leftStartCell = false;
+        bool revisitsStartCell = false;
+
         foreach (BallPath.PathPoint point in shotStep.path)
         {
             if (point == null) continue;
 
             Vector3 cell = BallPath.SnapToGrid(point.position, panelSize);
+
+            if (Vector3.Distance(cell, startCell) < 0.01f)
+            {
+                // 一度離れてから戻ってきた場合は、開始マスも通過マスとして扱う。
+                if (leftStartCell) revisitsStartCell = true;
+            }
+            else
+            {
+                leftStartCell = true;
+            }
+
             if (cells.Count > 0 && Vector3.Distance(cells[cells.Count - 1], cell) < 0.01f) continue;
             if (cells.Contains(cell)) continue;
 
@@ -134,16 +151,12 @@ public class ShotPreview : MonoBehaviour
 
         Vector3 stopCell = cells[cells.Count - 1];
 
-        // 開始マスは座標で判定する。
-        // 経路点に開始位置が含まれるかは計算内容によって変わるため、
-        // インデックス頼み（0番目が開始）にすると隣のマスが表示されないことがある。
-        Vector3 startCell = BallPath.SnapToGrid(shotBall.transform.position, panelSize);
-
-        // 通過マス（開始マスと停止マスを除く）
+        // 通過マス（停止マスを除く）。
+        // 開始マスは、反射などでもう一度そこを通る場合のみ表示する。
         int passIndex = 0;
         for (int i = 0; i < cells.Count - 1; i++)
         {
-            if (Vector3.Distance(cells[i], startCell) < 0.01f) continue;
+            if (!revisitsStartCell && Vector3.Distance(cells[i], startCell) < 0.01f) continue;
 
             ShowPassEffect(passIndex, cells[i]);
             passIndex++;
