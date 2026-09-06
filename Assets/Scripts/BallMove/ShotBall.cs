@@ -57,6 +57,19 @@ public class ShotBall : MonoBehaviour
     private GameObject currentMagicEffectObj;
     private MagicType currentActiveMagic = MagicType.None;
 
+    [Header("Keyboard Aim")]
+    [Tooltip("矢印キーでの照準とEnterキーでのショットを有効にします。")]
+    [SerializeField] private bool enableKeyboardAim = true;
+
+    [Tooltip("マウスをこのピクセル数以上動かすと、キーボード照準からマウス照準へ戻ります。")]
+    [SerializeField] private float mouseSwitchThreshold = 2f;
+
+    // キーボードで指定中の方向。Vector3.zero なら未指定。
+    private Vector3 keyboardAimDir = Vector3.zero;
+    // 現在キーボードで狙っているか（false ならマウス）。
+    private bool usingKeyboardAim = false;
+    private Vector2 lastMousePosition;
+
     [Header("Shot Preview (チュートリアル用)")]
     [Tooltip("ショットの予測表示。GameManager の Show Shot Preview がオンのときだけ動きます。")]
     [SerializeField] private ShotPreview shotPreview;
@@ -71,6 +84,8 @@ public class ShotBall : MonoBehaviour
     /// </summary>
     public bool IsOperable =>
         !isMoving
+        // オプション画面を開いている間は操作を受け付けない。
+        && (OptionManager.Instance == null || !OptionManager.Instance.IsPaused)
         && (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0)
         // 最後のターゲットが落ちてクリア確定を待っている間に撃たれると、
         // 手数が減ってゲームオーバーになってしまうため操作を止める。
@@ -145,11 +160,12 @@ public class ShotBall : MonoBehaviour
 
         if (canOperate)
         {
+            UpdateAimInput();
             UpdateArrowByMouse();
             HandlePowerChange();
             UpdateShotPreview();
 
-            if (clickAction.WasPressedThisFrame())
+            if (clickAction.WasPressedThisFrame() || IsShootKeyPressed())
             {
                 ShootFromMouse();
             }
@@ -190,9 +206,79 @@ public class ShotBall : MonoBehaviour
         shotPreview.Show(gameObject, dir, targetPanels, isFireActive);
     }
 
-    /// <summary>マウス位置から8方向へ補正した狙いの方向を返します。求められない場合は zero。</summary>
+    /// <summary>
+    /// 矢印キーとマウスの入力を見て、どちらで狙っているかと方向を更新します。
+    /// 矢印キーを押すとキーボード照準に切り替わり、マウスを動かすとマウス照準に戻ります。
+    /// 斜め方向は2つの矢印キーを同時に押して指定します。
+    /// </summary>
+    private void UpdateAimInput()
+    {
+        Keyboard keyboard = Keyboard.current;
+
+        if (enableKeyboardAim && keyboard != null)
+        {
+            // いずれかの矢印キーが「押された瞬間」だけ方向を確定する。
+            // 押されている間ずっと更新すると、斜め（2キー同時押し）から片方を離したとき、
+            // 残った1キーの方向に上書きされてしまい、斜めのまま狙えない。
+            bool anyArrowPressedThisFrame =
+                keyboard.leftArrowKey.wasPressedThisFrame ||
+                keyboard.rightArrowKey.wasPressedThisFrame ||
+                keyboard.upArrowKey.wasPressedThisFrame ||
+                keyboard.downArrowKey.wasPressedThisFrame;
+
+            if (anyArrowPressedThisFrame)
+            {
+                int x = 0;
+                int z = 0;
+
+                if (keyboard.leftArrowKey.isPressed) x -= 1;
+                if (keyboard.rightArrowKey.isPressed) x += 1;
+                if (keyboard.upArrowKey.isPressed) z += 1;
+                if (keyboard.downArrowKey.isPressed) z -= 1;
+
+                if (x != 0 || z != 0)
+                {
+                    keyboardAimDir = BallPath.Get8Direction(new Vector3(x, 0f, z).normalized);
+                    usingKeyboardAim = true;
+                }
+            }
+        }
+
+        // マウスが動いたらマウス照準へ戻す。
+        Mouse mouse = Mouse.current;
+        if (mouse != null)
+        {
+            Vector2 position = mouse.position.ReadValue();
+            if ((position - lastMousePosition).sqrMagnitude > mouseSwitchThreshold * mouseSwitchThreshold)
+            {
+                usingKeyboardAim = false;
+            }
+            lastMousePosition = position;
+        }
+    }
+
+    /// <summary>ショット実行のキーが押されたか。</summary>
+    private bool IsShootKeyPressed()
+    {
+        if (!enableKeyboardAim) return false;
+
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null) return false;
+
+        return keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame;
+    }
+
+    /// <summary>
+    /// 現在の狙いの方向を8方向で返します。求められない場合は zero。
+    /// キーボード照準中はその方向を、そうでなければマウス位置から求めます。
+    /// </summary>
     private Vector3 GetAimDirection()
     {
+        if (usingKeyboardAim && keyboardAimDir != Vector3.zero)
+        {
+            return keyboardAimDir;
+        }
+
         var cam = Camera.main;
         if (cam == null) return Vector3.zero;
 
@@ -317,17 +403,10 @@ public class ShotBall : MonoBehaviour
     void UpdateArrowByMouse()
     {
         if (arrow == null) return;
-        Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
-        var cam = Camera.main;
-        if (cam == null) return;
 
-        float depth = Vector3.Distance(cam.transform.position, transform.position);
-        Vector3 worldMouse = cam.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, depth));
-        Vector3 rawDir = transform.position - worldMouse;
-        rawDir.y = 0f;
-
-        if (rawDir.sqrMagnitude < 0.0001f) return;
-        Vector3 dir = BallPath.Get8Direction(rawDir.normalized);
+        // マウス・キーボードのどちらの照準にも対応するため、共通の方向取得を使う。
+        Vector3 dir = GetAimDirection();
+        if (dir == Vector3.zero) return;
 
         float arrowDistance = 0.7f;
         Vector3 pos = transform.position + dir * arrowDistance;
@@ -340,16 +419,10 @@ public class ShotBall : MonoBehaviour
 
     void ShootFromMouse()
     {
-        Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
-        var cam = Camera.main;
-        if (cam == null) return;
+        Vector3 aimDir = GetAimDirection();
+        if (aimDir == Vector3.zero) return;
 
-        float depth = Vector3.Distance(cam.transform.position, transform.position);
-        Vector3 worldMouse = cam.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, depth));
-        Vector3 rawDir = transform.position - worldMouse;
-        rawDir.y = 0f;
-
-        moveDir = BallPath.Get8Direction(rawDir.normalized);
+        moveDir = aimDir;
         ApplyPowerLevel();
 
         int targetPanels = Mathf.RoundToInt(distanceLevels[currentLevel]);
