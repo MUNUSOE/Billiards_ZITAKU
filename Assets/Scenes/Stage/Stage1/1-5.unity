@@ -13378,7 +13378,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2126381761}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2071874468
@@ -13416,7 +13417,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMoves: 100
-  showShotPreview: 0
+  showShotPreview: 1
   GameOverUI: {fileID: 1748194421}
   gameOverDelay: 1
 --- !u!114 &2071874470
@@ -13674,6 +13675,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092194729}
   m_CullTransparentMesh: 1
+--- !u!1 &2126381759
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2126381761}
+  - component: {fileID: 2126381760}
+  m_Layer: 0
+  m_Name: ShotPreview
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2126381760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126381759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6367f18c4dd43e847a9f3d82405e8f21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  passCellEffectPrefab: {fileID: 8000756121748368222, guid: ab65876956829bc4794bc5d3ec58a6ae, type: 3}
+  stopCellEffectPrefab: {fileID: 3634556389457622699, guid: 9b9320fc60430da498008337321d6fc6, type: 3}
+  cellEffectOffsetY: -0.2
+  momentumLabelPrefab: {fileID: 2306645533099535398, guid: b1941aeb985278144a58c2b0130b702c, type: 3}
+  momentumLabelOffset: {x: 0, y: 0.6, z: 0}
+  momentumLabelFaceCamera: 1
+--- !u!4 &2126381761
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126381759}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.82791, y: 0, z: -2.96786}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2071874467}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3083009653436338969
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13798,6 +13849,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
+      propertyPath: shotPreview
+      value: 
+      objectReference: {fileID: 2126381760}
     - target: {fileID: 4750643789783546631, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
       propertyPath: arrowWeakObj
       value: 
