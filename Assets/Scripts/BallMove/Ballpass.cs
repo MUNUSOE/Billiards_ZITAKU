@@ -79,6 +79,9 @@ public static class BallPath
     {
         public GameObject ball;
         public List<PathPoint> path;
+        // この球が受け取った運動量（マス数）。ショット球は選択した威力、
+        // 連鎖で動く球は衝突時に引き継いだ値が入ります。ショット予測の表示に使います。
+        public int panels;
     }
 
     public class SimState
@@ -1217,7 +1220,7 @@ public static class BallPath
 
             List<PathPoint> path = CalculatePath(currentBall, startPos, currentDir, currentPanels, panelSize, ballRadius, state, fireActiveForCurrentBall, out GameObject hitBall, out int passPanels, out Vector3 finalDir);
 
-            steps.Add(new ChainStep { ball = currentBall, path = path });
+            steps.Add(new ChainStep { ball = currentBall, path = path, panels = currentPanels });
 
             // 経路上の最初のターゲット接触で炎魔法を消費し、以後の連鎖へ渡さない。
             if (fireActiveForCurrentBall && path != null)

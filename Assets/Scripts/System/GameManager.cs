@@ -11,6 +11,13 @@ public class GameManager : MonoBehaviour
     private int currentMoves;
     private bool gameOverTriggered;
 
+    [Header("Tutorial / Debug")]
+    [Tooltip("ショットの予測（通過マス・停止マス・最初に当たる球の運動量）を表示します。チュートリアル用。")]
+    [SerializeField] private bool showShotPreview = false;
+
+    /// <summary>ショット予測表示が有効か。ステージごとに Inspector で切り替えます。</summary>
+    public bool ShowShotPreview => showShotPreview;
+
     [Header("UI Settings")]
     public GameObject GameOverUI;
     [SerializeField] private float gameOverDelay = 1.0f; // ★ ゲームオーバー表示までの遅延時間（秒）

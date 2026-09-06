@@ -57,6 +57,10 @@ public class ShotBall : MonoBehaviour
     private GameObject currentMagicEffectObj;
     private MagicType currentActiveMagic = MagicType.None;
 
+    [Header("Shot Preview (チュートリアル用)")]
+    [Tooltip("ショットの予測表示。GameManager の Show Shot Preview がオンのときだけ動きます。")]
+    [SerializeField] private ShotPreview shotPreview;
+
     private Transform arrow;
     private bool isMoving = false;
     private bool gameOverTriggered = false;
@@ -143,12 +147,64 @@ public class ShotBall : MonoBehaviour
         {
             UpdateArrowByMouse();
             HandlePowerChange();
+            UpdateShotPreview();
 
             if (clickAction.WasPressedThisFrame())
             {
                 ShootFromMouse();
             }
         }
+        else if (shotPreview != null)
+        {
+            // 移動中やクリア待ちの間は予測を消す。
+            shotPreview.Hide();
+        }
+    }
+
+    /// <summary>
+    /// 現在の狙いにあわせてショット予測を更新します。
+    /// GameManager の Show Shot Preview がオフのときは何も表示しません。
+    /// </summary>
+    private void UpdateShotPreview()
+    {
+        if (shotPreview == null) return;
+
+        bool enabledByStage = GameManager.Instance != null && GameManager.Instance.ShowShotPreview;
+        if (!enabledByStage)
+        {
+            shotPreview.Hide();
+            return;
+        }
+
+        Vector3 dir = GetAimDirection();
+        if (dir == Vector3.zero)
+        {
+            shotPreview.Hide();
+            return;
+        }
+
+        int targetPanels = Mathf.RoundToInt(distanceLevels[currentLevel]);
+        bool isFireActive = MagicManager.Instance != null
+            && MagicManager.Instance.ActiveMagic == MagicType.Fire;
+
+        shotPreview.Show(gameObject, dir, targetPanels, isFireActive);
+    }
+
+    /// <summary>マウス位置から8方向へ補正した狙いの方向を返します。求められない場合は zero。</summary>
+    private Vector3 GetAimDirection()
+    {
+        var cam = Camera.main;
+        if (cam == null) return Vector3.zero;
+
+        Vector2 mouseScreenPos = Mouse.current.position.ReadValue();
+        float depth = Vector3.Distance(cam.transform.position, transform.position);
+        Vector3 worldMouse = cam.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, depth));
+        Vector3 rawDir = transform.position - worldMouse;
+        rawDir.y = 0f;
+
+        if (rawDir.sqrMagnitude < 0.0001f) return Vector3.zero;
+
+        return BallPath.Get8Direction(rawDir.normalized);
     }
 
     private void UpdateBallColorAndEffect()
@@ -308,6 +364,7 @@ public class ShotBall : MonoBehaviour
     IEnumerator RunChain(List<BallPath.ChainStep> steps, MagicType usedMagic)
     {
         isMoving = true;
+        if (shotPreview != null) shotPreview.Hide();
         if (arrow != null) arrow.gameObject.SetActive(false);
 
         yield return BallPath.PlayChain(steps);
