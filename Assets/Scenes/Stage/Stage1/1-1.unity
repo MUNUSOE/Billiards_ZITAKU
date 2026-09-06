@@ -172,7 +172,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &15091060
 RectTransform:
   m_ObjectHideFlags: 0
@@ -916,7 +916,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &189624065
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1282,7 +1282,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 220, y: -130}
+  m_AnchoredPosition: {x: 210, y: -130}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &218002925
@@ -2124,7 +2124,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 315, y: -130}
+  m_AnchoredPosition: {x: 295, y: -130}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &289287879
@@ -2481,7 +2481,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433373, guid: f6fd568b816c64943a44efc3add3a881, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5824670795371433374, guid: f6fd568b816c64943a44efc3add3a881, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4196,7 +4196,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   passCellEffectPrefab: {fileID: 8000756121748368222, guid: ab65876956829bc4794bc5d3ec58a6ae, type: 3}
   stopCellEffectPrefab: {fileID: 3634556389457622699, guid: 9b9320fc60430da498008337321d6fc6, type: 3}
-  cellEffectOffsetY: 0.02
+  cellEffectOffsetY: -0.2
   momentumLabelPrefab: {fileID: 2306645533099535398, guid: b1941aeb985278144a58c2b0130b702c, type: 3}
   momentumLabelOffset: {x: 0, y: 0.6, z: 0}
   momentumLabelFaceCamera: 1
@@ -6702,7 +6702,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1255087237
 RectTransform:
   m_ObjectHideFlags: 0
