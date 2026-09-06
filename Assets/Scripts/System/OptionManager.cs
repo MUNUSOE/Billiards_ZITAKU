@@ -1,9 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class OptionManager : MonoBehaviour
 {
+    public static OptionManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     [Header("UI References")]
     [SerializeField] private GameObject optionPanel;
     [SerializeField] private Slider bgmSlider;
@@ -14,6 +27,9 @@ public class OptionManager : MonoBehaviour
 
     private bool isPaused = false;
 
+    /// <summary>オプション画面を開いているか。他のスクリプトから操作を止める判定に使えます。</summary>
+    public bool IsPaused => isPaused;
+
     void Start()
     {
         // 起動時はオプションパネルを非表示にしておく
@@ -23,22 +39,50 @@ public class OptionManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        // ESCキーで開閉する。
+        // Time.timeScale = 0 でも入力の取得は影響を受けないため、閉じる操作も問題なく効く。
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null) return;
+
+        if (keyboard.escapeKey.wasPressedThisFrame)
+        {
+            ToggleOption();
+        }
+    }
+
+    /// <summary>オプション画面を開いていれば閉じ、閉じていれば開きます。</summary>
+    public void ToggleOption()
+    {
+        if (isPaused) ResumeGame();
+        else OpenOption();
+    }
+
     // 右上の灰色のオプションボタンを押した時
     public void OpenOption()
     {
         isPaused = true;
-        optionPanel.SetActive(true);
+        if (optionPanel != null) optionPanel.SetActive(true);
         Time.timeScale = 0f; // ゲーム内の物理演算・時間を一時停止
-        SoundManager.Instance.PlaySE(SEType.DecideButton);
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(SEType.DecideButton);
+        }
     }
 
     // 「ゲームに戻る」ボタンを押した時
     public void ResumeGame()
     {
         isPaused = false;
-        optionPanel.SetActive(false);
+        if (optionPanel != null) optionPanel.SetActive(false);
         Time.timeScale = 1f; // ゲームの時間を再開
-        SoundManager.Instance.PlaySE(SEType.DecideButton);
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(SEType.DecideButton);
+        }
     }
 
     // 「リトライ」ボタンを押した時
