@@ -361,7 +361,25 @@ public class ShotBall : MonoBehaviour
 
     void HandlePowerChange()
     {
-        if (Keyboard.current.aKey.wasPressedThisFrame)
+        bool decrease = false;
+        bool increase = false;
+
+        // キーボード（A/Dキー）での判定
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.aKey.wasPressedThisFrame) decrease = true;
+            else if (Keyboard.current.dKey.wasPressedThisFrame) increase = true;
+        }
+
+        // マウスホイールでの判定
+        if (Mouse.current != null)
+        {
+            float scrollY = Mouse.current.scroll.ReadValue().y;
+            if (scrollY > 0f) increase = true;       // 上スクロールで増加
+            else if (scrollY < 0f) decrease = true;  // 下スクロールで減少
+        }
+
+        if (decrease)
         {
             if (currentLevel > 0)
             {
@@ -370,7 +388,7 @@ public class ShotBall : MonoBehaviour
                 if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.WeakArrow);
             }
         }
-        else if (Keyboard.current.dKey.wasPressedThisFrame)
+        else if (increase)
         {
             if (currentLevel < distanceLevels.Length - 1)
             {
