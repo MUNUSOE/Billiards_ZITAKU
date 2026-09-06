@@ -1287,7 +1287,7 @@ public static class BallPath
             float ratio = Mathf.Clamp01(t / shotDuration);
             float factor = 1f - ratio;
             factor = factor * factor;
-            if (factor < 0.02f) factor = 0.02f;
+            if (factor < 0.2f) factor = 0.2f;
 
             float frameSpeed = shotSpeed * factor * Time.deltaTime;
             float remainingFrameSpeed = frameSpeed;

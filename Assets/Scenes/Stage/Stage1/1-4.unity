@@ -13312,13 +13312,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fireMagicButton: {fileID: 950711011}
   fireCountText: {fileID: 1255087238}
-  fireMagicCount: 100
+  fireMagicCount: 1
   waterMagicButton: {fileID: 218002927}
   waterCountText: {fileID: 15091061}
-  waterMagicCount: 100
+  waterMagicCount: 1
   windMagicButton: {fileID: 289287881}
   windCountText: {fileID: 189624066}
-  windMagicCount: 100
+  windMagicCount: 1
   shotBall: {fileID: 449158586}
 --- !u!114 &2071874469
 MonoBehaviour:
