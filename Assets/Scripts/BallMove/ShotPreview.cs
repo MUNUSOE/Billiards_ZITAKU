@@ -149,13 +149,18 @@ public class ShotPreview : MonoBehaviour
 
         if (cells.Count == 0) return;
 
-        Vector3 stopCell = cells[cells.Count - 1];
+        // 停止マスは経路の最後の点から直接求める。
+        // cells は重複を除いたリストなので、一度通ったマスに戻って停止する場合、
+        // そのマスは末尾に追加されず、cells の最後＝停止マスにはならない。
+        BallPath.PathPoint lastPoint = shotStep.path[shotStep.path.Count - 1];
+        Vector3 stopCell = BallPath.SnapToGrid(lastPoint.position, panelSize);
 
         // 通過マス（停止マスを除く）。
         // 開始マスは、反射などでもう一度そこを通る場合のみ表示する。
         int passIndex = 0;
-        for (int i = 0; i < cells.Count - 1; i++)
+        for (int i = 0; i < cells.Count; i++)
         {
+            if (Vector3.Distance(cells[i], stopCell) < 0.01f) continue;
             if (!revisitsStartCell && Vector3.Distance(cells[i], startCell) < 0.01f) continue;
 
             ShowPassEffect(passIndex, cells[i]);
