@@ -72,6 +72,8 @@ public class SoundManager : MonoBehaviour
     private Dictionary<SEType, SEData> seDict = new Dictionary<SEType, SEData>();
 
     private float currentBGMIndividualVolume = 1.0f;
+    // ★追加: 現在再生中ループSEの個別音量を保持する変数
+    private float currentLoopSEIndividualVolume = 1.0f;
 
     public float UserBGMVolume => userBGMVolume;
     public float UserSEVolume => userSEVolume;
@@ -95,19 +97,16 @@ public class SoundManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // シーン読み込みイベントに登録
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void OnDisable()
     {
-        // イベント解除
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void Start()
     {
-        // ★ 最初（起動時）のシーン用にBGM判定・再生を手動で実行
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
@@ -136,14 +135,12 @@ public class SoundManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // シーン名に応じて再生するBGMを分岐
         if (scene.name == "Title" || scene.name == "StageSelect")
         {
             PlayBGM(BGMType.MainTheme);
         }
         else
         {
-            // Title, StageSelect 以外のシーン（各ステージなど）
             PlayBGM(BGMType.Stage);
         }
     }
@@ -156,7 +153,6 @@ public class SoundManager : MonoBehaviour
 
         if (bgmDict.TryGetValue(type, out var data))
         {
-            // 既に同じ曲が再生中なら演奏を止めずにそのまま維持
             if (bgmSource.clip == data.clip && bgmSource.isPlaying) return;
 
             bgmSource.clip = data.clip;
@@ -206,8 +202,11 @@ public class SoundManager : MonoBehaviour
             loopSeSource.clip = data.clip;
             loopSeSource.loop = true;
 
-            float finalVolume = Mathf.Clamp01(data.volume * userSEVolume * masterVolumeBoost);
-            loopSeSource.volume = finalVolume;
+            // ★追加: このSEの個別音量を保存しておく
+            currentLoopSEIndividualVolume = data.volume;
+
+            // ★修正: 再生前に音量を全体設定に合わせて反映
+            ApplyVolumes();
 
             loopSeSource.Play();
         }
@@ -233,7 +232,7 @@ public class SoundManager : MonoBehaviour
     public void SetSEVolume(float volume)
     {
         userSEVolume = Mathf.Clamp01(volume);
-        ApplyVolumes();
+        ApplyVolumes(); // ここで loopSeSource の音量も同時にリアルタイム変更されます
     }
 
     private void ApplyVolumes()
@@ -248,9 +247,10 @@ public class SoundManager : MonoBehaviour
             seSource.volume = Mathf.Clamp01(userSEVolume * masterVolumeBoost);
         }
 
+        // ★修正: ループSEの個別音量 (currentLoopSEIndividualVolume) を掛けて計算
         if (loopSeSource != null)
         {
-            loopSeSource.volume = Mathf.Clamp01(userSEVolume * masterVolumeBoost);
+            loopSeSource.volume = Mathf.Clamp01(currentLoopSEIndividualVolume * userSEVolume * masterVolumeBoost);
         }
     }
 }
