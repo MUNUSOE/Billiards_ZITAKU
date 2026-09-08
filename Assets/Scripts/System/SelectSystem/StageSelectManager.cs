@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UI; // レガシーTextに必要
 using UnityEngine.SceneManagement;
+using TMPro;
 
 /// <summary>
 /// ステージセレクト全体を管理する。
@@ -23,21 +24,23 @@ public class StageSelectManager : MonoBehaviour
     [Header("Opened Book UI (Left Page)")]
     [Tooltip("左ページ全体のRectTransform（CurlPageの位置・サイズ合わせに使う）。")]
     [SerializeField] private RectTransform leftPageRect;
-    [SerializeField] private Text leftPageTitleText;
-    [SerializeField] private Text leftPageNumberText;
+    [SerializeField] private TMP_Text leftPageTitleText;
+    [SerializeField] private TMP_Text leftPageNumberText;
     [SerializeField] private Button leftPlayButton;
     [SerializeField] private StarRatingView leftStarRating;
-    [Tooltip("左ページの「最速クリア」テキスト")]
+    [SerializeField] private Image leftStageImage;
+    [Tooltip("左ページの最速クリア表示テキスト(レガシーText)")]
     [SerializeField] private Text leftFastestClearText;
 
     [Header("Opened Book UI (Right Page)")]
     [Tooltip("右ページ全体のRectTransform（CurlPageの位置・サイズ合わせに使う）。")]
     [SerializeField] private RectTransform rightPageRect;
-    [SerializeField] private Text rightPageTitleText;
-    [SerializeField] private Text rightPageNumberText;
+    [SerializeField] private TMP_Text rightPageTitleText;
+    [SerializeField] private TMP_Text rightPageNumberText;
     [SerializeField] private Button rightPlayButton;
     [SerializeField] private StarRatingView rightStarRating;
-    [Tooltip("右ページの「最速クリア」テキスト")]
+    [SerializeField] private Image rightStageImage;
+    [Tooltip("右ページの最速クリア表示テキスト(レガシーText)")]
     [SerializeField] private Text rightFastestClearText;
 
     [Header("Book Controls")]
@@ -54,6 +57,8 @@ public class StageSelectManager : MonoBehaviour
 
     private void Start()
     {
+        // クリア画面(GameClear.OpenClearUI)が Time.timeScale = 0f にしたまま
+        // このシーンへ遷移してくる可能性があるため、メニュー画面としては必ず通常速度に戻す。
         Time.timeScale = 1f;
 
         InitializeSampleData();
@@ -64,8 +69,14 @@ public class StageSelectManager : MonoBehaviour
         if (prevBookPageButton != null) prevBookPageButton.onClick.AddListener(() => OnClickPageChange(false));
     }
 
+    /// <summary>
+    /// テスト用の本・ステージデータ作成。
+    /// インスペクターでデータが設定されていればそれを使い、空の場合のみ自動生成します。
+    /// </summary>
     private void InitializeSampleData()
     {
+        // ★修正: インスペクターで本（Books Data）が1冊でも設定されていれば、
+        // ユーザーの設定した本番データ（画像など）を優先して使い、自動生成はスキップする。
         if (booksData.Count > 0) return;
 
         for (int b = 1; b <= 12; b++)
@@ -82,9 +93,9 @@ public class StageSelectManager : MonoBehaviour
                 {
                     stageId = $"{b}-{s}",
                     stageName = $"{b}-{s}",
-                    sceneToLoad = $"{b}-{s}",
+                    sceneToLoad = $"Stage_{b}_{s}",
                     isUnlocked = true,
-                    parMoves = 3,
+                    parMoves = 3, // 最速クリア判定の基準手数を追加
                     starCount = 0,
                 });
             }
@@ -102,6 +113,7 @@ public class StageSelectManager : MonoBehaviour
 
         if (bookGridContainer == null) return;
 
+        // Content の下にある子要素（手動配置した本）を取得してデータ・イベントを設定する。
         int childCount = bookGridContainer.childCount;
 
         for (int i = 0; i < childCount; i++)
@@ -110,6 +122,7 @@ public class StageSelectManager : MonoBehaviour
 
             if (i >= booksData.Count)
             {
+                // データがない分は非表示。
                 child.gameObject.SetActive(false);
                 continue;
             }
@@ -124,13 +137,14 @@ public class StageSelectManager : MonoBehaviour
 
                 if (itemView.Button != null)
                 {
-                    itemView.Button.onClick.RemoveAllListeners();
+                    itemView.Button.onClick.RemoveAllListeners(); // 二重登録防止
                     itemView.Button.onClick.AddListener(() => OpenBook(book));
                 }
             }
             else
             {
-                Text t = child.GetComponentInChildren<Text>();
+                // BookShelfItemView が付いていない場合のフォールバック（タイトルのみ反映）。
+                TMP_Text t = child.GetComponentInChildren<TMP_Text>();
                 if (t != null) t.text = book.bookTitle;
 
                 Button btn = child.GetComponent<Button>();
@@ -168,15 +182,19 @@ public class StageSelectManager : MonoBehaviour
         int leftStageIndex = currentPagePairIndex * 2;
         int rightStageIndex = leftStageIndex + 1;
 
-        UpdateSinglePage(leftStageIndex, leftPageTitleText, leftPageNumberText, leftPlayButton, leftStarRating, leftFastestClearText);
-        UpdateSinglePage(rightStageIndex, rightPageTitleText, rightPageNumberText, rightPlayButton, rightStarRating, rightFastestClearText);
+        // 左ページ更新 
+        UpdateSinglePage(leftStageIndex, leftPageTitleText, leftPageNumberText, leftPlayButton, leftStarRating, leftStageImage, leftFastestClearText);
 
+        // 右ページ更新
+        UpdateSinglePage(rightStageIndex, rightPageTitleText, rightPageNumberText, rightPlayButton, rightStarRating, rightStageImage, rightFastestClearText);
+
+        // 矢印ボタンの有効／無効切り替え
         int totalStages = currentBook.stages.Count;
         if (prevBookPageButton != null) prevBookPageButton.interactable = (currentPagePairIndex > 0);
         if (nextBookPageButton != null) nextBookPageButton.interactable = (rightStageIndex < totalStages - 1);
     }
 
-    private void UpdateSinglePage(int stageIndex, Text titleText, Text pageNumText, Button playBtn, StarRatingView starRating, Text fastestClearText)
+    private void UpdateSinglePage(int stageIndex, TMP_Text titleText, TMP_Text pageNumText, Button playBtn, StarRatingView starRating, Image stageImage, Text fastestClearText)
     {
         bool hasStage = currentBook != null && stageIndex >= 0 && stageIndex < currentBook.stages.Count;
 
@@ -210,6 +228,26 @@ public class StageSelectManager : MonoBehaviour
                 starRating.SetStarCount(stage.starCount);
             }
 
+            if (stageImage != null)
+            {
+                // ★修正: どんな時でもImageオブジェクト自体は表示させておく
+                stageImage.gameObject.SetActive(true);
+                stageImage.enabled = true;
+
+                if (stage.stageImage != null)
+                {
+                    stageImage.sprite = stage.stageImage;
+                    // ★追加: インスペクターでImageに「黄緑色」などの色がついていた場合、画像の本来の色（白基準）にリセットして表示する
+                    stageImage.color = Color.white;
+                }
+                else
+                {
+                    // 画像が登録されていない場合は、インスペクターで設定した黄緑色の枠などをそのまま残す
+                    stageImage.sprite = null;
+                }
+            }
+
+            // 最速クリア達成判定
             if (fastestClearText != null)
             {
                 bool isFastest = StageResult.IsFastestAchieved(stage.stageId, stage.parMoves);
@@ -218,50 +256,71 @@ public class StageSelectManager : MonoBehaviour
         }
         else
         {
+            // ステージが存在しないページ（最後の奇数ページ用）。
             if (titleText != null) titleText.gameObject.SetActive(false);
             if (pageNumText != null) pageNumText.gameObject.SetActive(false);
             if (playBtn != null) playBtn.gameObject.SetActive(false);
             if (starRating != null) starRating.gameObject.SetActive(false);
+            if (stageImage != null) stageImage.gameObject.SetActive(false);
             if (fastestClearText != null) fastestClearText.gameObject.SetActive(false);
         }
     }
 
     private void OnClickPageChange(bool isNext)
     {
-        if (pageCurl != null && pageCurl.IsAnimating) return;
+        Debug.Log($"[StageSelectManager] ページ送りボタン押下 isNext={isNext} pageCurl={(pageCurl != null ? "あり" : "null")} isAnimating={(pageCurl != null && pageCurl.IsAnimating)}");
+
+        if (pageCurl != null && pageCurl.IsAnimating)
+        {
+            Debug.Log("[StageSelectManager] アニメーション中のため無視");
+            return;
+        }
+
         StartCoroutine(PageChangeRoutine(isNext));
     }
 
     private IEnumerator PageChangeRoutine(bool isNext)
     {
+        Debug.Log($"[StageSelectManager] PageChangeRoutine 開始 isNext={isNext} currentPagePairIndex={currentPagePairIndex}");
+
         if (pageCurl != null)
         {
-            RectTransform sourcePageRect = isNext ? rightPageRect : leftPageRect;
+            RectTransform pageRect = isNext ? rightPageRect : leftPageRect;
+
             int outgoingStageIndex = isNext ? (currentPagePairIndex * 2 + 1) : (currentPagePairIndex * 2);
             StageData outgoingStage = (currentBook != null && outgoingStageIndex >= 0 && outgoingStageIndex < currentBook.stages.Count)
                 ? currentBook.stages[outgoingStageIndex]
                 : null;
+            int outgoingPageNumber = outgoingStageIndex + 1;
 
-            yield return StartCoroutine(pageCurl.PlayCurlAnimation(isNext, sourcePageRect, outgoingStage, outgoingStageIndex + 1, () =>
+            yield return StartCoroutine(pageCurl.PlayCurlAnimation(isNext, pageRect, outgoingStage, outgoingPageNumber, () =>
             {
+                // 真横を向いて見えなくなった瞬間にデータを更新する。
                 if (isNext) currentPagePairIndex++;
                 else currentPagePairIndex--;
 
+                Debug.Log($"[StageSelectManager] onHalfway内でcurrentPagePairIndex更新 → {currentPagePairIndex}");
                 UpdatePageUI();
+                Debug.Log("[StageSelectManager] UpdatePageUI 完了");
             }));
         }
         else
         {
+            // アニメーション演出がない場合は即座に切り替える。
             if (isNext) currentPagePairIndex++;
             else currentPagePairIndex--;
+
             UpdatePageUI();
         }
+
+        Debug.Log($"[StageSelectManager] PageChangeRoutine 終了 currentPagePairIndex={currentPagePairIndex}");
     }
 
     private void OnSelectStage(StageData stage)
     {
         if (stage == null) return;
 
+        Debug.Log($"ステージ読み込み: {stage.stageId}");
         if (!string.IsNullOrEmpty(stage.sceneToLoad))
         {
             SceneManager.LoadScene(stage.sceneToLoad);

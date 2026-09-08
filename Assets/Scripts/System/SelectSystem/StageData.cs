@@ -10,9 +10,12 @@ public class StageData
     public bool isUnlocked = true;
 
     [Tooltip("このステージの最速手。StageInfoのParMovesと同じ値を設定します。")]
-    public int parMoves = 3;     // ★追加: 最速クリア判定用の規定手数
+    public int parMoves = 3;     // 最速クリア判定用の規定手数
 
     [Range(0, 3)] public int starCount = 0; // クリア時の星の数（0〜3）
+
+    [Tooltip("ステージセレクト画面で表示するサムネイル画像")]
+    public Sprite stageImage;    // ★追加: 画像用の変数
 }
 
 [System.Serializable]
