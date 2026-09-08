@@ -1,11 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 /// <summary>
 /// ヘルプ画面の表示・非表示、およびメニュー項目の切り替えを管理するクラス
 /// </summary>
 public class HelpManager : MonoBehaviour
 {
+    // OptionManagerと同じように、外部から簡単にアクセスできるようにする
+    public static HelpManager Instance { get; private set; }
+
+    [System.Serializable]
+    public class CategoryData
+    {
+        [Tooltip("このカテゴリを選択・解除するためのボタン")]
+        public Button categoryButton;
+
+        [Tooltip("このカテゴリが選択されたときに表示する、ボタン群をまとめた親オブジェクト")]
+        public GameObject menuContainer;
+    }
+
     [Header("UI References")]
     [Tooltip("ヘルプ画面全体のコンテナ（暗い背景＋ヘルプウィンドウ）")]
     [SerializeField] private GameObject helpContainer;
@@ -17,82 +31,100 @@ public class HelpManager : MonoBehaviour
     [SerializeField] private Button closeButton;
 
     [Header("Content Switching")]
-    [Tooltip("左側のメニューボタンの配列")]
+    [Tooltip("すべてのメニューボタン（カテゴリ問わず）を順番に登録します")]
     [SerializeField] private Button[] menuButtons;
 
-    [Tooltip("右側に表示する各項目のコンテンツパネル配列（menuButtonsとインデックスを合わせる）")]
+    [Tooltip("右側に表示するコンテンツパネル配列（menuButtonsとインデックスを合わせる）")]
     [SerializeField] private GameObject[] contentPanels;
+
+    [Header("Category Filtering")]
+    [Tooltip("カテゴリボタンと、それに紐づくメニューコンテナの設定")]
+    [SerializeField] private List<CategoryData> categories;
+
+    [Header("Highlight Frame")]
+    [Tooltip("選択中のボタンを示す黄色い枠のUI (RectTransform)")]
+    [SerializeField] private RectTransform highlightFrame;
+
+    // 現在選択中のカテゴリを記憶しておく変数
+    private CategoryData currentActiveCategory = null;
+
+    // ヘルプ画面が開いているかどうかを外部に教えるフラグ
+    private bool isHelpOpen = false;
+    public bool IsHelpOpen => isHelpOpen;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
 
     private void Start()
     {
-        // ヘルプ画面の初期状態を非表示にする
-        if (helpContainer != null)
-        {
-            helpContainer.SetActive(false);
-        }
+        if (helpContainer != null) helpContainer.SetActive(false);
 
-        // ボタンの表示状態を初期化（開くボタンを表示、閉じるボタンを非表示）
         if (openButton != null) openButton.gameObject.SetActive(true);
         if (closeButton != null) closeButton.gameObject.SetActive(false);
 
-        // 基本ボタンのイベント登録
         if (openButton != null) openButton.onClick.AddListener(OpenHelp);
         if (closeButton != null) closeButton.onClick.AddListener(CloseHelp);
 
-        // メニューボタンのクリックイベントを動的に登録
+        // メニューボタンのクリックイベント
         for (int i = 0; i < menuButtons.Length; i++)
         {
-            int index = i; // クロージャ（コールバック内での変数参照）のためにローカルコピーを作成
+            int index = i;
             if (menuButtons[i] != null)
             {
                 menuButtons[i].onClick.AddListener(() => SwitchContent(index));
             }
         }
-    }
 
-    /// <summary>
-    /// ヘルプ画面を開く
-    /// </summary>
-    public void OpenHelp()
-    {
-        if (helpContainer != null) helpContainer.SetActive(true);
-
-        // 開くボタンを隠し、閉じるボタンを表示する
-        if (openButton != null) openButton.gameObject.SetActive(false);
-        if (closeButton != null) closeButton.gameObject.SetActive(true);
-
-        // 開いた直後はすべてのコンテンツパネルを非表示にする（ボタンが押されるまで空っぽにする）
-        if (contentPanels != null)
+        // カテゴリボタンのイベント
+        if (categories != null)
         {
-            for (int i = 0; i < contentPanels.Length; i++)
+            foreach (var category in categories)
             {
-                if (contentPanels[i] != null)
+                if (category.categoryButton != null)
                 {
-                    contentPanels[i].SetActive(false);
+                    CategoryData cat = category;
+                    category.categoryButton.onClick.AddListener(() => ToggleCategory(cat));
                 }
             }
         }
-
-        // 必要に応じてここで Time.timeScale = 0f; などを実行しゲームをポーズします
     }
 
-    /// <summary>
-    /// ヘルプ画面を閉じる
-    /// </summary>
+    public void OpenHelp()
+    {
+        isHelpOpen = true; // フラグをON
+
+        if (helpContainer != null) helpContainer.SetActive(true);
+
+        if (openButton != null) openButton.gameObject.SetActive(false);
+        if (closeButton != null) closeButton.gameObject.SetActive(true);
+
+        ResetCategoryFilter();
+        ClearContentAndHighlight();
+
+        // ゲーム内のアニメーション等も止める
+        Time.timeScale = 0f;
+    }
+
     public void CloseHelp()
     {
+        isHelpOpen = false; // フラグをOFF
+
         if (helpContainer != null) helpContainer.SetActive(false);
 
-        // 閉じるボタンを隠し、開くボタンを表示する
         if (openButton != null) openButton.gameObject.SetActive(true);
         if (closeButton != null) closeButton.gameObject.SetActive(false);
 
-        // 必要に応じてここで Time.timeScale = 1f; などを実行しポーズを解除します
+        // ゲームのポーズを解除する
+        Time.timeScale = 1f;
     }
 
-    /// <summary>
-    /// 選択されたインデックスのコンテンツのみを表示し、他を非表示にする
-    /// </summary>
     private void SwitchContent(int index)
     {
         if (contentPanels == null) return;
@@ -101,9 +133,78 @@ public class HelpManager : MonoBehaviour
         {
             if (contentPanels[i] != null)
             {
-                // 一致するインデックスのパネルだけをアクティブにする
                 contentPanels[i].SetActive(i == index);
             }
         }
+
+        if (highlightFrame != null && menuButtons != null && index >= 0 && index < menuButtons.Length)
+        {
+            Button selectedBtn = menuButtons[index];
+            if (selectedBtn != null)
+            {
+                highlightFrame.gameObject.SetActive(true);
+                highlightFrame.SetParent(selectedBtn.transform.parent, false);
+
+                RectTransform btnRect = selectedBtn.GetComponent<RectTransform>();
+                highlightFrame.position = btnRect.position;
+                highlightFrame.sizeDelta = btnRect.sizeDelta;
+
+                highlightFrame.SetAsLastSibling();
+            }
+        }
+    }
+
+    private void ToggleCategory(CategoryData category)
+    {
+        if (currentActiveCategory == category)
+        {
+            ResetCategoryFilter();
+        }
+        else
+        {
+            currentActiveCategory = category;
+            ApplyCategoryFilter();
+        }
+
+        ClearContentAndHighlight();
+    }
+
+    private void ResetCategoryFilter()
+    {
+        currentActiveCategory = null;
+        if (categories == null) return;
+
+        foreach (var cat in categories)
+        {
+            if (cat != null && cat.menuContainer != null)
+            {
+                cat.menuContainer.SetActive(true);
+            }
+        }
+    }
+
+    private void ApplyCategoryFilter()
+    {
+        if (categories == null) return;
+
+        foreach (var cat in categories)
+        {
+            if (cat != null && cat.menuContainer != null)
+            {
+                cat.menuContainer.SetActive(cat == currentActiveCategory);
+            }
+        }
+    }
+
+    private void ClearContentAndHighlight()
+    {
+        if (contentPanels != null)
+        {
+            for (int i = 0; i < contentPanels.Length; i++)
+            {
+                if (contentPanels[i] != null) contentPanels[i].SetActive(false);
+            }
+        }
+        if (highlightFrame != null) highlightFrame.gameObject.SetActive(false);
     }
 }
