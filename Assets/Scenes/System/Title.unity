@@ -776,13 +776,13 @@ MonoBehaviour:
     volume: 0.2
   - type: 5
     clip: {fileID: 8300000, guid: 0d3b01658141a8c42996adea904343c9, type: 3}
-    volume: 0.2
+    volume: 0.1
   - type: 6
     clip: {fileID: 8300000, guid: c4e3733bca334d44fb408214c3c776ca, type: 3}
-    volume: 0.2
+    volume: 0.1
   - type: 7
     clip: {fileID: 8300000, guid: b20e903c59f477a458a420f1c5216f64, type: 3}
-    volume: 0.2
+    volume: 0.1
   - type: 8
     clip: {fileID: 8300000, guid: 9ff8742a7fa12e9469e00e739498486d, type: 3}
     volume: 1
@@ -809,7 +809,7 @@ MonoBehaviour:
     volume: 0.5
   - type: 16
     clip: {fileID: 8300000, guid: c62e57fd4acdea049b7af9f4b91d1688, type: 3}
-    volume: 0.5
+    volume: 0.06
   userBGMVolume: 1
   userSEVolume: 1
   masterVolumeBoost: 2.5
