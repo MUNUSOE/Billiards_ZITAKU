@@ -90,6 +90,8 @@ public class ShotBall : MonoBehaviour
         && (OptionManager.Instance == null || !OptionManager.Instance.IsPaused)
         // ヘルプ画面を開いている間は操作を受け付けない。
         && (HelpManager.Instance == null || !HelpManager.Instance.IsHelpOpen)
+        // ヒント画面を開いている間は操作を受け付けない。
+        && (HintManager.Instance == null || !HintManager.Instance.IsHintOpen)
         && (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0)
         // 最後のターゲットが落ちてクリア確定を待っている間に撃たれると、
         // 手数が減ってゲームオーバーになってしまうため操作を止める。
@@ -512,6 +514,12 @@ public class ShotBall : MonoBehaviour
 
         // チュートリアル側へ「打った」ことを知らせる。
         TutorialInputGate.NotifyShotFired();
+
+        // ボールを打ち出したら、画面上部のヒントテキストを消去する
+        if (HintManager.Instance != null)
+        {
+            HintManager.Instance.HideHintText();
+        }
 
         moveDir = aimDir;
         ApplyPowerLevel();
