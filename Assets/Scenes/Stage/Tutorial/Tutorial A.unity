@@ -673,7 +673,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &104023588
 RectTransform:
   m_ObjectHideFlags: 0
@@ -860,9 +860,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 175493063}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 60}
   m_SizeDelta: {x: 600, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &171468340
@@ -897,7 +897,7 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 1
+    m_LineSpacing: 1.2
   m_Text: "\u305D\u308C\u3067\u306F\u7403\u3092\u6253\u3064\u524D\u306B\u3001\r\u9B54\u5C0E\u30AD\u30E5\u30FC\u306E\u6271\u3044\u65B9\u3092\u6559\u3048\u307E\u3059\u306D\r\n\u307E\u305A\u306F\u65B9\u5411\u306E\u6307\u5B9A\u3067\u3059"
 --- !u!222 &171468341
 CanvasRenderer:
@@ -941,9 +941,9 @@ RectTransform:
   - {fileID: 171468339}
   m_Father: {fileID: 552990856}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000030517578, y: -165.00002}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0.000030517578, y: -115.000015}
   m_SizeDelta: {x: 800, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &175493064
@@ -3501,9 +3501,9 @@ RectTransform:
   - {fileID: 2085682769}
   m_Father: {fileID: 1665980590}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -165}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: -115}
   m_SizeDelta: {x: 800, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &475975295
@@ -5237,7 +5237,7 @@ MonoBehaviour:
     correctChoiceIndex: 0
     correctResultObject: {fileID: 0}
     wrongResultObject: {fileID: 0}
-    nextSceneName: 2
+    nextSceneName: Tutorial B
   shotBall: {fileID: 3621838022422841172}
   inputCooldown: 0.15
   markCompletedAtEnd: 1
@@ -8226,9 +8226,9 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1344042631}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1665980590}
@@ -8236,13 +8236,13 @@ RectTransform:
   - {fileID: 145275330}
   - {fileID: 401495346}
   - {fileID: 575384345}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1714663890}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 400.00003, y: 224.97421}
+  m_SizeDelta: {x: 800.00006, y: 449.94843}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1348488824
 GameObject:
   m_ObjectHideFlags: 0
@@ -11465,6 +11465,7 @@ RectTransform:
   m_Children:
   - {fileID: 2023037518}
   - {fileID: 942697268}
+  - {fileID: 1344042635}
   - {fileID: 1056808687}
   - {fileID: 1358022450}
   - {fileID: 104023588}
@@ -13912,7 +13913,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2010219496
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14460,9 +14461,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 475975294}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 60}
   m_SizeDelta: {x: 600, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2085682770
@@ -14497,7 +14498,7 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 1
+    m_LineSpacing: 1.2
   m_Text: "\u65E9\u901F\u3067\u3059\u304C...\u79C1\u304C\u8853\u306E\u30CA\u30D3\u30B2\u30FC\u30C8\u3092\u884C\u3044\u307E\u3059\n\u5168\u3066\u306E\u30D3\u30EA\u30E4\u30FC\u30C9\u3092\u653B\u7565\u3057\u3001\u672C\u304B\u3089\u306E\u8131\u51FA\u3092\u76EE\u6307\u3057\u307E\u3057\u3087\u3046"
 --- !u!222 &2085682771
 CanvasRenderer:
@@ -15161,7 +15162,6 @@ SceneRoots:
   - {fileID: 1185362703}
   - {fileID: 462260756}
   - {fileID: 1714663890}
-  - {fileID: 1344042635}
   - {fileID: 2071874467}
   - {fileID: 892461124}
   - {fileID: 488099956}
