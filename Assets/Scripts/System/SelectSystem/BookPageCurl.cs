@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UI; // レガシーTextに必要
+using TMPro;
 
 /// <summary>
 /// 本のページをめくる演出。呼び出し側は PlayCurlAnimation を yield return して
@@ -14,13 +15,13 @@ public class BookPageCurl : MonoBehaviour
 
     [Header("Front Face Content (めくれる紙自体に表示する内容)")]
     [Tooltip("めくれるページのタイトル表示。未設定なら何も表示しない。")]
-    [SerializeField] private Text frontTitleText;
+    [SerializeField] private TMP_Text frontTitleText;
     [Tooltip("めくれるページのページ番号表示。")]
-    [SerializeField] private Text frontPageNumberText;
+    [SerializeField] private TMP_Text frontPageNumberText;
     [Tooltip("めくれるページの星表示。")]
     [SerializeField] private StarRatingView frontStarRating;
-    [Tooltip("めくれるページの最速クリア表示。")]
-    [SerializeField] private Text frontFastestClearText;
+    [Tooltip("めくれるページの最速クリア表示(レガシーText)。")]
+    [SerializeField] private Text frontFastestClearText; // ★レガシーTextに変更
 
     [Header("Settings")]
     [SerializeField] private float duration = 0.4f; // めくるスピード（秒）
@@ -99,6 +100,7 @@ public class BookPageCurl : MonoBehaviour
             if (hasStage) frontStarRating.SetStarCount(stage.starCount);
         }
 
+        // ★最速クリア表示の設定（レガシーText）
         if (frontFastestClearText != null)
         {
             if (hasStage)
