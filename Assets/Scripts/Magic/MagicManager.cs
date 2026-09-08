@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using TMPro;
 
 public enum MagicType
@@ -87,9 +88,9 @@ public class MagicManager : MonoBehaviour
     private void Start()
     {
         // UIボタンのイベント登録
-        if (fireMagicButton != null) fireMagicButton.onClick.AddListener(() => ToggleMagic(MagicType.Fire));
-        if (waterMagicButton != null) waterMagicButton.onClick.AddListener(() => ToggleMagic(MagicType.Water));
-        if (windMagicButton != null) windMagicButton.onClick.AddListener(() => ToggleMagic(MagicType.Wind));
+        if (fireMagicButton != null) fireMagicButton.onClick.AddListener(() => OnMagicButtonClicked(MagicType.Fire));
+        if (waterMagicButton != null) waterMagicButton.onClick.AddListener(() => OnMagicButtonClicked(MagicType.Water));
+        if (windMagicButton != null) windMagicButton.onClick.AddListener(() => OnMagicButtonClicked(MagicType.Wind));
 
         UpdateUI();
     }
@@ -117,6 +118,22 @@ public class MagicManager : MonoBehaviour
         else if (keyboard.eKey.wasPressedThisFrame)
         {
             ToggleMagic(MagicType.Wind);
+        }
+    }
+
+    /// <summary>
+    /// 魔法ボタンがクリックされたときの処理です。
+    /// クリック後はボタンの選択状態を外します。選択されたままだと、
+    /// Enterキーが UI の「決定」として同じボタンを再度押してしまい、
+    /// せっかく選んだ魔法が解除された状態でショットされてしまうためです。
+    /// </summary>
+    private void OnMagicButtonClicked(MagicType type)
+    {
+        ToggleMagic(type);
+
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
         }
     }
 

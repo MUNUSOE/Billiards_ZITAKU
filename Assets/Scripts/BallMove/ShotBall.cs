@@ -510,6 +510,18 @@ public class ShotBall : MonoBehaviour
             MagicManager.Instance.ApplyPendingPotionRestores();
         }
 
+        // ポケットへの吸い込み演出が終わるまで待つ。
+        // 演出中はまだ球が Destroy されておらずクリア判定が成立しないため、
+        // 先に手数を消費すると「最後の球を落として手数0」のときに
+        // クリアより先にゲームオーバーが確定してしまう。
+        while (Pocket.IsAnyBallBeingPocketed)
+        {
+            yield return null;
+        }
+
+        // 消滅の反映を1フレーム待ってから手数を消費する。
+        yield return null;
+
         isMoving = false;
 
         if (GameManager.Instance != null)
