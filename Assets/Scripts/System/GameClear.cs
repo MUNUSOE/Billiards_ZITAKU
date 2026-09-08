@@ -99,6 +99,27 @@ public class GameClear : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// クリア記録（クリア済みフラグ・自己ベスト手数）を保存します。
+    /// ステージの識別と最速手は、シーンに置いた StageInfo から取得します。
+    /// StageInfo が無いシーン（チュートリアルなど）では何もしません。
+    /// </summary>
+    private void RecordStageResult()
+    {
+        if (StageInfo.Instance == null) return;
+        if (GameManager.Instance == null) return;
+
+        string stageId = StageInfo.Instance.StageId;
+        int movesUsed = GameManager.Instance.MovesUsed;
+
+        StageResult.RecordClear(stageId, movesUsed);
+
+        if (StageInfo.Instance.IsFastestAchieved)
+        {
+            Debug.Log($"[GameClear] {stageId} は最速手（{StageInfo.Instance.ParMoves}手以内）を達成しています。");
+        }
+    }
+
     private bool AreAllTargetsDestroyed()
     {
         return targetObjects.TrueForAll(target => target == null);
@@ -115,6 +136,8 @@ public class GameClear : MonoBehaviour
         }
 
         clearTriggered = true;
+
+        RecordStageResult();
 
         if (ClearUI == null)
         {

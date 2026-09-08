@@ -24,40 +24,56 @@ public class ShotBall : MonoBehaviour
     public GameObject arrowStrongObj;
 
     [Header("Magic Visual Settings")]
-    [SerializeField] private Color normalColor = Color.white;
-    [SerializeField] private Color fireColor = Color.red;
-    [SerializeField] private Color waterColor = Color.blue;
-    [SerializeField] private Color windColor = Color.green;
+    [SerializeField] private Color normalColor = Color.white; // 通常（白）
+    [SerializeField] private Color fireColor = Color.red;     // 炎（赤）
+    [SerializeField] private Color waterColor = Color.blue;   // 水（青）
+    [SerializeField] private Color windColor = Color.green;  // 風（緑）
 
     [Header("Magic Select Effect Prefabs (選択中)")]
+    [Tooltip("炎魔法選択時にボールに付与するエフェクト")]
     [SerializeField] private GameObject fireEffectPrefab;
     [SerializeField] private float fireEffectOffsetY = 0f;
 
+    [Tooltip("水魔法選択時にボールに付与するエフェクト")]
     [SerializeField] private GameObject waterEffectPrefab;
     [SerializeField] private float waterEffectOffsetY = 0f;
 
+    [Tooltip("風魔法選択時にボールに付与するエフェクト")]
     [SerializeField] private GameObject windEffectPrefab;
     [SerializeField] private float windEffectOffsetY = 0f;
 
     [Header("Magic Action Effect Prefabs (発動時)")]
+    [Tooltip("水魔法発動（引き寄せ）時に発生させる専用エフェクト")]
     [SerializeField] private GameObject waterCastEffectPrefab;
+    [Tooltip("水魔法発動時エフェクトのY軸オフセット調整")]
     [SerializeField] private float waterCastEffectOffsetY = 0f;
 
+    [Tooltip("風魔法発動（押し出し）時に発生させる専用エフェクト")]
     [SerializeField] private GameObject windCastEffectPrefab;
+    [Tooltip("風魔法発動時エフェクトのY軸オフセット調整")]
     [SerializeField] private float windCastEffectOffsetY = 0f;
 
+    // 現在ボールに追従・表示している選択中エフェクトのインスタンス
     private GameObject currentMagicEffectObj;
     private MagicType currentActiveMagic = MagicType.None;
 
     [Header("Keyboard Aim")]
+    [Tooltip("矢印キーでの照準とEnterキーでのショットを有効にします。")]
     [SerializeField] private bool enableKeyboardAim = true;
+
+    [Tooltip("マウスをこのピクセル数以上動かすと、キーボード照準からマウス照準へ戻ります。")]
     [SerializeField] private float mouseSwitchThreshold = 2f;
 
+    // キーボードで指定中の方向。Vector3.zero なら未指定。
     private Vector3 keyboardAimDir = Vector3.zero;
+    // 直近に確定した狙いの方向。方向変更が禁止されている間はこれを保持し続ける。
+    private Vector3 lastAimDirection = Vector3.zero;
+    // 現在キーボードで狙っているか（false ならマウス）。
     private bool usingKeyboardAim = false;
     private Vector2 lastMousePosition;
 
     [Header("Shot Preview (チュートリアル用)")]
+    [Tooltip("ショットの予測表示。GameManager の Show Shot Preview がオンのときだけ動きます。")]
     [SerializeField] private ShotPreview shotPreview;
 
     private Transform arrow;
@@ -66,13 +82,20 @@ public class ShotBall : MonoBehaviour
 
     /// <summary>
     /// 矢印の操作やショットが可能な状態か。
+    /// Update 内の canOperate と同じ条件で、魔法ボタンの押下可否の判定にも使います。
     /// </summary>
     public bool IsOperable =>
         !isMoving
+        // オプション画面を開いている間は操作を受け付けない。
         && (OptionManager.Instance == null || !OptionManager.Instance.IsPaused)
+        // ヘルプ画面を開いている間は操作を受け付けない。
         && (HelpManager.Instance == null || !HelpManager.Instance.IsHelpOpen)
         && (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0)
+        // 最後のターゲットが落ちてクリア確定を待っている間に撃たれると、
+        // 手数が減ってゲームオーバーになってしまうため操作を止める。
         && (GameClear.Instance == null || !GameClear.Instance.IsClearPendingOrTriggered)
+        // ポケットへの吸い込み演出中は、まだ球が消えておらずクリア判定が成立しないため、
+        // その隙に撃たれて手数が減らないよう操作を止める。
         && !Pocket.IsAnyBallBeingPocketed;
 
     private Vector3 moveDir;
@@ -138,6 +161,14 @@ public class ShotBall : MonoBehaviour
     {
         UpdateBallColorAndEffect();
 
+        // チュートリアルで威力が固定されている場合は、その値に合わせる。
+        if (TutorialInputGate.IsActive && TutorialInputGate.ForcedPowerLevel >= 0
+            && currentLevel != TutorialInputGate.ForcedPowerLevel)
+        {
+            currentLevel = Mathf.Clamp(TutorialInputGate.ForcedPowerLevel, 0, distanceLevels.Length - 1);
+            UpdateArrowObject();
+        }
+
         bool canOperate = IsOperable;
 
         if (canOperate)
@@ -154,10 +185,15 @@ public class ShotBall : MonoBehaviour
         }
         else if (shotPreview != null)
         {
+            // 移動中やクリア待ちの間は予測を消す。
             shotPreview.Hide();
         }
     }
 
+    /// <summary>
+    /// 現在の狙いにあわせてショット予測を更新します。
+    /// GameManager の Show Shot Preview がオフのときは何も表示しません。
+    /// </summary>
     private void UpdateShotPreview()
     {
         if (shotPreview == null) return;
@@ -183,12 +219,23 @@ public class ShotBall : MonoBehaviour
         shotPreview.Show(gameObject, dir, targetPanels, isFireActive);
     }
 
+    /// <summary>
+    /// 矢印キーとマウスの入力を見て、どちらで狙っているかと方向を更新します。
+    /// 矢印キーを押すとキーボード照準に切り替わり、マウスを動かすとマウス照準に戻ります。
+    /// 斜め方向は2つの矢印キーを同時に押して指定します。
+    /// </summary>
     private void UpdateAimInput()
     {
+        // チュートリアルで方向変更が禁止されている間は受け付けない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowDirection) return;
+
         Keyboard keyboard = Keyboard.current;
 
         if (enableKeyboardAim && keyboard != null)
         {
+            // いずれかの矢印キーが「押された瞬間」だけ方向を確定する。
+            // 押されている間ずっと更新すると、斜め（2キー同時押し）から片方を離したとき、
+            // 残った1キーの方向に上書きされてしまい、斜めのまま狙えない。
             bool anyArrowPressedThisFrame =
                 keyboard.leftArrowKey.wasPressedThisFrame ||
                 keyboard.rightArrowKey.wasPressedThisFrame ||
@@ -213,6 +260,7 @@ public class ShotBall : MonoBehaviour
             }
         }
 
+        // マウスが動いたらマウス照準へ戻す。
         Mouse mouse = Mouse.current;
         if (mouse != null)
         {
@@ -225,6 +273,7 @@ public class ShotBall : MonoBehaviour
         }
     }
 
+    /// <summary>ショット実行のキーが押されたか。</summary>
     private bool IsShootKeyPressed()
     {
         if (!enableKeyboardAim) return false;
@@ -235,7 +284,59 @@ public class ShotBall : MonoBehaviour
         return keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame;
     }
 
+    /// <summary>
+    /// 現在の狙いの方向を8方向で返します。求められない場合は zero。
+    /// キーボード照準中はその方向を、そうでなければマウス位置から求めます。
+    /// </summary>
     private Vector3 GetAimDirection()
+    {
+        // チュートリアルで方向が固定されている場合はそれを返す。
+        if (TutorialInputGate.IsActive && TutorialInputGate.UseForcedAim)
+        {
+            lastAimDirection = BallPath.Get8Direction(TutorialInputGate.ForcedDirection);
+            return lastAimDirection;
+        }
+
+        // チュートリアルで方向変更が禁止されている間は、直近の方向を保持し続ける。
+        // ここでマウス位置から計算し直すと、入力を無視していても矢印がカーソルに追従してしまう。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowDirection)
+        {
+            if (lastAimDirection != Vector3.zero) return lastAimDirection;
+        }
+
+        Vector3 dir = ComputeAimDirection();
+        if (dir != Vector3.zero) lastAimDirection = dir;
+
+        return dir;
+    }
+
+    /// <summary>
+    /// 狙いの方向を外部から設定します。チュートリアルで初期値を与えるために使います。
+    /// </summary>
+    public void SetAimDirection(Vector3 direction)
+    {
+        if (direction == Vector3.zero) return;
+
+        Vector3 dir = BallPath.Get8Direction(direction.normalized);
+        keyboardAimDir = dir;
+        lastAimDirection = dir;
+        usingKeyboardAim = true;
+
+        UpdateArrowByMouse();
+    }
+
+    /// <summary>
+    /// 威力レベルを外部から設定します。チュートリアルで初期値を与えるために使います。
+    /// </summary>
+    public void SetPowerLevel(int level)
+    {
+        currentLevel = Mathf.Clamp(level, 0, distanceLevels.Length - 1);
+        ApplyPowerLevel();
+        UpdateArrowObject();
+    }
+
+    /// <summary>キーボードまたはマウスの現在の入力から、狙いの方向を計算します。</summary>
+    private Vector3 ComputeAimDirection()
     {
         if (usingKeyboardAim && keyboardAimDir != Vector3.zero)
         {
@@ -324,20 +425,25 @@ public class ShotBall : MonoBehaviour
 
     void HandlePowerChange()
     {
+        // チュートリアルで威力変更が禁止されている間は受け付けない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowPower) return;
+
         bool decrease = false;
         bool increase = false;
 
+        // キーボード（A/Dキー）での判定
         if (Keyboard.current != null)
         {
             if (Keyboard.current.aKey.wasPressedThisFrame) decrease = true;
             else if (Keyboard.current.dKey.wasPressedThisFrame) increase = true;
         }
 
+        // マウスホイールでの判定
         if (Mouse.current != null)
         {
             float scrollY = Mouse.current.scroll.ReadValue().y;
-            if (scrollY > 0f) increase = true;
-            else if (scrollY < 0f) decrease = true;
+            if (scrollY > 0f) increase = true;       // 上スクロールで増加
+            else if (scrollY < 0f) decrease = true;  // 下スクロールで減少
         }
 
         if (decrease)
@@ -357,34 +463,6 @@ public class ShotBall : MonoBehaviour
                 UpdateArrowObject();
                 if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.StrongArrow);
             }
-        }
-    }
-
-    /// <summary>
-    /// チュートリアル等から威力を強制的に設定します（0:弱, 1:中, 2:強）。
-    /// </summary>
-    public void SetPowerLevel(int level)
-    {
-        currentLevel = Mathf.Clamp(level, 0, distanceLevels.Length - 1);
-        ApplyPowerLevel();
-        UpdateArrowObject();
-    }
-
-    /// <summary>
-    /// チュートリアル等から照準方向を強制的に設定します。
-    /// </summary>
-    public void SetAimDirection(Vector3 direction)
-    {
-        if (direction != Vector3.zero)
-        {
-            keyboardAimDir = BallPath.Get8Direction(direction.normalized);
-            usingKeyboardAim = true;
-            UpdateArrowByMouse(); // 矢印の向きを即座に反映
-        }
-        else
-        {
-            keyboardAimDir = Vector3.zero;
-            usingKeyboardAim = false;
         }
     }
 
@@ -411,6 +489,7 @@ public class ShotBall : MonoBehaviour
     {
         if (arrow == null) return;
 
+        // マウス・キーボードのどちらの照準にも対応するため、共通の方向取得を使う。
         Vector3 dir = GetAimDirection();
         if (dir == Vector3.zero) return;
 
@@ -425,8 +504,14 @@ public class ShotBall : MonoBehaviour
 
     void ShootFromMouse()
     {
+        // チュートリアルで打ち出しが禁止されている間は撃てない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowShot) return;
+
         Vector3 aimDir = GetAimDirection();
         if (aimDir == Vector3.zero) return;
+
+        // チュートリアル側へ「打った」ことを知らせる。
+        TutorialInputGate.NotifyShotFired();
 
         moveDir = aimDir;
         ApplyPowerLevel();
@@ -474,6 +559,7 @@ public class ShotBall : MonoBehaviour
             yield break;
         }
 
+        // 水・風魔法ともに専用の発動時エフェクトとY座標オフセットを渡して呼び出し
         if (usedMagic == MagicType.Water)
         {
             yield return WaterMagic.ApplyPull(gameObject, waterCastEffectPrefab, waterCastEffectOffsetY);
@@ -492,8 +578,22 @@ public class ShotBall : MonoBehaviour
                 MagicManager.Instance.ConsumeMagic(usedMagic);
             }
 
+            // 消費が終わったあとに、このショットで取得したポーションの回復を適用する。
+            // 順序を逆にすると、使った魔法のポーションを取っても回復しない。
             MagicManager.Instance.ApplyPendingPotionRestores();
         }
+
+        // ポケットへの吸い込み演出が終わるまで待つ。
+        // 演出中はまだ球が Destroy されておらずクリア判定が成立しないため、
+        // 先に手数を消費すると「最後の球を落として手数0」のときに
+        // クリアより先にゲームオーバーが確定してしまう。
+        while (Pocket.IsAnyBallBeingPocketed)
+        {
+            yield return null;
+        }
+
+        // 消滅の反映を1フレーム待ってから手数を消費する。
+        yield return null;
 
         isMoving = false;
 

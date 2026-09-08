@@ -1,24 +1,55 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // シーン遷移に必須
+using UnityEngine.SceneManagement;
 
 public class TitleManager : MonoBehaviour
 {
-    [Header("遷移先のシーン名")]
-    [SerializeField] private string gameSceneName = "GameScene"; // 実際に遊ぶメインのシーン名
+    [Header("Scene Names")]
+    [Tooltip("チュートリアルの最初のシーン名")]
+    [SerializeField] private string tutorialSceneName = "TutorialA";
+
+    [Tooltip("ステージ選択のシーン名")]
+    [SerializeField] private string stageSelectSceneName = "StageSelect";
+
+    [Header("Debug")]
+    [Tooltip("チェックを入れると、完了済みでも毎回チュートリアルへ進みます。デバッグ用。")]
+    [SerializeField] private bool alwaysShowTutorial = false;
 
     /// <summary>
     /// ゲームスタートボタンを押した時の処理
     /// </summary>
     public void OnClickStartButton()
     {
-        // SE（効果音）を鳴らす場合
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySE(SEType.DecideButton);
         }
 
-        // 指定したシーンへ遷移
-        SceneManager.LoadScene(gameSceneName);
+        // 念のためゲームの時間を通常速度に戻す
+        Time.timeScale = 1f;
+
+        // チュートリアル未完了（またはデバッグON）ならチュートリアルへ、それ以外はステージ選択へ
+        if (alwaysShowTutorial || !TutorialProgress.IsCompleted)
+        {
+            SceneManager.LoadScene(tutorialSceneName);
+        }
+        else
+        {
+            SceneManager.LoadScene(stageSelectSceneName);
+        }
+    }
+
+    /// <summary>
+    /// ステージ選択へ直接進む（チュートリアルをスキップするボタン等用）
+    /// </summary>
+    public void GoToStageSelect()
+    {
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(SEType.DecideButton);
+        }
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(stageSelectSceneName);
     }
 
     /// <summary>
@@ -26,20 +57,25 @@ public class TitleManager : MonoBehaviour
     /// </summary>
     public void OnClickQuitButton()
     {
-        // SE（効果音）を鳴らす場合
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySE(SEType.DecideButton);
         }
 
-        Debug.Log("ゲームを終了します"); // エディタ上での確認用ログ
+        Debug.Log("ゲームを終了します");
 
 #if UNITY_EDITOR
-        // Unityエディタ上で実行中の場合は、プレイモードを停止する
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-        // ビルドされたゲームアプリ（PC/スマホ等）の場合は、アプリを終了する
         Application.Quit();
 #endif
+    }
+
+    /// <summary>
+    /// チュートリアルの完了記録を消す（デバッグ用のボタンに割り当て可能）
+    /// </summary>
+    public void ResetTutorialProgress()
+    {
+        TutorialProgress.ResetProgress();
     }
 }

@@ -8,6 +8,10 @@ public class StageData
     public string stageName;     // 例: "1-1"
     public string sceneToLoad;   // 移動先のシーン名 (例: "Stage_1_1")
     public bool isUnlocked = true;
+
+    [Tooltip("このステージの最速手。StageInfoのParMovesと同じ値を設定します。")]
+    public int parMoves = 3;     // ★追加: 最速クリア判定用の規定手数
+
     [Range(0, 3)] public int starCount = 0; // クリア時の星の数（0〜3）
 }
 
