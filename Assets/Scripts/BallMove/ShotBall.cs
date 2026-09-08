@@ -66,6 +66,8 @@ public class ShotBall : MonoBehaviour
 
     // キーボードで指定中の方向。Vector3.zero なら未指定。
     private Vector3 keyboardAimDir = Vector3.zero;
+    // 直近に確定した狙いの方向。方向変更が禁止されている間はこれを保持し続ける。
+    private Vector3 lastAimDirection = Vector3.zero;
     // 現在キーボードで狙っているか（false ならマウス）。
     private bool usingKeyboardAim = false;
     private Vector2 lastMousePosition;
@@ -288,9 +290,51 @@ public class ShotBall : MonoBehaviour
         // チュートリアルで方向が固定されている場合はそれを返す。
         if (TutorialInputGate.IsActive && TutorialInputGate.UseForcedAim)
         {
-            return BallPath.Get8Direction(TutorialInputGate.ForcedDirection);
+            lastAimDirection = BallPath.Get8Direction(TutorialInputGate.ForcedDirection);
+            return lastAimDirection;
         }
 
+        // チュートリアルで方向変更が禁止されている間は、直近の方向を保持し続ける。
+        // ここでマウス位置から計算し直すと、入力を無視していても矢印がカーソルに追従してしまう。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowDirection)
+        {
+            if (lastAimDirection != Vector3.zero) return lastAimDirection;
+        }
+
+        Vector3 dir = ComputeAimDirection();
+        if (dir != Vector3.zero) lastAimDirection = dir;
+
+        return dir;
+    }
+
+    /// <summary>
+    /// 狙いの方向を外部から設定します。チュートリアルで初期値を与えるために使います。
+    /// </summary>
+    public void SetAimDirection(Vector3 direction)
+    {
+        if (direction == Vector3.zero) return;
+
+        Vector3 dir = BallPath.Get8Direction(direction.normalized);
+        keyboardAimDir = dir;
+        lastAimDirection = dir;
+        usingKeyboardAim = true;
+
+        UpdateArrowByMouse();
+    }
+
+    /// <summary>
+    /// 威力レベルを外部から設定します。チュートリアルで初期値を与えるために使います。
+    /// </summary>
+    public void SetPowerLevel(int level)
+    {
+        currentLevel = Mathf.Clamp(level, 0, distanceLevels.Length - 1);
+        ApplyPowerLevel();
+        UpdateArrowObject();
+    }
+
+    /// <summary>キーボードまたはマウスの現在の入力から、狙いの方向を計算します。</summary>
+    private Vector3 ComputeAimDirection()
+    {
         if (usingKeyboardAim && keyboardAimDir != Vector3.zero)
         {
             return keyboardAimDir;
