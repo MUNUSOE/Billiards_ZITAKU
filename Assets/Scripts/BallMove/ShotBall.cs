@@ -156,6 +156,14 @@ public class ShotBall : MonoBehaviour
     {
         UpdateBallColorAndEffect();
 
+        // チュートリアルで威力が固定されている場合は、その値に合わせる。
+        if (TutorialInputGate.IsActive && TutorialInputGate.ForcedPowerLevel >= 0
+            && currentLevel != TutorialInputGate.ForcedPowerLevel)
+        {
+            currentLevel = Mathf.Clamp(TutorialInputGate.ForcedPowerLevel, 0, distanceLevels.Length - 1);
+            UpdateArrowObject();
+        }
+
         bool canOperate = IsOperable;
 
         if (canOperate)
@@ -213,6 +221,9 @@ public class ShotBall : MonoBehaviour
     /// </summary>
     private void UpdateAimInput()
     {
+        // チュートリアルで方向変更が禁止されている間は受け付けない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowDirection) return;
+
         Keyboard keyboard = Keyboard.current;
 
         if (enableKeyboardAim && keyboard != null)
@@ -274,6 +285,12 @@ public class ShotBall : MonoBehaviour
     /// </summary>
     private Vector3 GetAimDirection()
     {
+        // チュートリアルで方向が固定されている場合はそれを返す。
+        if (TutorialInputGate.IsActive && TutorialInputGate.UseForcedAim)
+        {
+            return BallPath.Get8Direction(TutorialInputGate.ForcedDirection);
+        }
+
         if (usingKeyboardAim && keyboardAimDir != Vector3.zero)
         {
             return keyboardAimDir;
@@ -361,6 +378,9 @@ public class ShotBall : MonoBehaviour
 
     void HandlePowerChange()
     {
+        // チュートリアルで威力変更が禁止されている間は受け付けない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowPower) return;
+
         bool decrease = false;
         bool increase = false;
 
@@ -437,8 +457,14 @@ public class ShotBall : MonoBehaviour
 
     void ShootFromMouse()
     {
+        // チュートリアルで打ち出しが禁止されている間は撃てない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowShot) return;
+
         Vector3 aimDir = GetAimDirection();
         if (aimDir == Vector3.zero) return;
+
+        // チュートリアル側へ「打った」ことを知らせる。
+        TutorialInputGate.NotifyShotFired();
 
         moveDir = aimDir;
         ApplyPowerLevel();

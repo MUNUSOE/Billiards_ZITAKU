@@ -142,6 +142,9 @@ public class MagicManager : MonoBehaviour
     /// </summary>
     public void ToggleMagic(MagicType type)
     {
+        // チュートリアルで魔法が禁止されている間は選択できない。
+        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowMagic) return;
+
         // 演出中の選択変更は、消費処理とのずれ（回数が減らないまま効果だけ出る）の原因になるため受け付けない。
         if (selectionLocked) return;
 
