@@ -62,18 +62,16 @@ public class GameClear : MonoBehaviour
     {
         while (!clearTriggered)
         {
-            // 主ボールのポケット、炎マス、手数切れによるゲームオーバーを優先する。
-            if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
-            {
-                yield break;
-            }
-
             // 炎マスで球を失っている場合、球が盤面から消えていてもクリアではない。
             if (GameManager.Instance != null && GameManager.Instance.HasLostBallToHazard)
             {
                 yield break;
             }
 
+            // クリア成立の確認をゲームオーバー判定より先に行う。
+            // GameManager.IsGameOver は TriggerGameOver を呼んだ瞬間に true になるため、
+            // 先にゲームオーバーを見てしまうと、最後の球を落とすのと同時に手数が0になった場合に
+            // クリアを取りこぼしてしまう。
             if (AreAllTargetsDestroyed())
             {
                 // 待機に入る前にフラグを立て、この間の追加ショットを止める。
@@ -81,12 +79,19 @@ public class GameClear : MonoBehaviour
 
                 yield return new WaitForSeconds(clearDelay);
 
-                if (GameManager.Instance == null ||
-                    (!GameManager.Instance.IsGameOver && !GameManager.Instance.HasLostBallToHazard))
+                // ここでは IsGameOver を見ない。クリアが成立している場合は
+                // GameManager 側が表示待機中にゲームオーバーを取り消す。
+                if (GameManager.Instance == null || !GameManager.Instance.HasLostBallToHazard)
                 {
                     OpenClearUI();
                 }
 
+                yield break;
+            }
+
+            // ターゲットが残ったままのゲームオーバーは確定なので監視を終える。
+            if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+            {
                 yield break;
             }
 

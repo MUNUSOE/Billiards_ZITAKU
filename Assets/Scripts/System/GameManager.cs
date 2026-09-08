@@ -104,17 +104,51 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private IEnumerator GameOverRoutine()
     {
-        Debug.Log($"ゲームオーバー判定発生。{gameOverDelay}秒後に表示します。");
-        OnGameOver?.Invoke();
+        Debug.Log($"ゲームオーバー判定発生。{gameOverDelay}秒後に表示します（その間もクリア成立を監視）。");
 
-        // 指定した秒数（1秒）待機
-        yield return new WaitForSeconds(gameOverDelay);
+        // クリアは GameClear 側で clearDelay 待ってから確定するため、
+        // 最後の球を落とすのと同時に手数が0になると、先にゲームオーバーが出てしまう。
+        // 待機中も毎フレーム確認し、クリアが成立したら表示を中止する。
+        float elapsed = 0f;
+        while (elapsed < gameOverDelay)
+        {
+            if (IsClearWinning())
+            {
+                Debug.Log("[GameManager] クリア成立を検知したため、ゲームオーバー表示を中止します。");
+                gameOverTriggered = false;
+                yield break;
+            }
+
+            yield return null;
+            elapsed += Time.deltaTime;
+        }
+
+        if (IsClearWinning())
+        {
+            Debug.Log("[GameManager] クリア成立を検知したため、ゲームオーバー表示を中止します。");
+            gameOverTriggered = false;
+            yield break;
+        }
+
+        OnGameOver?.Invoke();
 
         if (GameOverUI != null)
         {
             GameOverUI.SetActive(true);
             Debug.Log("ゲームオーバーUIを表示しました。");
         }
+    }
+
+    /// <summary>
+    /// クリアが成立している（または確定待ち）ためゲームオーバーにすべきでないか。
+    /// 炎で球を失っている場合はクリアではないので false を返します。
+    /// </summary>
+    private bool IsClearWinning()
+    {
+        if (ballLostToHazard) return false;
+        if (GameClear.Instance == null) return false;
+
+        return GameClear.Instance.IsClearPendingOrTriggered;
     }
 
     /// <summary>
