@@ -76,28 +76,27 @@ public class TutorialManager : MonoBehaviour
         TutorialPage page = GetCurrentPage();
         if (page == null) return;
 
-        switch (page.advanceMode)
+        // 打ち出し待ちは他の条件より先に処理する（演出の完了を待つため）。
+        if (HasMode(page, TutorialAdvanceMode.Shot))
         {
-            case TutorialAdvanceMode.LeftClick:
-                if (IsLeftClickPressed()) Advance();
-                break;
-
-            case TutorialAdvanceMode.SpaceKey:
-                if (IsSpacePressed()) Advance();
-                break;
-
-            case TutorialAdvanceMode.Shot:
-                HandleShotAdvance();
-                break;
-
-            case TutorialAdvanceMode.Choice:
-                // ボタンのクリック待ち。OnChoiceSelected から進みます。
-                break;
-
-            case TutorialAdvanceMode.SceneChange:
-                if (IsLeftClickPressed()) LoadNextScene(page);
-                break;
+            HandleShotAdvance();
+            if (waitingForShotToFinish) return;
         }
+
+        // Choice はボタンのクリック待ちなので、ここでは何もしない（OnChoiceSelected から進む）。
+
+        bool advanceRequested = false;
+
+        if (HasMode(page, TutorialAdvanceMode.LeftClick) && IsLeftClickPressed()) advanceRequested = true;
+        if (HasMode(page, TutorialAdvanceMode.SpaceKey) && IsSpacePressed()) advanceRequested = true;
+
+        if (advanceRequested) Advance();
+    }
+
+    /// <summary>ページに指定の条件が含まれているか。</summary>
+    private static bool HasMode(TutorialPage page, TutorialAdvanceMode mode)
+    {
+        return (page.advanceMode & mode) != 0;
     }
 
     /// <summary>
@@ -111,13 +110,19 @@ public class TutorialManager : MonoBehaviour
             if (TutorialInputGate.ConsumeShotFired())
             {
                 waitingForShotToFinish = true;
+
+                // 打ち直しを防ぐため、演出が終わるまで打ち出しを禁止する。
+                TutorialInputGate.Apply(false, false, false, false,
+                    TutorialInputGate.UseForcedAim, TutorialInputGate.ForcedDirection,
+                    TutorialInputGate.ForcedPowerLevel);
             }
             return;
         }
 
-        // 球がすべて止まったら次のページへ。
+        // 球がすべて止まる（＝操作可能に戻る）まで待つ。
         if (shotBall != null && !shotBall.IsOperable) return;
 
+        // 演出が終わったので自動で次のページへ進む。
         waitingForShotToFinish = false;
         Advance();
     }
@@ -125,6 +130,15 @@ public class TutorialManager : MonoBehaviour
     /// <summary>次のページへ進みます。最後まで進んだ場合は終了処理を行います。</summary>
     public void Advance()
     {
+        TutorialPage page = GetCurrentPage();
+
+        // SceneChange が指定されているページは、次のページではなくシーンへ遷移する。
+        if (page != null && HasMode(page, TutorialAdvanceMode.SceneChange))
+        {
+            LoadNextScene(page);
+            return;
+        }
+
         GoToPage(currentIndex + 1);
     }
 
@@ -172,34 +186,59 @@ public class TutorialManager : MonoBehaviour
     /// <summary>ページの設定にあわせて操作の許可範囲を切り替えます。</summary>
     private void ApplyInputMode(TutorialPage page)
     {
+        bool allowDirection = false;
+        bool allowPower = false;
+        bool allowShot = false;
+        const bool allowMagic = false; // チュートリアルでは魔法を扱わない
+
         switch (page.inputMode)
         {
             case TutorialInputMode.None:
-                TutorialInputGate.Apply(false, false, false, false, false, Vector3.zero, -1);
                 break;
 
             case TutorialInputMode.DirectionOnly:
-                TutorialInputGate.Apply(true, false, false, false, false, Vector3.zero, -1);
+                allowDirection = true;
                 break;
 
             case TutorialInputMode.DirectionAndPower:
-                TutorialInputGate.Apply(true, true, false, false, false, Vector3.zero, -1);
+                allowDirection = true;
+                allowPower = true;
                 break;
 
             case TutorialInputMode.AllExceptMagic:
-                TutorialInputGate.Apply(true, true, true, false, false, Vector3.zero, -1);
+                allowDirection = true;
+                allowPower = true;
+                allowShot = true;
                 break;
 
             case TutorialInputMode.FixedShotOnly:
-                TutorialInputGate.Apply(false, false, true, false,
-                    true, page.forcedDirection.normalized, page.forcedPowerLevel);
+                allowShot = true;
                 break;
         }
+
+        // FixedShotOnly は方向・威力の指定を常に使う（従来どおりの挙動）。
+        bool useDirection = page.useForcedDirection || page.inputMode == TutorialInputMode.FixedShotOnly;
+        bool usePower = page.useForcedPower || page.inputMode == TutorialInputMode.FixedShotOnly;
+
+        // 指定があればショット球へ反映する。
+        // 変更が許可されているモードでは「初期値」として働き、そこから操作できます。
+        if (shotBall != null)
+        {
+            if (useDirection) shotBall.SetAimDirection(page.forcedDirection);
+            if (usePower) shotBall.SetPowerLevel(page.forcedPowerLevel);
+        }
+
+        // 変更が禁止されている場合だけ、その値に固定し続ける。
+        bool lockDirection = useDirection && !allowDirection;
+        int lockPowerLevel = (usePower && !allowPower) ? page.forcedPowerLevel : -1;
+
+        TutorialInputGate.Apply(allowDirection, allowPower, allowShot, allowMagic,
+            lockDirection, page.forcedDirection.normalized, lockPowerLevel);
     }
 
     private void BindChoiceButtons(TutorialPage page)
     {
-        if (page.advanceMode != TutorialAdvanceMode.Choice) return;
+        if (!HasMode(page, TutorialAdvanceMode.Choice)) return;
         if (page.choiceButtons == null) return;
 
         for (int i = 0; i < page.choiceButtons.Length; i++)

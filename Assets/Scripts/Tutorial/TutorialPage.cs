@@ -20,23 +20,29 @@ public enum TutorialInputMode
     FixedShotOnly,
 }
 
-/// <summary>次のページへ進む条件です。</summary>
+/// <summary>
+/// 次のページへ進む条件です。複数を組み合わせて指定できます（Inspector ではチェックボックス形式）。
+/// SceneChange は単独の条件ではなく、「進むときに次のシーンへ遷移する」という指定です。
+/// </summary>
+[System.Flags]
 public enum TutorialAdvanceMode
 {
+    None = 0,
+
     /// <summary>左クリックで次へ。テキスト送り用。</summary>
-    LeftClick,
+    LeftClick = 1 << 0,
 
     /// <summary>スペースキーで次へ。「Space to Next」の操作説明ページ用。</summary>
-    SpaceKey,
+    SpaceKey = 1 << 1,
 
-    /// <summary>実際に球を打ち出したら次へ。</summary>
-    Shot,
+    /// <summary>実際に球を打ち出し、演出が終わったら自動で次へ。</summary>
+    Shot = 1 << 2,
 
     /// <summary>選択肢ボタンを押したら次へ。</summary>
-    Choice,
+    Choice = 1 << 3,
 
-    /// <summary>左クリックで次のシーンへ遷移する。</summary>
-    SceneChange,
+    /// <summary>進むとき、次のページではなく次のシーンへ遷移する。他の条件と組み合わせて使います。</summary>
+    SceneChange = 1 << 4,
 }
 
 /// <summary>
@@ -55,13 +61,20 @@ public class TutorialPage
 
     [Header("操作")]
     public TutorialInputMode inputMode = TutorialInputMode.None;
+    [Tooltip("次へ進む条件。複数選択できます。SceneChange を含めると、進むときにシーン遷移します。")]
     public TutorialAdvanceMode advanceMode = TutorialAdvanceMode.LeftClick;
 
-    [Header("固定ショット設定（Input Mode が FixedShotOnly のとき）")]
-    [Tooltip("固定する方向。8方向のいずれか（例: 左向きなら X=-1, Z=0）。")]
+    [Header("方向・威力の指定")]
+    [Tooltip("方向を指定する。Input Mode が方向変更を許可している場合は「初期値」として設定され、禁止している場合はその方向に固定されます。")]
+    public bool useForcedDirection = false;
+
+    [Tooltip("指定する方向。8方向のいずれか（例: 左向きなら X=-1, Z=0）。")]
     public Vector3 forcedDirection = new Vector3(-1f, 0f, 0f);
 
-    [Tooltip("固定する威力レベル。0=弱(1マス) 1=中(2マス) 2=強(3マス)。")]
+    [Tooltip("威力を指定する。Input Mode が威力変更を許可している場合は「初期値」として設定され、禁止している場合はその値に固定されます。")]
+    public bool useForcedPower = false;
+
+    [Tooltip("指定する威力レベル。0=弱(1マス) 1=中(2マス) 2=強(3マス)。")]
     [Range(0, 2)]
     public int forcedPowerLevel = 0;
 
