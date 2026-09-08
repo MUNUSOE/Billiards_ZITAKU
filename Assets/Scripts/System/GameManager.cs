@@ -30,6 +30,12 @@ public class GameManager : MonoBehaviour
     private bool ballLostToHazard; // 炎マスなどで球を失ったか（この場合クリアにはできない）
 
     public int CurrentMoves => currentMoves;
+
+    /// <summary>このステージで使った手数。クリア記録の保存に使います。</summary>
+    public int MovesUsed => Mathf.Max(0, maxMoves - currentMoves);
+
+    /// <summary>このステージの初期手数。</summary>
+    public int MaxMoves => maxMoves;
     public bool IsGameOver => gameOverTriggered;
 
     /// <summary>炎マスなどで球を失っている場合 true。クリア判定を抑制するために使う。</summary>

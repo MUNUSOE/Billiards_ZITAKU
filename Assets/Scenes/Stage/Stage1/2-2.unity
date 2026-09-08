@@ -16380,6 +16380,7 @@ GameObject:
   - component: {fileID: 2071874467}
   - component: {fileID: 2071874468}
   - component: {fileID: 2071874469}
+  - component: {fileID: 2071874473}
   - component: {fileID: 2071874470}
   - component: {fileID: 2071874471}
   - component: {fileID: 2071874472}
@@ -16487,6 +16488,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgmSlider: {fileID: 470919322}
   seSlider: {fileID: 931414006}
+--- !u!114 &2071874473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071874466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8c92e69ac58bff4fb03e52b8ee0be22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parMoves: 3
+  stageIdOverride: 
 --- !u!1 &2073794760
 GameObject:
   m_ObjectHideFlags: 0

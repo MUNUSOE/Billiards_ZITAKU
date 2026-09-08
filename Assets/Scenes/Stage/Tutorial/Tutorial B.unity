@@ -5938,7 +5938,7 @@ MonoBehaviour:
     nextSceneName: Tutorial C
   shotBall: {fileID: 3621838022422841172}
   inputCooldown: 0.15
-  markCompletedAtEnd: 1
+  markCompletedAtEnd: 0
 --- !u!4 &892461124
 Transform:
   m_ObjectHideFlags: 0

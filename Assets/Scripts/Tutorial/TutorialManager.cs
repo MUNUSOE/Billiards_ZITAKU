@@ -27,7 +27,7 @@ public class TutorialManager : MonoBehaviour
     [Tooltip("ページが切り替わった直後、この秒数だけ入力を受け付けません。クリックの二重反応を防ぎます。")]
     [SerializeField] private float inputCooldown = 0.15f;
 
-    [Tooltip("最後のページを終えたときにチュートリアル完了として記録します。")]
+    [Tooltip("このチュートリアルから別のシーンへ遷移する際、チュートリアル完了として記録します。")]
     [SerializeField] private bool markCompletedAtEnd = true;
 
     private int currentIndex = -1;
@@ -156,6 +156,13 @@ public class TutorialManager : MonoBehaviour
         }
 
         currentIndex = index;
+
+        // ★修正ポイント：別のスクリプトが勝手にシーン移動を行っても確実にするため、
+        // 最後のページが表示された瞬間に「チュートリアル完了」をセーブしてしまう。
+        if (markCompletedAtEnd && pages.Count > 0 && currentIndex == pages.Count - 1)
+        {
+            TutorialProgress.MarkCompleted();
+        }
 
         if (currentIndex < 0 || currentIndex >= pages.Count)
         {
