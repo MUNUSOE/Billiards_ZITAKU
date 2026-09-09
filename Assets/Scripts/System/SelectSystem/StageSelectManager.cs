@@ -93,7 +93,7 @@ public class StageSelectManager : MonoBehaviour
                 {
                     stageId = $"{b}-{s}",
                     stageName = $"{b}-{s}",
-                    sceneToLoad = $"Stage_{b}_{s}",
+                    sceneToLoad = $"{b}-{s}",
                     isUnlocked = true,
                     parMoves = 3, // 最速クリア判定の基準手数を追加
                     starCount = 0,

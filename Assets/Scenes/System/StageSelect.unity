@@ -1385,16 +1385,18 @@ MonoBehaviour:
   bookViewPanel: {fileID: 1724438508}
   bookGridContainer: {fileID: 548668021}
   leftPageRect: {fileID: 0}
-  leftPageTitleText: {fileID: 0}
-  leftPageNumberText: {fileID: 0}
+  leftPageTitleText: {fileID: 1350700893}
+  leftPageNumberText: {fileID: 1433279766}
   leftPlayButton: {fileID: 1662520821}
   leftStarRating: {fileID: 1489320907}
+  leftStageImage: {fileID: 1743243755}
   leftFastestClearText: {fileID: 1935720056}
   rightPageRect: {fileID: 0}
-  rightPageTitleText: {fileID: 0}
-  rightPageNumberText: {fileID: 0}
+  rightPageTitleText: {fileID: 1048193799}
+  rightPageNumberText: {fileID: 1068996885}
   rightPlayButton: {fileID: 63381814}
   rightStarRating: {fileID: 1589087385}
+  rightStageImage: {fileID: 459013178}
   rightFastestClearText: {fileID: 1645937999}
   closeBookButton: {fileID: 1811660384}
   nextBookPageButton: {fileID: 1525638536}
