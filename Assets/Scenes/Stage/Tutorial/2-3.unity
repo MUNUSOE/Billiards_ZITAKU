@@ -1751,7 +1751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0ce02c8cc392940b4105f4bcac09b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 1-2
+  sceneName: 3-1
   cooldownTime: 1
 --- !u!4 &263315028 stripped
 Transform:
@@ -5977,60 +5977,6 @@ MonoBehaviour:
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
     forcedPowerLevel: 0
-    useForcedMagic: 0
-    forcedMagicType: 0
-    allowOnlyForcedMagic: 0
-    selectForcedMagicOnEnter: 0
-    advanceDelayAfterShot: 0
-    choiceButtons: []
-    correctChoiceIndex: 0
-    correctResultObject: {fileID: 0}
-    wrongResultObject: {fileID: 0}
-    nextSceneName: 
-  - pageName: 
-    displayObject: {fileID: 0}
-    inputMode: 0
-    advanceMode: 1
-    useForcedDirection: 0
-    forcedDirection: {x: 0, y: 0, z: 0}
-    useForcedPower: 0
-    forcedPowerLevel: 0
-    useForcedMagic: 0
-    forcedMagicType: 0
-    allowOnlyForcedMagic: 0
-    selectForcedMagicOnEnter: 0
-    advanceDelayAfterShot: 0
-    choiceButtons: []
-    correctChoiceIndex: 0
-    correctResultObject: {fileID: 0}
-    wrongResultObject: {fileID: 0}
-    nextSceneName: 
-  - pageName: 
-    displayObject: {fileID: 0}
-    inputMode: 6
-    advanceMode: 32
-    useForcedDirection: 1
-    forcedDirection: {x: 1, y: 0, z: 0}
-    useForcedPower: 1
-    forcedPowerLevel: 2
-    useForcedMagic: 1
-    forcedMagicType: 2
-    allowOnlyForcedMagic: 1
-    selectForcedMagicOnEnter: 0
-    advanceDelayAfterShot: 0
-    choiceButtons: []
-    correctChoiceIndex: 0
-    correctResultObject: {fileID: 0}
-    wrongResultObject: {fileID: 0}
-    nextSceneName: 
-  - pageName: 
-    displayObject: {fileID: 0}
-    inputMode: 5
-    advanceMode: 4
-    useForcedDirection: 1
-    forcedDirection: {x: 1, y: 0, z: 0}
-    useForcedPower: 1
-    forcedPowerLevel: 2
     useForcedMagic: 0
     forcedMagicType: 0
     allowOnlyForcedMagic: 0

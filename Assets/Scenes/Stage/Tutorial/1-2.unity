@@ -588,6 +588,7 @@ MonoBehaviour:
     forcedMagicType: 0
     allowOnlyForcedMagic: 0
     selectForcedMagicOnEnter: 0
+    advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
     correctResultObject: {fileID: 0}
@@ -605,6 +606,7 @@ MonoBehaviour:
     forcedMagicType: 0
     allowOnlyForcedMagic: 0
     selectForcedMagicOnEnter: 0
+    advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
     correctResultObject: {fileID: 0}
@@ -622,6 +624,7 @@ MonoBehaviour:
     forcedMagicType: 1
     allowOnlyForcedMagic: 1
     selectForcedMagicOnEnter: 0
+    advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
     correctResultObject: {fileID: 0}
@@ -639,6 +642,7 @@ MonoBehaviour:
     forcedMagicType: 1
     allowOnlyForcedMagic: 0
     selectForcedMagicOnEnter: 0
+    advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
     correctResultObject: {fileID: 0}
@@ -1741,7 +1745,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0ce02c8cc392940b4105f4bcac09b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 1-2
+  sceneName: 1-3
   cooldownTime: 1
 --- !u!4 &263315028 stripped
 Transform:
