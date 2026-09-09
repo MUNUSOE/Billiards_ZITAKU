@@ -24,6 +24,14 @@ public static class TutorialInputGate
     /// <summary>魔法の選択を許可するか。</summary>
     public static bool AllowMagic { get; private set; }
 
+    /// <summary>
+    /// 特定の魔法だけを許可するか。true のとき AllowedMagicType 以外は選択できません。
+    /// </summary>
+    public static bool RestrictToSingleMagic { get; private set; }
+
+    /// <summary>RestrictToSingleMagic が true のとき、選択を許可する魔法。</summary>
+    public static MagicType AllowedMagicType { get; private set; } = MagicType.None;
+
     /// <summary>方向を固定するか。true のとき ForcedDirection が使われます。</summary>
     public static bool UseForcedAim { get; private set; }
 
@@ -41,7 +49,8 @@ public static class TutorialInputGate
 
     /// <summary>チュートリアルの制限を有効にして、許可する操作を設定します。</summary>
     public static void Apply(bool allowDirection, bool allowPower, bool allowShot, bool allowMagic,
-                             bool useForcedAim, Vector3 forcedDirection, int forcedPowerLevel)
+                             bool useForcedAim, Vector3 forcedDirection, int forcedPowerLevel,
+                             bool restrictToSingleMagic = false, MagicType allowedMagicType = MagicType.None)
     {
         IsActive = true;
         AllowDirection = allowDirection;
@@ -51,6 +60,20 @@ public static class TutorialInputGate
         UseForcedAim = useForcedAim;
         ForcedDirection = forcedDirection;
         ForcedPowerLevel = forcedPowerLevel;
+        RestrictToSingleMagic = restrictToSingleMagic;
+        AllowedMagicType = allowedMagicType;
+    }
+
+    /// <summary>
+    /// その魔法を選択できるか。チュートリアル中でなければ常に true。
+    /// </summary>
+    public static bool CanSelectMagic(MagicType type)
+    {
+        if (!IsActive) return true;
+        if (!AllowMagic) return false;
+        if (!RestrictToSingleMagic) return true;
+
+        return type == AllowedMagicType;
     }
 
     /// <summary>ShotBall から、打ち出しが行われたことを通知します。</summary>
@@ -83,5 +106,7 @@ public static class TutorialInputGate
         ForcedDirection = Vector3.zero;
         ForcedPowerLevel = -1;
         ShotFired = false;
+        RestrictToSingleMagic = false;
+        AllowedMagicType = MagicType.None;
     }
 }

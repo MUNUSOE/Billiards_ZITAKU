@@ -138,12 +138,23 @@ public class MagicManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 使用する魔法を直接指定します。
+    /// チュートリアルであらかじめ魔法を選ばせておくために使います。
+    /// トグルではないため、残り回数やロック状態に関わらず指定した魔法が選択されます。
+    /// </summary>
+    public void SetActiveMagic(MagicType type)
+    {
+        ActiveMagic = type;
+    }
+
+    /// <summary>
     /// 魔法の選択切り替え（トグル処理）
     /// </summary>
     public void ToggleMagic(MagicType type)
     {
-        // チュートリアルで魔法が禁止されている間は選択できない。
-        if (TutorialInputGate.IsActive && !TutorialInputGate.AllowMagic) return;
+        // チュートリアルで禁止されている魔法は選択できない。
+        // 特定の魔法だけを押させたいページでは、それ以外がここで弾かれる。
+        if (!TutorialInputGate.CanSelectMagic(type)) return;
 
         // 演出中の選択変更は、消費処理とのずれ（回数が減らないまま効果だけ出る）の原因になるため受け付けない。
         if (selectionLocked) return;
