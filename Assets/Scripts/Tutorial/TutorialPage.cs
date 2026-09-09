@@ -16,8 +16,14 @@ public enum TutorialInputMode
     /// <summary>魔法以外のすべて（方向・威力・打ち出し）を許可。</summary>
     AllExceptMagic,
 
+    /// <summary>魔法を含むすべての操作を許可。通常プレイと同じ状態。</summary>
+    AllMoveAccept,
+
     /// <summary>方向と威力は固定したまま、打ち出しだけ許可。</summary>
     FixedShotOnly,
+
+    /// <summary>魔法の選択だけ許可。方向・威力・打ち出しはできません。</summary>
+    SelectMagicOnly,
 }
 
 /// <summary>
@@ -40,6 +46,9 @@ public enum TutorialAdvanceMode
 
     /// <summary>選択肢ボタンを押したら次へ。</summary>
     Choice = 1 << 3,
+
+    /// <summary>指定した魔法が選択されたら次へ。魔法ボタン（キーボード・UIどちらでも）を押させるページ用。</summary>
+    MagicSelected = 1 << 5,
 
     /// <summary>進むとき、次のページではなく次のシーンへ遷移する。他の条件と組み合わせて使います。</summary>
     SceneChange = 1 << 4,
@@ -65,7 +74,7 @@ public class TutorialPage
     public TutorialAdvanceMode advanceMode = TutorialAdvanceMode.LeftClick;
 
     [Header("方向・威力の指定")]
-    [Tooltip("方向を指定する。Input Mode が方向変更を許可している場合は「初期値」として設定され、禁止している場合はその方向に固定されます。")]
+    [Tooltip("方向を指定する。Input Mode が方向変更を許可している場合は「初期値」として設定され、禁止している場合はその方向に固定されます。SelectMagicOnly など操作を止めるモードでも指定できます。")]
     public bool useForcedDirection = false;
 
     [Tooltip("指定する方向。8方向のいずれか（例: 左向きなら X=-1, Z=0）。")]
@@ -77,6 +86,23 @@ public class TutorialPage
     [Tooltip("指定する威力レベル。0=弱(1マス) 1=中(2マス) 2=強(3マス)。")]
     [Range(0, 2)]
     public int forcedPowerLevel = 0;
+
+    [Tooltip("使用する魔法を指定する。プレイヤーに押させたい魔法、または最初から選択させておきたい魔法を指定します。")]
+    public bool useForcedMagic = false;
+
+    [Tooltip("指定する魔法。None なら魔法なしの状態にします。")]
+    public MagicType forcedMagicType = MagicType.None;
+
+    [Tooltip("チェックすると、指定した魔法だけを押せる状態にします。他の魔法のボタン・キーは反応しません。")]
+    public bool allowOnlyForcedMagic = false;
+
+    [Tooltip("チェックすると、ページに入った時点で指定した魔法を選択済みにします。プレイヤーに押させる場合は外してください。")]
+    public bool selectForcedMagicOnEnter = false;
+
+    [Header("待機（Advance Mode が Shot のとき）")]
+    [Tooltip("ショットの処理が終わってから次のページへ進むまでの待機秒数。\n魔法の発動エフェクトは球の移動より長く残るため、その表示を見せ切りたい場合に設定します。")]
+    [Min(0f)]
+    public float advanceDelayAfterShot = 0f;
 
     [Header("選択肢（Advance Mode が Choice のとき）")]
     [Tooltip("選択肢のボタン。並び順が選択肢の番号になります。")]

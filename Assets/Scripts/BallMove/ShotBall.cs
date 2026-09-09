@@ -84,6 +84,13 @@ public class ShotBall : MonoBehaviour
     /// 矢印の操作やショットが可能な状態か。
     /// Update 内の canOperate と同じ条件で、魔法ボタンの押下可否の判定にも使います。
     /// </summary>
+    /// <summary>
+    /// ショットの一連の処理（移動・連鎖・魔法の演出）が進行中か。
+    /// IsOperable と違い、クリア待ちやポケット演出などの状態には左右されません。
+    /// チュートリアルで「打ち終わったか」を判定するのに使います。
+    /// </summary>
+    public bool IsShotSequenceRunning => isMoving;
+
     public bool IsOperable =>
         !isMoving
         // オプション画面を開いている間は操作を受け付けない。

@@ -34,6 +34,8 @@ public class TutorialManager : MonoBehaviour
     private float cooldownTimer;
     private bool lastChoiceWasCorrect;
     private bool waitingForShotToFinish;
+    // ショットの処理が終わってから、ページを進めるまでの残り待機時間。
+    private float shotAdvanceDelayTimer;
 
     /// <summary>直前の選択肢が正解だったか。結果表示ページで参照します。</summary>
     public bool LastChoiceWasCorrect => lastChoiceWasCorrect;
@@ -90,7 +92,21 @@ public class TutorialManager : MonoBehaviour
         if (HasMode(page, TutorialAdvanceMode.LeftClick) && IsLeftClickPressed()) advanceRequested = true;
         if (HasMode(page, TutorialAdvanceMode.SpaceKey) && IsSpacePressed()) advanceRequested = true;
 
+        // 指定した魔法が選択されたら進む。
+        if (HasMode(page, TutorialAdvanceMode.MagicSelected) && IsForcedMagicSelected(page)) advanceRequested = true;
+
         if (advanceRequested) Advance();
+    }
+
+    /// <summary>
+    /// そのページで指定した魔法が、プレイヤーによって選択されたか。
+    /// </summary>
+    private static bool IsForcedMagicSelected(TutorialPage page)
+    {
+        if (MagicManager.Instance == null) return false;
+        if (!page.useForcedMagic) return false;
+
+        return MagicManager.Instance.ActiveMagic == page.forcedMagicType;
     }
 
     /// <summary>ページに指定の条件が含まれているか。</summary>
@@ -110,6 +126,7 @@ public class TutorialManager : MonoBehaviour
             if (TutorialInputGate.ConsumeShotFired())
             {
                 waitingForShotToFinish = true;
+                shotAdvanceDelayTimer = GetCurrentPage() != null ? GetCurrentPage().advanceDelayAfterShot : 0f;
 
                 // 打ち直しを防ぐため、演出が終わるまで打ち出しを禁止する。
                 TutorialInputGate.Apply(false, false, false, false,
@@ -119,8 +136,19 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // 球がすべて止まる（＝操作可能に戻る）まで待つ。
-        if (shotBall != null && !shotBall.IsOperable) return;
+        // ショットの一連の処理が終わるまで待つ。
+        // IsOperable ではなく IsShotSequenceRunning を見るのは、
+        // クリアが成立すると IsOperable が false のままになり、
+        // チュートリアルのページが進まなくなってしまうため。
+        if (shotBall != null && shotBall.IsShotSequenceRunning) return;
+
+        // 魔法の発動エフェクトは球の移動が終わったあとも残るため、
+        // ページごとに指定した時間だけ追加で待つ。
+        if (shotAdvanceDelayTimer > 0f)
+        {
+            shotAdvanceDelayTimer -= Time.unscaledDeltaTime;
+            return;
+        }
 
         // 演出が終わったので自動で次のページへ進む。
         waitingForShotToFinish = false;
@@ -187,6 +215,7 @@ public class TutorialManager : MonoBehaviour
         BindChoiceButtons(page);
 
         waitingForShotToFinish = false;
+        shotAdvanceDelayTimer = 0f;
         cooldownTimer = inputCooldown;
     }
 
@@ -196,7 +225,7 @@ public class TutorialManager : MonoBehaviour
         bool allowDirection = false;
         bool allowPower = false;
         bool allowShot = false;
-        const bool allowMagic = false; // チュートリアルでは魔法を扱わない
+        bool allowMagic = false;
 
         switch (page.inputMode)
         {
@@ -218,14 +247,29 @@ public class TutorialManager : MonoBehaviour
                 allowShot = true;
                 break;
 
+            case TutorialInputMode.AllMoveAccept:
+                allowDirection = true;
+                allowPower = true;
+                allowShot = true;
+                allowMagic = true;
+                break;
+
             case TutorialInputMode.FixedShotOnly:
                 allowShot = true;
                 break;
+
+            case TutorialInputMode.SelectMagicOnly:
+                allowMagic = true;
+                break;
         }
 
-        // FixedShotOnly は方向・威力の指定を常に使う（従来どおりの挙動）。
-        bool useDirection = page.useForcedDirection || page.inputMode == TutorialInputMode.FixedShotOnly;
-        bool usePower = page.useForcedPower || page.inputMode == TutorialInputMode.FixedShotOnly;
+        // FixedShotOnly / SelectMagicOnly は方向・威力の指定を常に使う。
+        bool alwaysUseForcedAim =
+            page.inputMode == TutorialInputMode.FixedShotOnly ||
+            page.inputMode == TutorialInputMode.SelectMagicOnly;
+
+        bool useDirection = page.useForcedDirection || alwaysUseForcedAim;
+        bool usePower = page.useForcedPower || alwaysUseForcedAim;
 
         // 指定があればショット球へ反映する。
         // 変更が許可されているモードでは「初期値」として働き、そこから操作できます。
@@ -235,12 +279,32 @@ public class TutorialManager : MonoBehaviour
             if (usePower) shotBall.SetPowerLevel(page.forcedPowerLevel);
         }
 
+        // 指定した魔法だけを押せる状態にする場合は、魔法の操作自体は許可したうえで種類を絞る。
+        bool restrictMagic = page.useForcedMagic && page.allowOnlyForcedMagic;
+        if (restrictMagic) allowMagic = true;
+
+        // ページに入った時点で選択済みにする指定。
+        // プレイヤーに押させたい場合はチェックを外しておきます。
+        if (MagicManager.Instance != null)
+        {
+            if (page.useForcedMagic && page.selectForcedMagicOnEnter)
+            {
+                MagicManager.Instance.SetActiveMagic(page.forcedMagicType);
+            }
+            else if (HasMode(page, TutorialAdvanceMode.MagicSelected))
+            {
+                // 押させて進むページでは、前ページの選択が残っていると即座に進んでしまうため解除する。
+                MagicManager.Instance.SetActiveMagic(MagicType.None);
+            }
+        }
+
         // 変更が禁止されている場合だけ、その値に固定し続ける。
         bool lockDirection = useDirection && !allowDirection;
         int lockPowerLevel = (usePower && !allowPower) ? page.forcedPowerLevel : -1;
 
         TutorialInputGate.Apply(allowDirection, allowPower, allowShot, allowMagic,
-            lockDirection, page.forcedDirection.normalized, lockPowerLevel);
+            lockDirection, page.forcedDirection.normalized, lockPowerLevel,
+            restrictMagic, page.forcedMagicType);
     }
 
     private void BindChoiceButtons(TutorialPage page)
