@@ -57,6 +57,12 @@ public class ShotArrowView : MonoBehaviour
     // プレハブが指定された場合は、ここに生成した実体が入ります。
     private readonly List<GameObject> runtimeArrows = new List<GameObject>();
 
+    // このコンポーネントが生成したオブジェクト。作り直すときに破棄するため控えておきます。
+    private readonly List<GameObject> spawnedArrows = new List<GameObject>();
+
+    // 用意が済んでいるか。二重に生成しないためのフラグです。
+    private bool built;
+
     private void Awake()
     {
         BuildRuntimeArrows();
@@ -70,6 +76,22 @@ public class ShotArrowView : MonoBehaviour
     /// </summary>
     private void BuildRuntimeArrows()
     {
+        // 既に用意済みなら何もしない。
+        // ShotBall の Awake が先に走って SetPowerLevel から呼ばれた場合、
+        // そのあと自分の Awake でも呼ばれるため、ここで二重生成を防ぎます。
+        if (built) return;
+        built = true;
+
+        // 作り直しに備えて、以前生成したものがあれば破棄する。
+        foreach (GameObject spawned in spawnedArrows)
+        {
+            if (spawned == null) continue;
+
+            if (Application.isPlaying) Destroy(spawned);
+            else DestroyImmediate(spawned);
+        }
+        spawnedArrows.Clear();
+
         runtimeArrows.Clear();
 
         foreach (ArrowEntry entry in arrows)
@@ -91,6 +113,7 @@ public class ShotArrowView : MonoBehaviour
                 instance.transform.localRotation = Quaternion.identity;
                 instance.SetActive(false);
                 runtimeArrows.Add(instance);
+                spawnedArrows.Add(instance);
             }
             else
             {
