@@ -19,9 +19,8 @@ public class ShotBall : MonoBehaviour
     public float ballRadius = 0.25f;
 
     [Header("Arrow Settings")]
-    public GameObject arrowWeakObj;
-    public GameObject arrowMiddleObj;
-    public GameObject arrowStrongObj;
+    [Tooltip("方向を示す矢印の表示。威力ごとの3Dオブジェクトは ShotArrowView 側で登録します。")]
+    public ShotArrowView arrowView;
 
     [Header("Magic Visual Settings")]
     [SerializeField] private Color normalColor = Color.white; // 通常（白）
@@ -76,7 +75,7 @@ public class ShotBall : MonoBehaviour
     [Tooltip("ショットの予測表示。GameManager の Show Shot Preview がオンのときだけ動きます。")]
     [SerializeField] private ShotPreview shotPreview;
 
-    private Transform arrow;
+
     private bool isMoving = false;
     private bool gameOverTriggered = false;
 
@@ -151,7 +150,7 @@ public class ShotBall : MonoBehaviour
         gameOverTriggered = true;
         isMoving = true;
 
-        if (arrow != null) arrow.gameObject.SetActive(false);
+        if (arrowView != null) arrowView.SetVisible(false);
 
         if (GameManager.Instance != null)
         {
@@ -482,33 +481,19 @@ public class ShotBall : MonoBehaviour
 
     void UpdateArrowObject()
     {
-        if (arrowWeakObj != null) arrowWeakObj.SetActive(false);
-        if (arrowMiddleObj != null) arrowMiddleObj.SetActive(false);
-        if (arrowStrongObj != null) arrowStrongObj.SetActive(false);
-
-        switch (currentLevel)
-        {
-            case 0: if (arrowWeakObj != null) { arrowWeakObj.SetActive(true); arrow = arrowWeakObj.transform; } break;
-            case 1: if (arrowMiddleObj != null) { arrowMiddleObj.SetActive(true); arrow = arrowMiddleObj.transform; } break;
-            case 2: if (arrowStrongObj != null) { arrowStrongObj.SetActive(true); arrow = arrowStrongObj.transform; } break;
-        }
+        if (arrowView != null) arrowView.SetPowerLevel(currentLevel);
     }
 
     void UpdateArrowByMouse()
     {
-        if (arrow == null) return;
+        if (arrowView == null) return;
 
         // マウス・キーボードのどちらの照準にも対応するため、共通の方向取得を使う。
         Vector3 dir = GetAimDirection();
         if (dir == Vector3.zero) return;
 
-        float arrowDistance = 0.7f;
-        Vector3 pos = transform.position + dir * arrowDistance;
-        pos.y = transform.position.y;
-        arrow.position = pos;
-
-        float angle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
-        arrow.localRotation = Quaternion.Euler(90f, angle, 180f);
+        // 位置・向きの計算は ShotArrowView 側に任せる。
+        arrowView.UpdateTransform(transform.position, dir);
     }
 
     void ShootFromMouse()
@@ -544,7 +529,7 @@ public class ShotBall : MonoBehaviour
     {
         isMoving = true;
         if (shotPreview != null) shotPreview.Hide();
-        if (arrow != null) arrow.gameObject.SetActive(false);
+        if (arrowView != null) arrowView.SetVisible(false);
 
         yield return BallPath.PlayChain(steps);
 
@@ -619,7 +604,7 @@ public class ShotBall : MonoBehaviour
 
         if (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0)
         {
-            if (arrow != null) arrow.gameObject.SetActive(true);
+            if (arrowView != null) arrowView.SetVisible(true);
             UpdateArrowByMouse();
         }
     }
@@ -634,7 +619,7 @@ public class ShotBall : MonoBehaviour
     IEnumerator RunPush(Vector3 pushDirection, int totalPanels)
     {
         isMoving = true;
-        if (arrow != null) arrow.gameObject.SetActive(false);
+        if (arrowView != null) arrowView.SetVisible(false);
 
         yield return BallPath.PushBallRoutine(gameObject, pushDirection, totalPanels);
 
@@ -644,7 +629,7 @@ public class ShotBall : MonoBehaviour
 
         if (GameManager.Instance == null || GameManager.Instance.CurrentMoves > 0)
         {
-            if (arrow != null) arrow.gameObject.SetActive(true);
+            if (arrowView != null) arrowView.SetVisible(true);
             UpdateArrowByMouse();
         }
     }
