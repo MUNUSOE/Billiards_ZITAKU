@@ -665,7 +665,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 6f8416b8ff5a1e24392d166ca42def8f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1538,8 +1538,10 @@ MonoBehaviour:
       sceneToLoad: Tutorial A
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 0
   - bookId: 1
     bookTitle: "0 \u306E\u7AE0"
     bookCover: {fileID: 0}
@@ -1549,29 +1551,37 @@ MonoBehaviour:
       sceneToLoad: 0-1
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 0-2
       stageName: 0-2
       sceneToLoad: 0-2
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 0-3
       stageName: 0-3
       sceneToLoad: 0-3
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 0-4
       stageName: 0-4
       sceneToLoad: 0-4
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
   - bookId: 2
     bookTitle: "1 \u306E\u7AE0"
     bookCover: {fileID: 0}
@@ -1581,29 +1591,37 @@ MonoBehaviour:
       sceneToLoad: 1-1
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 1-2
       stageName: 1-2
       sceneToLoad: 1-2
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 1-3
       stageName: 1-3
       sceneToLoad: 1-3
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 1-4
       stageName: 1-4
       sceneToLoad: 1-4
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
   - bookId: 3
     bookTitle: "2 \u306E\u7AE0"
     bookCover: {fileID: 0}
@@ -1613,29 +1631,37 @@ MonoBehaviour:
       sceneToLoad: 2-1
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 2-2
       stageName: 2-2
       sceneToLoad: 2-2
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 2-3
       stageName: 2-3
       sceneToLoad: 2-3
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 2-4
       stageName: 2-4
       sceneToLoad: 2-4
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
   - bookId: 4
     bookTitle: "3 \u306E\u7AE0"
     bookCover: {fileID: 0}
@@ -1645,29 +1671,37 @@ MonoBehaviour:
       sceneToLoad: 3-1
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 3-2
       stageName: 3-2
       sceneToLoad: 3-2
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 3-3
       stageName: 3-3
       sceneToLoad: 3-3
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 3-4
       stageName: 3-4
       sceneToLoad: 3-4
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
   - bookId: 5
     bookTitle: "4 \u306E\u7AE0"
     bookCover: {fileID: 0}
@@ -1677,29 +1711,37 @@ MonoBehaviour:
       sceneToLoad: 4-1
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 4-2
       stageName: 4-2
       sceneToLoad: 4-2
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 4-3
       stageName: 4-3
       sceneToLoad: 4-3
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
     - stageId: 4-4
       stageName: 4-4
       sceneToLoad: 4-4
       isUnlocked: 1
       parMoves: 3
+      twoStarMoves: 5
       starCount: 0
       stageImage: {fileID: 0}
+      showStarRating: 1
 --- !u!4 &317337712
 Transform:
   m_ObjectHideFlags: 0
@@ -3283,7 +3325,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 6f8416b8ff5a1e24392d166ca42def8f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3358,7 +3400,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 6f8416b8ff5a1e24392d166ca42def8f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4102,7 +4144,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 6f8416b8ff5a1e24392d166ca42def8f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4591,6 +4633,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
 --- !u!1 &1005374404
 GameObject:
   m_ObjectHideFlags: 0
@@ -7390,9 +7434,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   starIcons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1735832426}
+  - {fileID: 56335313}
+  - {fileID: 830922835}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
 --- !u!1 &1525638532
 GameObject:
   m_ObjectHideFlags: 0
@@ -7953,9 +7999,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   starIcons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1682165674}
+  - {fileID: 570482822}
+  - {fileID: 570198699}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
 --- !u!1 &1610766766
 GameObject:
   m_ObjectHideFlags: 0
@@ -8912,7 +8960,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 6f8416b8ff5a1e24392d166ca42def8f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -9024,7 +9072,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 6f8416b8ff5a1e24392d166ca42def8f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
