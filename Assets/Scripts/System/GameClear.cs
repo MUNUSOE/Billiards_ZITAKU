@@ -114,10 +114,9 @@ public class GameClear : MonoBehaviour
 
         StageResult.RecordClear(stageId, movesUsed);
 
-        if (StageInfo.Instance.IsFastestAchieved)
-        {
-            Debug.Log($"[GameClear] {stageId} は最速手（{StageInfo.Instance.ParMoves}手以内）を達成しています。");
-        }
+        int stars = StageInfo.Instance.StarCount;
+        Debug.Log($"[GameClear] {stageId} 獲得星={stars} / 3"
+                + $"（最速手={StageInfo.Instance.ParMoves} 星2つの条件={StageInfo.Instance.TwoStarMoves}）");
     }
 
     private bool AreAllTargetsDestroyed()

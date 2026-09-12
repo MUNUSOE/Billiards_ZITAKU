@@ -166,7 +166,20 @@ public class StageSelectManager : MonoBehaviour
                 playBtn.onClick.AddListener(() => OnSelectStage(stage));
             }
 
-            if (starRating != null) { starRating.gameObject.SetActive(true); starRating.SetStarCount(stage.starCount); }
+            if (starRating != null)
+            {
+                // ★追加: ステージデータで星を表示する設定のときだけ Active にする
+                if (stage.showStarRating)
+                {
+                    starRating.gameObject.SetActive(true);
+                    int stars = StageResult.GetStarCount(stage.stageId, stage.parMoves, stage.twoStarMoves);
+                    starRating.SetStarCount(stars);
+                }
+                else
+                {
+                    starRating.gameObject.SetActive(false);
+                }
+            }
 
             if (stageImage != null)
             {
@@ -199,7 +212,6 @@ public class StageSelectManager : MonoBehaviour
         StartCoroutine(PageChangeRoutine(isNext));
     }
 
-    // Pivot（回転軸）を位置をズレさせずに変更する便利関数
     private void SetPivotPreservingPosition(RectTransform rectTransform, Vector2 newPivot)
     {
         if (rectTransform == null) return;
@@ -210,17 +222,14 @@ public class StageSelectManager : MonoBehaviour
         rectTransform.anchoredPosition -= deltaPosition;
     }
 
-    // ▼ 新しい本物のページ回転アニメーション ▼
     private IEnumerator PageChangeRoutine(bool isNext)
     {
         isAnimating = true;
         float halfDuration = turnDuration / 2f;
 
-        // 1. 今のページを 0度 から 90度（奥へ）回転させて見えなくする
         RectTransform outgoingPage = isNext ? rightPageRect : leftPageRect;
         Vector2 originalOutPivot = outgoingPage.pivot;
 
-        // Next(右へ)なら右ページの左端(0, 0.5)を軸に。Prev(左へ)なら左ページの右端(1, 0.5)を軸に。
         SetPivotPreservingPosition(outgoingPage, isNext ? new Vector2(0f, 0.5f) : new Vector2(1f, 0.5f));
 
         float elapsed = 0f;
@@ -228,27 +237,22 @@ public class StageSelectManager : MonoBehaviour
         {
             elapsed += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(elapsed / halfDuration);
-            // 90度で真横になって見えなくなる
             float angle = Mathf.Lerp(0f, isNext ? 90f : -90f, t);
             outgoingPage.localRotation = Quaternion.Euler(0f, angle, 0f);
             yield return null;
         }
         outgoingPage.localRotation = Quaternion.Euler(0f, isNext ? 90f : -90f, 0f);
 
-        // 2. ページが真横になって見えなくなった瞬間に中身のデータを書き換える
         if (isNext) currentPairIndex++;
         else currentPairIndex--;
         UpdatePageUI();
 
-        // 回転させたページを元に戻す
         outgoingPage.localRotation = Quaternion.identity;
         SetPivotPreservingPosition(outgoingPage, originalOutPivot);
 
-        // 3. 次のページを -90度(または90度) から 0度 に回転させて表示する
         RectTransform incomingPage = isNext ? leftPageRect : rightPageRect;
         Vector2 originalInPivot = incomingPage.pivot;
 
-        // Nextなら新しい左ページが -90度 から 0度へ。Prevなら新しい右ページが 90度 から 0度へ。
         SetPivotPreservingPosition(incomingPage, isNext ? new Vector2(1f, 0.5f) : new Vector2(0f, 0.5f));
         incomingPage.localRotation = Quaternion.Euler(0f, isNext ? -90f : 90f, 0f);
 
@@ -311,7 +315,8 @@ public class StageSelectManager : MonoBehaviour
         if (!string.IsNullOrEmpty(tutorialSceneName))
         {
             BookData tutBook = new BookData { bookId = bookIdCounter++, bookTitle = "チュートリアル" };
-            tutBook.stages.Add(new StageData { stageId = tutorialSceneName, stageName = "チュートリアル", sceneToLoad = tutorialSceneName, isUnlocked = true, parMoves = 3, starCount = 0 });
+            // ★ チュートリアルはデフォルトで星非表示 (showStarRating = false) に設定します
+            tutBook.stages.Add(new StageData { stageId = tutorialSceneName, stageName = "チュートリアル", sceneToLoad = tutorialSceneName, isUnlocked = true, parMoves = 3, twoStarMoves = 5, starCount = 0, showStarRating = false });
             booksData.Add(tutBook);
         }
 
@@ -325,7 +330,8 @@ public class StageSelectManager : MonoBehaviour
 
             foreach (string stageName in chapterStages[chapter])
             {
-                book.stages.Add(new StageData { stageId = stageName, stageName = stageName, sceneToLoad = stageName, isUnlocked = true, parMoves = 3, starCount = 0 });
+                // ★ 通常ステージは星表示あり (showStarRating = true)
+                book.stages.Add(new StageData { stageId = stageName, stageName = stageName, sceneToLoad = stageName, isUnlocked = true, parMoves = 3, twoStarMoves = 5, starCount = 0, showStarRating = true });
             }
             booksData.Add(book);
         }

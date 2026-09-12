@@ -47,6 +47,33 @@ public static class StageResult
     }
 
     /// <summary>
+    /// 獲得している星の数（0〜3）を返します。
+    ///
+    /// 1つ目: クリア済み
+    /// 2つ目: 自己ベストが twoStarMoves 以内
+    /// 3つ目: 自己ベストが parMoves 以内（最速手達成）
+    ///
+    /// 手数は少ないほど良いため、twoStarMoves には parMoves 以上の値（緩い条件）を設定します。
+    /// </summary>
+    public static int GetStarCount(string stageId, int parMoves, int twoStarMoves)
+    {
+        if (!IsCleared(stageId)) return 0;
+
+        int best = GetBestMoves(stageId);
+        if (best < 0) return 1; // クリア済みだが手数の記録がない場合
+
+        int stars = 1;
+
+        // 設定ミス（2つ目の条件が最速手より厳しい）でも破綻しないよう、緩い方を採用する。
+        int twoStarThreshold = Mathf.Max(twoStarMoves, parMoves);
+        if (best <= twoStarThreshold) stars = 2;
+
+        if (parMoves > 0 && best <= parMoves) stars = 3;
+
+        return stars;
+    }
+
+    /// <summary>
     /// クリア結果を記録します。自己ベストはより少ない手数のときだけ更新されます。
     /// </summary>
     /// <returns>今回の記録で自己ベストが更新された場合 true。</returns>

@@ -44,7 +44,7 @@ public static class WindMagic
 
     /// <summary>
     /// 全ての移動先を先に確定してから、対象球を順番にスライドさせます。
-    /// 同一直線上に1マス目・2マス目の2球がある場合は、外側の2マス目の球だけを3マス目へ移動します。
+    /// 同一直線上に1マス目・2マス目の2球がある場合は、外側の2マス目の球から順に3マス目へ移動します。
     /// </summary>
     /// <param name="centerBall">中心となる主ボール</param>
     /// <param name="effectPrefab">発動時に生成するエフェクトのプレハブ（省略可）</param>
@@ -66,30 +66,42 @@ public static class WindMagic
             Vector3 direction = Directions[i];
             string dirName = DirectionNames[i];
 
-            GameObject target = FindOutermostVisibleBall(centerBall, centerCell, direction, panelSize, dirName);
-            if (target == null) continue;
+            // ★修正: 1〜2マス以内にある「すべて」の球をリストアップする
+            List<GameObject> lineBalls = FindVisibleBallsInLine(centerBall, centerCell, direction, panelSize, dirName);
 
-            if (reservedBalls.Contains(target))
+            // リストアップされた球は「外側（遠い方）から順に」処理されるため、
+            // 外側の球が3マス目へ行き、内側の球はその後ろ（2マス目）に並ぶように押し出されます。
+            foreach (GameObject target in lineBalls)
             {
-                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は既に他方向の移動で予約済みのためスキップ");
-                continue;
-            }
+                if (reservedBalls.Contains(target))
+                {
+                    Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は既に他方向の移動で予約済みのためスキップ");
+                    continue;
+                }
 
-            if (!TryResolveWindDestination(target, centerCell, direction, panelSize, dirName, out Vector3 destination, out bool stopsOnTriangleWall))
-            {
-                continue;
-            }
+                // ★修正: 既に移動が確定した球(reservedBalls)を障害物判定から除外させるために渡す
+                if (!TryResolveWindDestination(target, centerCell, direction, panelSize, dirName, reservedCells, reservedBalls, out Vector3 destination, out bool stopsOnTriangleWall))
+                {
+                    continue;
+                }
 
-            if (BallPath.IsMagicMoveDestinationBlocked(destination, target, reservedCells, panelSize, allowTriangleWall: stopsOnTriangleWall))
-            {
-                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} の着地予定セル {destination} が塞がっているため不発");
-                continue;
-            }
+                // ★修正: 既に移動が確定した球を障害物判定から除外する
+                if (BallPath.IsMagicMoveDestinationBlocked(destination, target, reservedCells, panelSize, allowTriangleWall: stopsOnTriangleWall, ignoreBalls: reservedBalls))
+                {
+                    Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} の着地予定セル {destination} が塞がっているため不発");
+                    continue;
+                }
 
-            Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} を {destination} へ移動確定（三角壁停止={stopsOnTriangleWall}）");
-            moves.Add(new WindMove(target, destination));
-            reservedBalls.Add(target);
-            reservedCells.Add(destination);
+                // 移動先が現在の位置と同じ（動けない）場合でも、他の球が後ろに並べるよう場所を予約しておく
+                if (Vector3.Distance(target.transform.position, destination) > 0.1f)
+                {
+                    Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} を {destination} へ移動確定（三角壁停止={stopsOnTriangleWall}）");
+                    moves.Add(new WindMove(target, destination));
+                }
+
+                reservedBalls.Add(target);
+                reservedCells.Add(destination);
+            }
         }
 
         Debug.Log($"[WindMagic] === 判定終了。実際に動く球の数={moves.Count} ===");
@@ -176,13 +188,13 @@ public static class WindMagic
     /// <summary>
     /// 風による移動先を決定します。
     /// </summary>
-    private static bool TryResolveWindDestination(GameObject target, Vector3 centerCell, Vector3 direction, float panelSize, string dirName, out Vector3 destination, out bool stopsOnTriangleWall)
+    // ★修正: ignoreBalls (reservedBalls) を引数に追加し、移動前の球に衝突して止まるのを防ぐ
+    private static bool TryResolveWindDestination(GameObject target, Vector3 centerCell, Vector3 direction, float panelSize, string dirName, HashSet<Vector3> reservedCells, HashSet<GameObject> reservedBalls, out Vector3 destination, out bool stopsOnTriangleWall)
     {
-        destination = centerCell + direction * panelSize * 3f;
+        Vector3 currentCell = BallPath.SnapToGrid(target.transform.position, panelSize);
+        destination = currentCell;
         stopsOnTriangleWall = false;
         if (target == null) return false;
-
-        Vector3 currentCell = BallPath.SnapToGrid(target.transform.position, panelSize);
 
         if (!BallPath.CanMagicBallLeaveTriangleWall(currentCell, direction, panelSize))
         {
@@ -200,6 +212,11 @@ public static class WindMagic
 
             if (BallPath.CanWindStopOnTriangleWall(currentCell, nextCell, direction, panelSize))
             {
+                // ★追加: 停止先がすでに他の球（外側の球など）で予約されている場合はその手前で止まる
+                if (BallPath.IsMagicMoveDestinationBlocked(nextCell, target, reservedCells, panelSize, allowTriangleWall: true, ignoreBalls: reservedBalls))
+                {
+                    break;
+                }
                 destination = nextCell;
                 stopsOnTriangleWall = true;
                 Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は{distance}マス目の三角壁({nextCell})で停止（成功扱い）");
@@ -208,23 +225,30 @@ public static class WindMagic
 
             if (BallPath.IsWaterPullLineBlocked(currentCell, nextCell, direction, panelSize))
             {
-                destination = currentCell;
                 Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は{distance}マス目手前で遮られたため、{currentCell}で停止");
-                return true;
+                break;
+            }
+
+            // ★追加: 停止先がすでに他の球で予約されている場合はその手前で止まる
+            if (BallPath.IsMagicMoveDestinationBlocked(nextCell, target, reservedCells, panelSize, allowTriangleWall: false, ignoreBalls: reservedBalls))
+            {
+                Debug.Log($"[WindMagic] {dirName}: 対象球 {target.name} は{distance}マス目に他の球があるため、{currentCell}で停止");
+                break;
             }
 
             currentCell = nextCell;
+            destination = currentCell;
         }
 
         return true;
     }
 
     /// <summary>
-    /// 1〜2マス目を調べます。両方に球がある場合は、外側（2マス目）を返します。
+    /// ★修正: 1〜2マス目にあるすべてのターゲット球をリストアップし、外側（遠い方）から順に並べて返します。
     /// </summary>
-    private static GameObject FindOutermostVisibleBall(GameObject centerBall, Vector3 centerCell, Vector3 direction, float panelSize, string dirName)
+    private static List<GameObject> FindVisibleBallsInLine(GameObject centerBall, Vector3 centerCell, Vector3 direction, float panelSize, string dirName)
     {
-        GameObject outermost = null;
+        List<GameObject> balls = new List<GameObject>();
 
         for (int distance = 1; distance <= 2; distance++)
         {
@@ -239,15 +263,12 @@ public static class WindMagic
             GameObject found = BallPath.FindBallAtGridCell(cell, centerBall, panelSize);
             if (found != null)
             {
-                outermost = found;
+                balls.Add(found);
             }
         }
 
-        if (outermost == null)
-        {
-            Debug.Log($"[WindMagic] {dirName}: 1〜2マス以内に対象球なし");
-        }
-
-        return outermost;
+        // 外側（遠い方）から順に処理しないと、内側の球が先に外側に移動しようとして詰まってしまうため反転する
+        balls.Reverse();
+        return balls;
     }
 }

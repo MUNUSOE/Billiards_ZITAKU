@@ -193,6 +193,19 @@ public static class BallPath
         return false;
     }
 
+    // ★追加: ポケットに入っている（重なっている）ボールかどうかを判定します。
+    public static bool IsBallInPocket(GameObject ball, float panelSize)
+    {
+        if (ball == null) return false;
+        // ボールの現在位置にポケットがあるか判定
+        Collider[] hits = Physics.OverlapSphere(ball.transform.position, panelSize * 0.2f);
+        foreach (Collider c in hits)
+        {
+            if (c.CompareTag("Pocket")) return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// マス間壁が、指定セルから指定方向への移動を遮るかを確認します。
     /// 通常移動とターゲットの押し出し前判定で共用し、隣接ターゲットのすり抜けを防ぎます。
@@ -422,6 +435,8 @@ public static class BallPath
             if (Mathf.Abs(candidateCell.x - cell.x) < 0.1f &&
                 Mathf.Abs(candidateCell.z - cell.z) < 0.1f)
             {
+                // ★追加: ポケットに入っている球は障害物判定から除外
+                if (IsBallInPocket(targetBall, panelSize)) continue;
                 return targetBall;
             }
         }
@@ -558,17 +573,28 @@ public static class BallPath
     /// <summary>
     /// 水・風魔法で球を移動させる先が、安全に配置可能かを確認します。
     /// </summary>
-    public static bool IsMagicMoveDestinationBlocked(Vector3 destination, GameObject movingBall, HashSet<Vector3> reservedCells, float panelSize, bool allowTriangleWall = false)
+    // ★修正: 既に移動が確定した球(ignoreBalls)を障害物判定から除外できるように引数を追加
+    public static bool IsMagicMoveDestinationBlocked(Vector3 destination, GameObject movingBall, HashSet<Vector3> reservedCells, float panelSize, bool allowTriangleWall = false, HashSet<GameObject> ignoreBalls = null)
     {
         if (reservedCells != null && reservedCells.Contains(destination))
         {
             Debug.Log($"[BallPath] IsMagicMoveDestinationBlocked: {destination} は同一発動内で他の球がすでに予約済み");
             return true;
         }
-        if (FindBallAtGridCell(destination, movingBall, panelSize) != null)
+
+        GameObject foundBall = FindBallAtGridCell(destination, movingBall, panelSize);
+        if (foundBall != null)
         {
-            Debug.Log($"[BallPath] IsMagicMoveDestinationBlocked: {destination} に既に別の球がいる");
-            return true;
+            // 移動が確定してそこからいなくなる予定の球なら、障害物として扱わない
+            if (ignoreBalls != null && ignoreBalls.Contains(foundBall))
+            {
+                // do nothing (無視する)
+            }
+            else
+            {
+                Debug.Log($"[BallPath] IsMagicMoveDestinationBlocked: {destination} に既に別の球がいる");
+                return true;
+            }
         }
         // [変更] 移動先が炎マスでも配置は許可する（遮蔽物として扱わない）。
         // その結果球が焼失するかどうかは、呼び出し側が HasActiveFlameOnMagicPath で判定する。
@@ -616,6 +642,13 @@ public static class BallPath
         {
             OverlapHasTag(cell, panelSize * 0.3f, "Ball", self, state, out found);
         }
+
+        // ★追加: ポケットに入っている球は障害物判定から除外
+        if (found != null && IsBallInPocket(found, panelSize))
+        {
+            found = null;
+        }
+
         return found;
     }
 
@@ -815,29 +848,47 @@ public static class BallPath
         float dz = Mathf.Abs(dir.z) > 0.1f ? Mathf.Sign(dir.z) : 0f;
         if (dx == 0f && dz == 0f) return false;
 
+        // ★修正: 斜め移動時は、通過するX/Z方向の隣接マス(辺)を角(対角)より優先して判定します。
+        // これにより、木箱がL字に並んでいる角へ入射したとき、完全反転ではなく辺での反射になります。
+        if (dx != 0f && dz != 0f)
+        {
+            bool blockedX = false;
+            bool blockedZ = false;
+            GameObject burnableX = null;
+            GameObject burnableZ = null;
+
+            Vector3 sideX = cell + new Vector3(dx * panelSize, 0f, 0f);
+            blockedX = TryGetTaggedObjectAtGridCell(sideX, panelSize, "Burnable", self, state, out burnableX);
+
+            Vector3 sideZ = cell + new Vector3(0f, 0f, dz * panelSize);
+            blockedZ = TryGetTaggedObjectAtGridCell(sideZ, panelSize, "Burnable", self, state, out burnableZ);
+
+            if (blockedX && blockedZ)
+            {
+                burnable = burnableX; // いずれか一方
+                normal = -Get8Direction(dir);
+                return true;
+            }
+            if (blockedX)
+            {
+                burnable = burnableX;
+                normal = new Vector3(-dx, 0f, 0f);
+                return true;
+            }
+            if (blockedZ)
+            {
+                burnable = burnableZ;
+                normal = new Vector3(0f, 0f, -dz);
+                return true;
+            }
+        }
+
+        // 辺の判定をすり抜けた場合（または直進の場合）は進行先マスを判定
         Vector3 nextCell = cell + StepOffset(dir, panelSize);
         if (TryGetTaggedObjectAtGridCell(nextCell, panelSize, "Burnable", self, state, out burnable))
         {
             normal = -Get8Direction(dir);
             return true;
-        }
-
-        // 斜め移動時は、通過するX/Z方向の隣接マスも木箱として扱います。
-        if (dx != 0f && dz != 0f)
-        {
-            Vector3 sideX = cell + new Vector3(dx * panelSize, 0f, 0f);
-            if (TryGetTaggedObjectAtGridCell(sideX, panelSize, "Burnable", self, state, out burnable))
-            {
-                normal = new Vector3(-dx, 0f, 0f);
-                return true;
-            }
-
-            Vector3 sideZ = cell + new Vector3(0f, 0f, dz * panelSize);
-            if (TryGetTaggedObjectAtGridCell(sideZ, panelSize, "Burnable", self, state, out burnable))
-            {
-                normal = new Vector3(0f, 0f, -dz);
-                return true;
-            }
         }
 
         return false;
@@ -876,8 +927,6 @@ public static class BallPath
 
     /// <summary>
     /// 木箱を「このショットでは破壊済み」として経路計算上だけ無効化します。
-    /// [変更] 以前はここで Object.Destroy を呼んでいたため、ショットした瞬間に木箱が消えていました。
-    /// 実際の破壊は、球がその位置へ到達したときに PathPoint.ApplyPendingEffects が行います。
     /// </summary>
     private static void MarkBurnableDestroyedForCurrentShot(GameObject burnable, SimState state)
     {
@@ -1084,8 +1133,6 @@ public static class BallPath
                 if (isWaterActive)
                 {
                     // 水魔法中は、斜め移動で横切る炎マスも含めて消火して通過します。
-                    // [変更] 以前はショット時に即 Extinguish していたため一瞬で消えていました。
-                    // 消火は「球が炎に触れた瞬間」に行うため、接触位置の経路点へひも付ける。
                     PathPoint extinguishPoint = new PathPoint(GetFlameContactPoint(currentCell, currentDir, panelSize, ballRadius));
                     extinguishPoint.flamesToExtinguish = new List<FlameTile>(flameTiles);
                     path.Add(extinguishPoint);
@@ -1236,6 +1283,10 @@ public static class BallPath
             }
 
             Vector3 originCell = SnapToGrid(startPos, panelSize);
+
+            // ★修正: 最後にポケットに落ちた球かどうかを判定
+            bool isPocketed = path.Count > 0 && path[path.Count - 1].isPocket;
+
             Vector3 finalRestPos = path.Count > 0
                 ? SnapToGrid(path[path.Count - 1].position, panelSize)
                 : originCell;
@@ -1244,9 +1295,14 @@ public static class BallPath
             {
                 state.movedBalls.Add(currentBall);
             }
-            state.occupiedCells.Add(finalRestPos);
 
-            state.virtualBalls[currentBall] = finalRestPos;
+            // ★修正: ポケットに落ちた球は以降のシミュレーションにおいてセルを占有せず、
+            // 当たり判定（virtualBalls）からも完全に除外します。
+            if (!isPocketed)
+            {
+                state.occupiedCells.Add(finalRestPos);
+                state.virtualBalls[currentBall] = finalRestPos;
+            }
 
             if (hitBall == null) break;
 
@@ -1305,9 +1361,6 @@ public static class BallPath
                 Vector3 segmentEnd = segment.position;
                 float distToNext = Vector3.Distance(tr.position, segmentEnd);
 
-                // [変更] 反射音は接触位置へ到達する前に鳴らす。
-                // 到達を待つと、壁際で減速する分だけ実際の接触より遅れて聞こえるため、
-                // 「このフレームで到達する」か「十分近づいた」時点で先に鳴らしておく。
                 if (segment.isWallHit &&
                     (distToNext <= WallHitSELeadDistance || remainingFrameSpeed >= distToNext))
                 {
@@ -1423,11 +1476,6 @@ public static class BallPath
 
             if (!point.isBallHit) return;
         }
-
-        // [変更] ここでの炎魔法の消費を削除しました。
-        // 消費は ShotBall.RunChain の最後（1ショットにつき1回）だけで行います。
-        // 以前は命中時とショット終了時の2箇所から ConsumeMagic が呼ばれており、
-        // 炎魔法の使用回数が1回のショットで2つ減っていました。
 
         if (SoundManager.Instance != null)
         {
