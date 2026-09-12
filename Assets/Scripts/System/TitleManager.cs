@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem; // 追加
 
 public class TitleManager : MonoBehaviour
 {
@@ -13,6 +14,18 @@ public class TitleManager : MonoBehaviour
     [Header("Debug")]
     [Tooltip("チェックを入れると、完了済みでも毎回チュートリアルへ進みます。デバッグ用。")]
     [SerializeField] private bool alwaysShowTutorial = false;
+
+    private void Update()
+    {
+        // Keyboard.current を使用して Enter キー（またはテンキーの Enter）の押下を判定
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame)
+            {
+                OnClickStartButton();
+            }
+        }
+    }
 
     /// <summary>
     /// ゲームスタートボタンを押した時の処理
