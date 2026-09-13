@@ -85,10 +85,18 @@ public class TitleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// チュートリアルの完了記録を消す（デバッグ用のボタンに割り当て可能）
+    /// 全てのプレイ記録（クリア状況、自己ベスト、星、チュートリアル進捗など）をリセットします。
+    /// （旧：チュートリアルの完了記録を消す処理）
     /// </summary>
-    public void ResetTutorialProgress()
+    public void ResetAllPlayData()
     {
-        TutorialProgress.ResetProgress();
+        // PlayerPrefs に保存されている全てのセーブデータを消去します
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+
+        Debug.Log("【完了】全てのプレイ履歴をリセットしました！");
+
+        // 古い状態が残らないよう、タイトル画面を再読み込みして完全に初期状態に戻します
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
