@@ -120,7 +120,10 @@ public class OptionManager : MonoBehaviour
     {
         Time.timeScale = 1f; // シーン再読み込み前に時間を必ず戻す
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        SoundManager.Instance.PlaySE(SEType.DecideButton);
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(SEType.DecideButton);
+        }
     }
 
     // 「タイトルに戻る」ボタンを押した時
