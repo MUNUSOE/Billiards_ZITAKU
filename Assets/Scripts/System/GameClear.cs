@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI; // ★ レガシーText用
+using TMPro; // ★ TextMeshPro用
 
 /// <summary>
 /// Inspector で登録した全ターゲット球が消滅したとき、クリアUIを表示する。
@@ -19,6 +21,16 @@ public class GameClear : MonoBehaviour
 
     [Tooltip("全ターゲット球が消滅してからクリアUIを表示するまでの秒数。")]
     [SerializeField, Min(0f)] private float clearDelay = 0.5f;
+
+    [Header("Result UI (Optional)")]
+    [Tooltip("クリア画面に表示する獲得した星のUI")]
+    [SerializeField] private StarRatingView starRatingView;
+
+    [Tooltip("星の獲得条件を表示するテキスト (TextMeshPro用)")]
+    [SerializeField] private TMP_Text conditionTextTMP;
+
+    [Tooltip("星の獲得条件を表示するテキスト (レガシーText用)")]
+    [SerializeField] private Text conditionTextLegacy;
 
     private bool clearTriggered;
 
@@ -142,6 +154,30 @@ public class GameClear : MonoBehaviour
         {
             Debug.LogWarning("[GameClear] Clear UI が未設定です。");
             return;
+        }
+
+        // ★追加: 星と獲得条件の表示更新
+        if (StageInfo.Instance != null)
+        {
+            if (starRatingView != null)
+            {
+                starRatingView.gameObject.SetActive(true);
+                starRatingView.SetStarCount(StageInfo.Instance.StarCount);
+            }
+
+            string conditionString =
+                $"★ クリア\n" +
+                $"★★ {StageInfo.Instance.TwoStarMoves}手以内でクリア\n" +
+                $"★★★ {StageInfo.Instance.ParMoves}手以内でクリア";
+
+            if (conditionTextTMP != null)
+            {
+                conditionTextTMP.text = conditionString;
+            }
+            else if (conditionTextLegacy != null)
+            {
+                conditionTextLegacy.text = conditionString;
+            }
         }
 
         Time.timeScale = 0f;
