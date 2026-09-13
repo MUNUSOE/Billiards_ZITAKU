@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
 /// ショットの予測表示です。チュートリアル向けの補助表示で、
@@ -27,7 +27,7 @@ public class ShotPreview : MonoBehaviour
     [SerializeField] private float cellEffectOffsetY = 0.02f;
 
     [Header("Momentum Label")]
-    [Tooltip("最初に当たるターゲット球の上に出す数値表示。子に TMP_Text を持つプレハブを指定します。")]
+    [Tooltip("最初に当たるターゲット球の上に出す数値表示。子に Text を持つプレハブを指定します。")]
     [SerializeField] private GameObject momentumLabelPrefab;
 
     [Tooltip("数値表示の位置オフセット（対象球からの相対位置）。")]
@@ -40,7 +40,7 @@ public class ShotPreview : MonoBehaviour
     private readonly List<GameObject> passEffects = new List<GameObject>();
     private GameObject stopEffect;
     private GameObject momentumLabel;
-    private TMP_Text momentumText;
+    private Text momentumText;
 
     // 直前の入力内容。同じ内容なら作り直さず、毎フレームの生成を避けます。
     private Vector3 lastDirection;
@@ -219,7 +219,7 @@ public class ShotPreview : MonoBehaviour
         if (momentumLabel == null)
         {
             momentumLabel = Instantiate(momentumLabelPrefab, transform);
-            momentumText = momentumLabel.GetComponentInChildren<TMP_Text>();
+            momentumText = momentumLabel.GetComponentInChildren<Text>();
         }
 
         momentumLabel.transform.position = target.transform.position + momentumLabelOffset;
