@@ -13780,8 +13780,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 689660934}
   m_HandleRect: {fileID: 689660933}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -24717,7 +24717,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18fb16bcbc37b4d47a1f11ebab312d88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iconsContainer: {fileID: 100582333}
+  iconsContainer: {fileID: 2042141745}
   fiveMovesIconPrefab: {fileID: 5890602774662682074, guid: e0e55d7cf1c11f341962be9cb740ab88, type: 3}
   oneMoveIconPrefab: {fileID: 5422838270984984619, guid: 9b6f18a354509bd48a51a9bb95f57bf4, type: 3}
 --- !u!114 &2071874471
