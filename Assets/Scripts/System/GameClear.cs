@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // ★ レガシーText用
-using TMPro; // ★ TextMeshPro用
+using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Inspector で登録した全ターゲット球が消滅したとき、クリアUIを表示する。
@@ -26,17 +26,14 @@ public class GameClear : MonoBehaviour
     [Tooltip("クリア画面に表示する獲得した星のUI")]
     [SerializeField] private StarRatingView starRatingView;
 
-    [Tooltip("星の獲得条件を表示するテキスト (TextMeshPro用)")]
-    [SerializeField] private TMP_Text conditionTextTMP;
+    [Header("Star Condition Texts")]
+    [Tooltip("左から順番に、星1・星2・星3の下に配置するテキストを登録します (TextMeshPro用)")]
+    [SerializeField] private TMP_Text[] conditionTextsTMP = new TMP_Text[3];
 
-    [Tooltip("星の獲得条件を表示するテキスト (レガシーText用)")]
-    [SerializeField] private Text conditionTextLegacy;
+    [Tooltip("左から順番に、星1・星2・星3の下に配置するテキストを登録します (レガシーText用)")]
+    [SerializeField] private Text[] conditionTextsLegacy = new Text[3];
 
     private bool clearTriggered;
-
-    // 全ターゲットが消えてから、クリアUIが出るまでの待機中を表します。
-    // この間にショットされると手数が減ってゲームオーバーになってしまうため、
-    // ShotBall 側はこのフラグが立っている間、操作を受け付けません。
     private bool clearPending;
 
     /// <summary>クリアが確定済み、または確定待ちの状態か。</summary>
@@ -59,7 +56,6 @@ public class GameClear : MonoBehaviour
             ClearUI.SetActive(false);
         }
 
-        // 監視対象が未設定のステージを自動クリアしない。
         if (targetObjects == null || targetObjects.Count == 0)
         {
             Debug.LogWarning("[GameClear] targetObjects が未設定のため、クリア判定を開始しません。");
@@ -74,34 +70,23 @@ public class GameClear : MonoBehaviour
     {
         while (!clearTriggered)
         {
-            // 炎マスで球を失っている場合、球が盤面から消えていてもクリアではない。
             if (GameManager.Instance != null && GameManager.Instance.HasLostBallToHazard)
             {
                 yield break;
             }
 
-            // クリア成立の確認をゲームオーバー判定より先に行う。
-            // GameManager.IsGameOver は TriggerGameOver を呼んだ瞬間に true になるため、
-            // 先にゲームオーバーを見てしまうと、最後の球を落とすのと同時に手数が0になった場合に
-            // クリアを取りこぼしてしまう。
             if (AreAllTargetsDestroyed())
             {
-                // 待機に入る前にフラグを立て、この間の追加ショットを止める。
                 clearPending = true;
-
                 yield return new WaitForSeconds(clearDelay);
 
-                // ここでは IsGameOver を見ない。クリアが成立している場合は
-                // GameManager 側が表示待機中にゲームオーバーを取り消す。
                 if (GameManager.Instance == null || !GameManager.Instance.HasLostBallToHazard)
                 {
                     OpenClearUI();
                 }
-
                 yield break;
             }
 
-            // ターゲットが残ったままのゲームオーバーは確定なので監視を終える。
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
             {
                 yield break;
@@ -111,11 +96,6 @@ public class GameClear : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// クリア記録（クリア済みフラグ・自己ベスト手数）を保存します。
-    /// ステージの識別と最速手は、シーンに置いた StageInfo から取得します。
-    /// StageInfo が無いシーン（チュートリアルなど）では何もしません。
-    /// </summary>
     private void RecordStageResult()
     {
         if (StageInfo.Instance == null) return;
@@ -136,16 +116,9 @@ public class GameClear : MonoBehaviour
         return targetObjects.TrueForAll(target => target == null);
     }
 
-    /// <summary>
-    /// クリアUIを表示し、ゲーム時間を停止する。複数回呼ばれても一度だけ実行する。
-    /// </summary>
     public void OpenClearUI()
     {
-        if (clearTriggered)
-        {
-            return;
-        }
-
+        if (clearTriggered) return;
         clearTriggered = true;
 
         RecordStageResult();
@@ -156,7 +129,7 @@ public class GameClear : MonoBehaviour
             return;
         }
 
-        // ★追加: 星と獲得条件の表示更新
+        // ★追加・修正: 3つの星それぞれの条件を個別のテキストに書き込む
         if (StageInfo.Instance != null)
         {
             if (starRatingView != null)
@@ -165,18 +138,24 @@ public class GameClear : MonoBehaviour
                 starRatingView.SetStarCount(StageInfo.Instance.StarCount);
             }
 
-            string conditionString =
-                $"★ クリア\n" +
-                $"★★ {StageInfo.Instance.TwoStarMoves}手以内でクリア\n" +
-                $"★★★ {StageInfo.Instance.ParMoves}手以内でクリア";
+            string[] conditionStrings = new string[3]
+            {
+                "クリア",
+                $"{StageInfo.Instance.TwoStarMoves}手以内",
+                $"{StageInfo.Instance.ParMoves}手以内"
+            };
 
-            if (conditionTextTMP != null)
+            for (int i = 0; i < 3; i++)
             {
-                conditionTextTMP.text = conditionString;
-            }
-            else if (conditionTextLegacy != null)
-            {
-                conditionTextLegacy.text = conditionString;
+                if (conditionTextsTMP != null && i < conditionTextsTMP.Length && conditionTextsTMP[i] != null)
+                {
+                    conditionTextsTMP[i].text = conditionStrings[i];
+                }
+
+                if (conditionTextsLegacy != null && i < conditionTextsLegacy.Length && conditionTextsLegacy[i] != null)
+                {
+                    conditionTextsLegacy[i].text = conditionStrings[i];
+                }
             }
         }
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -19,6 +19,13 @@ public class OptionManager : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject optionPanel;
+
+    [Tooltip("ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’é–‹ããƒœã‚¿ãƒ³ï¼ˆæ­¯è»Šãªã©ã®ã‚¢ã‚¤ã‚³ãƒ³ï¼‰")]
+    [SerializeField] private Button openButton;
+
+    [Tooltip("ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ï¼ˆâœ–ã‚¢ã‚¤ã‚³ãƒ³ï¼‰")]
+    [SerializeField] private Button closeButton;
+
     [SerializeField] private Slider bgmSlider;
     [SerializeField] private Slider seSlider;
 
@@ -27,22 +34,35 @@ public class OptionManager : MonoBehaviour
 
     private bool isPaused = false;
 
-    /// <summary>ƒIƒvƒVƒ‡ƒ“‰æ–Ê‚ğŠJ‚¢‚Ä‚¢‚é‚©B‘¼‚ÌƒXƒNƒŠƒvƒg‚©‚ç‘€ì‚ğ~‚ß‚é”»’è‚Ég‚¦‚Ü‚·B</summary>
+    /// <summary>ã‚ªãƒ—ã‚·ãƒ§ãƒ³ç”»é¢ã‚’é–‹ã„ã¦ã„ã‚‹ã‹ã€‚ä»–ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰æ“ä½œã‚’æ­¢ã‚ã‚‹åˆ¤å®šã«ä½¿ãˆã¾ã™ã€‚</summary>
     public bool IsPaused => isPaused;
 
     void Start()
     {
-        // ‹N“®‚ÍƒIƒvƒVƒ‡ƒ“ƒpƒlƒ‹‚ğ”ñ•\¦‚É‚µ‚Ä‚¨‚­
+        // èµ·å‹•æ™‚ã¯ã‚ªãƒ—ã‚·ãƒ§ãƒ³ãƒ‘ãƒãƒ«ã‚’éè¡¨ç¤ºã«ã—ã¦ãŠã
         if (optionPanel != null)
         {
             optionPanel.SetActive(false);
+        }
+
+        // é–‹ããƒ»é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã®åˆæœŸè¨­å®š
+        if (openButton != null)
+        {
+            openButton.gameObject.SetActive(true);
+            openButton.onClick.AddListener(OpenOption);
+        }
+
+        if (closeButton != null)
+        {
+            closeButton.gameObject.SetActive(false);
+            closeButton.onClick.AddListener(ResumeGame);
         }
     }
 
     private void Update()
     {
-        // ESCƒL[‚ÅŠJ•Â‚·‚éB
-        // Time.timeScale = 0 ‚Å‚à“ü—Í‚Ìæ“¾‚Í‰e‹¿‚ğó‚¯‚È‚¢‚½‚ßA•Â‚¶‚é‘€ì‚à–â‘è‚È‚­Œø‚­B
+        // ESCã‚­ãƒ¼ã§é–‹é–‰ã™ã‚‹ã€‚
+        // Time.timeScale = 0 ã§ã‚‚å…¥åŠ›ã®å–å¾—ã¯å½±éŸ¿ã‚’å—ã‘ãªã„ãŸã‚ã€é–‰ã˜ã‚‹æ“ä½œã‚‚å•é¡ŒãªãåŠ¹ãã€‚
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
 
@@ -52,19 +72,24 @@ public class OptionManager : MonoBehaviour
         }
     }
 
-    /// <summary>ƒIƒvƒVƒ‡ƒ“‰æ–Ê‚ğŠJ‚¢‚Ä‚¢‚ê‚Î•Â‚¶A•Â‚¶‚Ä‚¢‚ê‚ÎŠJ‚«‚Ü‚·B</summary>
+    /// <summary>ã‚ªãƒ—ã‚·ãƒ§ãƒ³ç”»é¢ã‚’é–‹ã„ã¦ã„ã‚Œã°é–‰ã˜ã€é–‰ã˜ã¦ã„ã‚Œã°é–‹ãã¾ã™ã€‚</summary>
     public void ToggleOption()
     {
         if (isPaused) ResumeGame();
         else OpenOption();
     }
 
-    // ‰Eã‚ÌŠDF‚ÌƒIƒvƒVƒ‡ƒ“ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½
+    // å³ä¸Šã®ã‚ªãƒ—ã‚·ãƒ§ãƒ³ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚
     public void OpenOption()
     {
         isPaused = true;
         if (optionPanel != null) optionPanel.SetActive(true);
-        Time.timeScale = 0f; // ƒQ[ƒ€“à‚Ì•¨—‰‰ZEŠÔ‚ğˆê’â~
+
+        // ãƒœã‚¿ãƒ³ã®è¡¨ç¤ºã‚’åˆ‡ã‚Šæ›¿ãˆï¼ˆé–‹ããƒœã‚¿ãƒ³ã‚’éš ã—ã€é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã‚’è¡¨ç¤ºï¼‰
+        if (openButton != null) openButton.gameObject.SetActive(false);
+        if (closeButton != null) closeButton.gameObject.SetActive(true);
+
+        Time.timeScale = 0f; // ã‚²ãƒ¼ãƒ å†…ã®ç‰©ç†æ¼”ç®—ãƒ»æ™‚é–“ã‚’ä¸€æ™‚åœæ­¢
 
         if (SoundManager.Instance != null)
         {
@@ -72,12 +97,17 @@ public class OptionManager : MonoBehaviour
         }
     }
 
-    // uƒQ[ƒ€‚É–ß‚évƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½
+    // ã€Œã‚²ãƒ¼ãƒ ã«æˆ»ã‚‹ã€ã¾ãŸã¯âœ–ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚
     public void ResumeGame()
     {
         isPaused = false;
         if (optionPanel != null) optionPanel.SetActive(false);
-        Time.timeScale = 1f; // ƒQ[ƒ€‚ÌŠÔ‚ğÄŠJ
+
+        // ãƒœã‚¿ãƒ³ã®è¡¨ç¤ºã‚’åˆ‡ã‚Šæ›¿ãˆï¼ˆé–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã‚’éš ã—ã€é–‹ããƒœã‚¿ãƒ³ã‚’è¡¨ç¤ºï¼‰
+        if (openButton != null) openButton.gameObject.SetActive(true);
+        if (closeButton != null) closeButton.gameObject.SetActive(false);
+
+        Time.timeScale = 1f; // ã‚²ãƒ¼ãƒ ã®æ™‚é–“ã‚’å†é–‹
 
         if (SoundManager.Instance != null)
         {
@@ -85,33 +115,33 @@ public class OptionManager : MonoBehaviour
         }
     }
 
-    // uƒŠƒgƒ‰ƒCvƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½
+    // ã€Œãƒªãƒˆãƒ©ã‚¤ã€ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚
     public void RetryGame()
     {
-        Time.timeScale = 1f; // ƒV[ƒ“Ä“Ç‚İ‚İ‘O‚ÉŠÔ‚ğ•K‚¸–ß‚·
+        Time.timeScale = 1f; // ã‚·ãƒ¼ãƒ³å†èª­ã¿è¾¼ã¿å‰ã«æ™‚é–“ã‚’å¿…ãšæˆ»ã™
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         SoundManager.Instance.PlaySE(SEType.DecideButton);
     }
 
-    // uƒ^ƒCƒgƒ‹‚É–ß‚évƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½
+    // ã€Œã‚¿ã‚¤ãƒˆãƒ«ã«æˆ»ã‚‹ã€ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚
     public void GoToTitle()
     {
-        Time.timeScale = 1f; // ƒV[ƒ“ˆÚ“®‘O‚ÉŠÔ‚ğ•K‚¸–ß‚·
+        Time.timeScale = 1f; // ã‚·ãƒ¼ãƒ³ç§»å‹•å‰ã«æ™‚é–“ã‚’å¿…ãšæˆ»ã™
         SceneManager.LoadScene(titleSceneName);
         SoundManager.Instance.PlaySE(SEType.DecideButton);
     }
 
-    // BGM‰¹—Ê•ÏXiSlider‚ÌOn Value Changed‚ÅŒÄ‚Ño‚µj
+    // BGMéŸ³é‡å¤‰æ›´æ™‚ï¼ˆSliderã®On Value Changedã§å‘¼ã³å‡ºã—ï¼‰
     public void OnBgmVolumeChanged(float value)
     {
-        // TODO: SoundManager“™‚ÌBGM‰¹—Ê•ÏXˆ—‚ğ‹Lq
-        // —á: AudioManager.Instance.SetBGMVolume(value);
+        // TODO: SoundManagerç­‰ã®BGMéŸ³é‡å¤‰æ›´å‡¦ç†ã‚’è¨˜è¿°
+        // ä¾‹: AudioManager.Instance.SetBGMVolume(value);
     }
 
-    // SE‰¹—Ê•ÏXiSlider‚ÌOn Value Changed‚ÅŒÄ‚Ño‚µj
+    // SEéŸ³é‡å¤‰æ›´æ™‚ï¼ˆSliderã®On Value Changedã§å‘¼ã³å‡ºã—ï¼‰
     public void OnSeVolumeChanged(float value)
     {
-        // TODO: SoundManager“™‚ÌSE‰¹—Ê•ÏXˆ—‚ğ‹Lq
-        // —á: AudioManager.Instance.SetSEVolume(value);
+        // TODO: SoundManagerç­‰ã®SEéŸ³é‡å¤‰æ›´å‡¦ç†ã‚’è¨˜è¿°
+        // ä¾‹: AudioManager.Instance.SetSEVolume(value);
     }
 }

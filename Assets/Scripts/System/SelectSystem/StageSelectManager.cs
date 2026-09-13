@@ -24,8 +24,7 @@ public class StageSelectManager : MonoBehaviour
 
     [Header("Opened Book UI (Left Page)")]
     [SerializeField] private RectTransform leftPageRect;
-    [SerializeField] private TMP_Text leftPageTitleText;
-    [SerializeField] private TMP_Text leftPageNumberText;
+    [SerializeField] private Text leftPageTitleText; // ★TMP_TextからレガシーTextに変更
     [SerializeField] private Button leftPlayButton;
     [SerializeField] private StarRatingView leftStarRating;
     [SerializeField] private Image leftStageImage;
@@ -33,8 +32,7 @@ public class StageSelectManager : MonoBehaviour
 
     [Header("Opened Book UI (Right Page)")]
     [SerializeField] private RectTransform rightPageRect;
-    [SerializeField] private TMP_Text rightPageTitleText;
-    [SerializeField] private TMP_Text rightPageNumberText;
+    [SerializeField] private Text rightPageTitleText; // ★TMP_TextからレガシーTextに変更
     [SerializeField] private Button rightPlayButton;
     [SerializeField] private StarRatingView rightStarRating;
     [SerializeField] private Image rightStageImage;
@@ -140,14 +138,14 @@ public class StageSelectManager : MonoBehaviour
 
         PagePair currentPair = allPagePairs[currentPairIndex];
 
-        UpdateSinglePage(currentPair.LeftStageIndex, currentPair.Book, leftPageTitleText, leftPageNumberText, leftPlayButton, leftStarRating, leftStageImage, leftFastestClearText);
-        UpdateSinglePage(currentPair.RightStageIndex, currentPair.Book, rightPageTitleText, rightPageNumberText, rightPlayButton, rightStarRating, rightStageImage, rightFastestClearText);
+        UpdateSinglePage(currentPair.LeftStageIndex, currentPair.Book, leftPageTitleText, leftPlayButton, leftStarRating, leftStageImage, leftFastestClearText);
+        UpdateSinglePage(currentPair.RightStageIndex, currentPair.Book, rightPageTitleText, rightPlayButton, rightStarRating, rightStageImage, rightFastestClearText);
 
         if (prevBookPageButton != null) prevBookPageButton.interactable = (currentPairIndex > 0);
         if (nextBookPageButton != null) nextBookPageButton.interactable = (currentPairIndex < allPagePairs.Count - 1);
     }
 
-    private void UpdateSinglePage(int stageIndex, BookData book, TMP_Text titleText, TMP_Text pageNumText, Button playBtn, StarRatingView starRating, Image stageImage, Text fastestClearText)
+    private void UpdateSinglePage(int stageIndex, BookData book, Text titleText, Button playBtn, StarRatingView starRating, Image stageImage, Text fastestClearText)
     {
         bool hasStage = book != null && stageIndex >= 0 && stageIndex < book.stages.Count;
 
@@ -156,7 +154,6 @@ public class StageSelectManager : MonoBehaviour
             StageData stage = book.stages[stageIndex];
 
             if (titleText != null) { titleText.gameObject.SetActive(true); titleText.text = stage.stageName; }
-            if (pageNumText != null) { pageNumText.gameObject.SetActive(true); pageNumText.text = $"- {stage.stageName} -"; }
 
             if (playBtn != null)
             {
@@ -168,7 +165,6 @@ public class StageSelectManager : MonoBehaviour
 
             if (starRating != null)
             {
-                // ★追加: ステージデータで星を表示する設定のときだけ Active にする
                 if (stage.showStarRating)
                 {
                     starRating.gameObject.SetActive(true);
@@ -198,7 +194,6 @@ public class StageSelectManager : MonoBehaviour
         else
         {
             if (titleText != null) titleText.gameObject.SetActive(false);
-            if (pageNumText != null) pageNumText.gameObject.SetActive(false);
             if (playBtn != null) playBtn.gameObject.SetActive(false);
             if (starRating != null) starRating.gameObject.SetActive(false);
             if (stageImage != null) stageImage.gameObject.SetActive(false);
