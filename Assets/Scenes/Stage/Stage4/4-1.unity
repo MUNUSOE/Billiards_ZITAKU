@@ -4729,7 +4729,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 445332952}
   m_HandleRect: {fileID: 445332951}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8025,8 +8025,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1607476109}
   m_HandleRect: {fileID: 1607476108}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.76486486
+  m_Value: 1.0000004
+  m_Size: 0.7648649
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -24095,6 +24095,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parMoves: 3
+  twoStarMoves: 5
   stageIdOverride: 
 --- !u!1 &2072567484
 GameObject:
