@@ -22098,6 +22098,7 @@ MonoBehaviour:
     advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
+    advanceButtons: []
     correctResultObject: {fileID: 0}
     wrongResultObject: {fileID: 0}
     nextSceneName: 
@@ -22116,6 +22117,7 @@ MonoBehaviour:
     advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
+    advanceButtons: []
     correctResultObject: {fileID: 0}
     wrongResultObject: {fileID: 0}
     nextSceneName: 
@@ -22134,6 +22136,7 @@ MonoBehaviour:
     advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
+    advanceButtons: []
     correctResultObject: {fileID: 0}
     wrongResultObject: {fileID: 0}
     nextSceneName: 
@@ -22152,6 +22155,7 @@ MonoBehaviour:
     advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
+    advanceButtons: []
     correctResultObject: {fileID: 0}
     wrongResultObject: {fileID: 0}
     nextSceneName: 
@@ -22170,6 +22174,7 @@ MonoBehaviour:
     advanceDelayAfterShot: 0
     choiceButtons: []
     correctChoiceIndex: 0
+    advanceButtons: []
     correctResultObject: {fileID: 0}
     wrongResultObject: {fileID: 0}
     nextSceneName: 
@@ -26206,7 +26211,7 @@ PrefabInstance:
     - target: {fileID: 7061971778010574395, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: ce0db67c24e48014b9c1f82c160a29ea, type: 2}
+      objectReference: {fileID: 2100000, guid: 201bb01473852ec4892cd162a583130c, type: 2}
     - target: {fileID: 7271115815958138563, guid: 6bcae111f4a45d342866ab9f3f31997b, type: 3}
       propertyPath: m_Sprite
       value: 
