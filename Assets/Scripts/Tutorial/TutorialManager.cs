@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems; // ★UIのクリック判定用
 
 /// <summary>
 /// チュートリアルの進行を管理します。
@@ -62,6 +63,7 @@ public class TutorialManager : MonoBehaviour
             if (page.displayObject != null) page.displayObject.SetActive(false);
             if (page.correctResultObject != null) page.correctResultObject.SetActive(false);
             if (page.wrongResultObject != null) page.wrongResultObject.SetActive(false);
+            UnbindAdvanceButtons(page); // 進むボタンのイベント解除
         }
 
         GoToPage(0);
@@ -85,11 +87,11 @@ public class TutorialManager : MonoBehaviour
             if (waitingForShotToFinish) return;
         }
 
-        // Choice はボタンのクリック待ちなので、ここでは何もしない（OnChoiceSelected から進む）。
+        // Choice と ButtonClick はボタンのクリック待ちなので、ここでは何もしない。
 
         bool advanceRequested = false;
 
-        if (HasMode(page, TutorialAdvanceMode.LeftClick) && IsLeftClickPressed()) advanceRequested = true;
+        if (HasMode(page, TutorialAdvanceMode.LeftClick) && IsValidLeftClick()) advanceRequested = true;
         if (HasMode(page, TutorialAdvanceMode.SpaceKey) && IsSpacePressed()) advanceRequested = true;
 
         // 指定した魔法が選択されたら進む。
@@ -181,12 +183,12 @@ public class TutorialManager : MonoBehaviour
             if (previous.correctResultObject != null) previous.correctResultObject.SetActive(false);
             if (previous.wrongResultObject != null) previous.wrongResultObject.SetActive(false);
             UnbindChoiceButtons(previous);
+            UnbindAdvanceButtons(previous); // 進むボタンのイベント解除
         }
 
         currentIndex = index;
 
-        // ★修正ポイント：別のスクリプトが勝手にシーン移動を行っても確実にするため、
-        // 最後のページが表示された瞬間に「チュートリアル完了」をセーブしてしまう。
+        // 最後のページが表示された瞬間に「チュートリアル完了」をセーブする。
         if (markCompletedAtEnd && pages.Count > 0 && currentIndex == pages.Count - 1)
         {
             TutorialProgress.MarkCompleted();
@@ -213,6 +215,7 @@ public class TutorialManager : MonoBehaviour
 
         ApplyInputMode(page);
         BindChoiceButtons(page);
+        BindAdvanceButtons(page); // 進むボタンのイベント登録
 
         waitingForShotToFinish = false;
         shotAdvanceDelayTimer = 0f;
@@ -332,6 +335,39 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    // ページを進める専用ボタンのイベント登録
+    private void BindAdvanceButtons(TutorialPage page)
+    {
+        if (!HasMode(page, TutorialAdvanceMode.ButtonClick)) return;
+        if (page.advanceButtons == null) return;
+
+        foreach (var button in page.advanceButtons)
+        {
+            if (button == null) continue;
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(OnAdvanceButtonClicked);
+        }
+    }
+
+    // ページを進める専用ボタンのイベント解除
+    private void UnbindAdvanceButtons(TutorialPage page)
+    {
+        if (page.advanceButtons == null) return;
+
+        foreach (var button in page.advanceButtons)
+        {
+            if (button != null) button.onClick.RemoveAllListeners();
+        }
+    }
+
+    // ページを進める専用ボタンが押されたときの処理
+    public void OnAdvanceButtonClicked()
+    {
+        // 連続クリック防止
+        if (cooldownTimer > 0f) return;
+        Advance();
+    }
+
     /// <summary>選択肢が押されたときの処理です。正誤を記録して次のページへ進みます。</summary>
     public void OnChoiceSelected(int choiceIndex)
     {
@@ -375,10 +411,36 @@ public class TutorialManager : MonoBehaviour
         return pages[currentIndex];
     }
 
-    private static bool IsLeftClickPressed()
+    // ★修正: オプションボタンや操作可能なUIを押したときの誤作動を防ぐ判定
+    private static bool IsValidLeftClick()
     {
         Mouse mouse = Mouse.current;
-        return mouse != null && mouse.leftButton.wasPressedThisFrame;
+        if (mouse == null || !mouse.leftButton.wasPressedThisFrame) return false;
+
+        // クリックした場所がUI上だった場合
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            // 何のUIをクリックしたかを調べる
+            PointerEventData pointerData = new PointerEventData(EventSystem.current)
+            {
+                position = mouse.position.ReadValue()
+            };
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            // クリックしたUIの中に、ボタンやスライダーなどの「操作できるUI」があるかチェック
+            foreach (RaycastResult result in results)
+            {
+                if (result.gameObject.GetComponentInParent<UnityEngine.UI.Button>() != null ||
+                    result.gameObject.GetComponentInParent<UnityEngine.UI.Slider>() != null)
+                {
+                    // オプションボタンなどを押した場合は左クリックでのページ進行をキャンセルする
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private static bool IsSpacePressed()
