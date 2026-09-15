@@ -35,7 +35,7 @@ public enum TutorialAdvanceMode
 {
     None = 0,
 
-    /// <summary>左クリックで次へ。テキスト送り用。</summary>
+    /// <summary>左クリックで次へ（UI上のクリックは無視します）。テキスト送り用。</summary>
     LeftClick = 1 << 0,
 
     /// <summary>スペースキーで次へ。「Space to Next」の操作説明ページ用。</summary>
@@ -49,6 +49,9 @@ public enum TutorialAdvanceMode
 
     /// <summary>指定した魔法が選択されたら次へ。魔法ボタン（キーボード・UIどちらでも）を押させるページ用。</summary>
     MagicSelected = 1 << 5,
+
+    /// <summary>指定したボタン（次へボタンなど）を押したら次へ。UIをクリックして進めたいページ用。</summary>
+    ButtonClick = 1 << 6, // ★追加
 
     /// <summary>進むとき、次のページではなく次のシーンへ遷移する。他の条件と組み合わせて使います。</summary>
     SceneChange = 1 << 4,
@@ -110,6 +113,10 @@ public class TutorialPage
 
     [Tooltip("正解の選択肢の番号（0から数えます）。")]
     public int correctChoiceIndex = 2;
+
+    [Header("進むボタン（Advance Mode が ButtonClick のとき）")]
+    [Tooltip("このボタンを押したときに次のページへ進みます。複数登録可能です。")]
+    public Button[] advanceButtons; // ★追加
 
     [Header("選択結果の表示（前のページの選択に応じて出し分け）")]
     [Tooltip("正解だった場合に表示するオブジェクト。")]

@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem; // 追加
+using UnityEngine.InputSystem;
 
 public class TitleManager : MonoBehaviour
 {
@@ -15,12 +15,30 @@ public class TitleManager : MonoBehaviour
     [Tooltip("チェックを入れると、完了済みでも毎回チュートリアルへ進みます。デバッグ用。")]
     [SerializeField] private bool alwaysShowTutorial = false;
 
+    [Header("Reset UI")]
+    [Tooltip("「本当にリセットしますか？」の確認ウィンドウパネル")]
+    [SerializeField] private GameObject resetConfirmWindow;
+
+    [Tooltip("「リセットしました」の完了ウィンドウパネル")]
+    [SerializeField] private GameObject resetCompleteWindow;
+
+    private void Start()
+    {
+        // 起動時はウィンドウを非表示にしておく
+        if (resetConfirmWindow != null) resetConfirmWindow.SetActive(false);
+        if (resetCompleteWindow != null) resetCompleteWindow.SetActive(false);
+    }
+
     private void Update()
     {
         // Keyboard.current を使用して Enter キー（またはテンキーの Enter）の押下を判定
         if (Keyboard.current != null)
         {
-            if (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame)
+            // 確認・完了ウィンドウが開いている間は、Enterでのスタート判定を無効にする
+            bool isWindowOpen = (resetConfirmWindow != null && resetConfirmWindow.activeSelf) ||
+                                (resetCompleteWindow != null && resetCompleteWindow.activeSelf);
+
+            if (!isWindowOpen && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame))
             {
                 OnClickStartButton();
             }
@@ -84,19 +102,57 @@ public class TitleManager : MonoBehaviour
 #endif
     }
 
+    // ====================================================
+    // ▼ リセット関連の処理 ▼
+    // ====================================================
+
     /// <summary>
-    /// 全てのプレイ記録（クリア状況、自己ベスト、星、チュートリアル進捗など）をリセットします。
-    /// （旧：チュートリアルの完了記録を消す処理）
+    /// タイトル画面の「リセットボタン」を押した時の処理。
+    /// 確認ウィンドウを表示します。
     /// </summary>
-    public void ResetAllPlayData()
+    public void OnClickResetButton()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+
+        if (resetConfirmWindow != null) resetConfirmWindow.SetActive(true);
+    }
+
+    /// <summary>
+    /// 確認ウィンドウで「キャンセル（いいえ）」を押した時の処理。
+    /// </summary>
+    public void CancelReset()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+
+        if (resetConfirmWindow != null) resetConfirmWindow.SetActive(false);
+    }
+
+    /// <summary>
+    /// 確認ウィンドウで「実行（はい）」を押した時の処理。
+    /// 全てのプレイ記録をリセットし、完了ウィンドウを表示します。
+    /// </summary>
+    public void ExecuteReset()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+
         // PlayerPrefs に保存されている全てのセーブデータを消去します
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
 
         Debug.Log("【完了】全てのプレイ履歴をリセットしました！");
 
-        // 古い状態が残らないよう、タイトル画面を再読み込みして完全に初期状態に戻します
+        if (resetConfirmWindow != null) resetConfirmWindow.SetActive(false);
+        if (resetCompleteWindow != null) resetCompleteWindow.SetActive(true);
+    }
+
+    /// <summary>
+    /// 完了ウィンドウで「OK」を押した時の処理。
+    /// 古い状態が残らないよう、タイトル画面を再読み込みします。
+    /// </summary>
+    public void CloseCompleteWindow()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
