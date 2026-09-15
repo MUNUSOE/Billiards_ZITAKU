@@ -30,8 +30,11 @@ public class ShotPreview : MonoBehaviour
     [Tooltip("最初に当たるターゲット球の上に出す数値表示。子に Text を持つプレハブを指定します。")]
     [SerializeField] private GameObject momentumLabelPrefab;
 
-    [Tooltip("数値表示の位置オフセット（対象球からの相対位置）。")]
-    [SerializeField] private Vector3 momentumLabelOffset = new Vector3(0f, 0.6f, 0f);
+    [Tooltip("数値表示の基準Yオフセット（ターゲット球の頭上に浮かせるための高さ）。")]
+    [SerializeField] private float momentumLabelHeight = 0.6f;
+
+    [Tooltip("数値表示をターゲット球から進行方向へどれだけずらすかの距離。")]
+    [SerializeField] private float momentumLabelForwardOffset = 0.8f;
 
     [Tooltip("数値表示を常にカメラへ向けるか。")]
     [SerializeField] private bool momentumLabelFaceCamera = true;
@@ -170,13 +173,26 @@ public class ShotPreview : MonoBehaviour
         // 停止マス
         ShowStopEffect(stopCell);
 
-        // 最初に当たるターゲット球の運動量
+        // 最初に当たるターゲット球の運動量と表示
         if (steps.Count > 1)
         {
             BallPath.ChainStep firstTarget = steps[1];
-            if (firstTarget != null && firstTarget.ball != null)
+            if (firstTarget != null && firstTarget.ball != null && firstTarget.path != null && firstTarget.path.Count > 0)
             {
-                ShowMomentumLabel(firstTarget.ball, firstTarget.panels);
+                // ターゲットがこれから進む方向を、シミュレーション経路の1歩目から計算する
+                Vector3 targetStartPos = firstTarget.ball.transform.position;
+                Vector3 targetNextPos = firstTarget.path[0].position;
+                Vector3 targetMoveDir = BallPath.Get8Direction((targetNextPos - targetStartPos).normalized);
+
+                // ターゲットが全く動けない場合は、衝突された方向の延長線上を仮の進行方向にする
+                if (targetMoveDir == Vector3.zero)
+                {
+                    // ショット球の停止位置からターゲット球へのベクトルを計算
+                    Vector3 incomingDir = (targetStartPos - stopCell).normalized;
+                    targetMoveDir = BallPath.Get8Direction(incomingDir);
+                }
+
+                ShowMomentumLabel(firstTarget.ball, firstTarget.panels, targetMoveDir);
             }
         }
     }
@@ -212,7 +228,8 @@ public class ShotPreview : MonoBehaviour
         stopEffect.SetActive(true);
     }
 
-    private void ShowMomentumLabel(GameObject target, int momentum)
+    // ★修正: ターゲットの進行方向を受け取り、その方向にオフセットをかけて表示する
+    private void ShowMomentumLabel(GameObject target, int momentum, Vector3 moveDirection)
     {
         if (momentumLabelPrefab == null) return;
 
@@ -222,7 +239,14 @@ public class ShotPreview : MonoBehaviour
             momentumText = momentumLabel.GetComponentInChildren<Text>();
         }
 
-        momentumLabel.transform.position = target.transform.position + momentumLabelOffset;
+        // ターゲット球の頭上の高さ(Y) ＋ 進行方向へずらした位置(XZ) を計算する
+        Vector3 finalOffset = new Vector3(
+            moveDirection.x * momentumLabelForwardOffset,
+            momentumLabelHeight,
+            moveDirection.z * momentumLabelForwardOffset
+        );
+
+        momentumLabel.transform.position = target.transform.position + finalOffset;
 
         if (momentumText != null)
         {
