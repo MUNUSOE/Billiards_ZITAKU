@@ -4145,7 +4145,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &565936978
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4184,7 +4184,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &567630827
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5517,7 +5517,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &781096396
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5588,7 +5588,8 @@ MonoBehaviour:
   stopCellEffectPrefab: {fileID: 3634556389457622699, guid: 9b9320fc60430da498008337321d6fc6, type: 3}
   cellEffectOffsetY: -0.2
   momentumLabelPrefab: {fileID: 0}
-  momentumLabelOffset: {x: 0, y: 0.6, z: 0}
+  momentumLabelHeight: 0.6
+  momentumLabelForwardOffset: 0.8
   momentumLabelFaceCamera: 1
 --- !u!1 &813246301
 GameObject:
@@ -7419,7 +7420,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1145344033
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8674,7 +8675,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1329862951
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11300,7 +11301,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1710581626
 RectTransform:
   m_ObjectHideFlags: 0
