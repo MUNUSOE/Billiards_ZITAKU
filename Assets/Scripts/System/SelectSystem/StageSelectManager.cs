@@ -158,7 +158,7 @@ public class StageSelectManager : MonoBehaviour
             if (playBtn != null)
             {
                 playBtn.gameObject.SetActive(true);
-                playBtn.interactable = stage.isUnlocked;
+                playBtn.interactable = stage.isUnlocked && EndingFlow.CanEnterScene(stage.sceneToLoad);
                 playBtn.onClick.RemoveAllListeners();
                 playBtn.onClick.AddListener(() => OnSelectStage(stage));
             }
@@ -268,7 +268,7 @@ public class StageSelectManager : MonoBehaviour
 
     private void OnSelectStage(StageData stage)
     {
-        if (stage == null) return;
+        if (stage == null || !stage.isUnlocked || !EndingFlow.CanEnterScene(stage.sceneToLoad)) return;
         if (!string.IsNullOrEmpty(stage.sceneToLoad))
         {
             SceneManager.LoadScene(stage.sceneToLoad);

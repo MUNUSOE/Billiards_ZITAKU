@@ -25,6 +25,7 @@ public class TitleFlow : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        if (EndingFlow.TryResumePendingEnding()) return;
         Time.timeScale = 1f;
 
         if (alwaysShowTutorial || !TutorialProgress.IsCompleted)
@@ -39,6 +40,7 @@ public class TitleFlow : MonoBehaviour
     /// <summary>ステージ選択へ直接進みます。チュートリアルを飛ばすボタン用。</summary>
     public void GoToStageSelect()
     {
+        if (EndingFlow.TryResumePendingEnding()) return;
         Time.timeScale = 1f;
         SceneManager.LoadScene(stageSelectSceneName);
     }
