@@ -1165,7 +1165,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4734570272542786046, guid: 109cc791f1e048a4bbe172513a566f86, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2799,7 +2799,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 620000000000000002, guid: 988eea329f6d63b4482058eeed68aba2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.9754038
+      value: -3.0245967
       objectReference: {fileID: 0}
     - target: {fileID: 620000000000000002, guid: 988eea329f6d63b4482058eeed68aba2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5710,8 +5710,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 94754922}
   m_HandleRect: {fileID: 94754921}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -14038,12 +14038,12 @@ MonoBehaviour:
   - {fileID: 1239118533}
   - {fileID: 598596366}
   hintTexts:
-  - "\u3053\u308C\u306F\u30D2\u30F3\u30C8\uFF11\u3067\u3059"
-  - "\u3053\u308C\u306F\u30D2\u30F3\u30C8\uFF12\u3067\u3059"
-  - "\u3053\u308C\u306F\u30D2\u30F3\u30C8\uFF13\u3067\u3059"
-  - "\u3053\u308C\u306F\uFF11\u624B\u76EE\u306E\u7B54\u3048\u3067\u3059"
-  - "\u3053\u308C\u306F\uFF12\u624B\u76EE\u306E\u7B54\u3048\u3067\u3059"
-  - "\u3053\u308C\u306F\uFF13\u624B\u76EE\u306E\u7B54\u3048\u3067\u3059"
+  - "\u6C34\u306F\u76F4\u7DDA\u4E0A\u8DDD\u96E2\u95A2\u4FC2\u306A\u304F\u5F15\u304D\u5BC4\u305B\u307E\u3059"
+  - "\u6C34\u3067\u30DD\u30B1\u30C3\u30C8\u306B\u5165\u308C\u3089\u308C\u308B\u30DE\u30B9\u306B\u6B62\u3081\u307E\u3057\u3087\u3046"
+  - "\u4E09\u89D2\u58C1\u306E\u969C\u5BB3\u7269\u5224\u5B9A\u306F\u7279\u6B8A\u3067\u3059"
+  - "\u6C34\u9B54\u6CD5\n\u5A01\u529B\u4E2D\u3067\u4E0B\u306B\u30B7\u30E7\u30C3\u30C8"
+  - "\u5A01\u529B\u5927\u3067\u5DE6\u4E0A\u306B\u30B7\u30E7\u30C3\u30C8"
+  - "\u5A01\u529B\u4E2D\u3067\u4E0B\u306B\u30B7\u30E7\u30C3\u30C8"
 --- !u!1 &1218254789
 GameObject:
   m_ObjectHideFlags: 0
@@ -22603,7 +22603,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 620000000000000001, guid: 988eea329f6d63b4482058eeed68aba2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 620000000000000002, guid: 988eea329f6d63b4482058eeed68aba2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -25293,7 +25293,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5883057850891466627, guid: 366e5312369094643bcd744a61656c71, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 5883057850891466627, guid: 366e5312369094643bcd744a61656c71, type: 3}
       propertyPath: m_LocalPosition.z
