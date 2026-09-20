@@ -1834,7 +1834,7 @@ MonoBehaviour:
   prevBookPageButton: {fileID: 1529810084}
   booksData:
   - bookId: 0
-    bookTitle: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB"
+    bookTitle: Tutorial
     bookCover: {fileID: 0}
     stages:
     - stageId: Tutorial A
@@ -2040,6 +2040,24 @@ MonoBehaviour:
     - stageId: 4-4
       stageName: 4-4
       sceneToLoad: 4-4
+      isUnlocked: 1
+      parMoves: 3
+      twoStarMoves: 5
+      starCount: 0
+      stageImage: {fileID: 0}
+      showStarRating: 1
+    - stageId: 4-5
+      stageName: 4-5
+      sceneToLoad: 4-5
+      isUnlocked: 1
+      parMoves: 3
+      twoStarMoves: 5
+      starCount: 0
+      stageImage: {fileID: 0}
+      showStarRating: 1
+    - stageId: 4-6
+      stageName: 4-6
+      sceneToLoad: 4-6
       isUnlocked: 1
       parMoves: 3
       twoStarMoves: 5
@@ -12314,9 +12332,9 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
+    x: 0.00037623922
     y: 0
-    width: 1
+    width: 0.99924755
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
