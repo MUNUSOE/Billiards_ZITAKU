@@ -5710,8 +5710,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 94754922}
   m_HandleRect: {fileID: 94754921}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.99999994
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -14126,8 +14126,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 934565719}
   m_HandleRect: {fileID: 934565718}
   m_Direction: 2
-  m_Value: 0.99999964
-  m_Size: 0.7648648
+  m_Value: 1
+  m_Size: 0.76486486
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -23578,7 +23578,7 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 1
+    m_LineSpacing: 1.2
   m_Text: "\u3053\u308C\u306F\u30D2\u30F3\u30C8\u3067\u3059"
 --- !u!222 &2027057192
 CanvasRenderer:

@@ -1026,7 +1026,7 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 1
+    m_LineSpacing: 1.2
   m_Text: "\u3053\u308C\u306F\u30D2\u30F3\u30C8\u3067\u3059"
 --- !u!222 &94194101
 CanvasRenderer:
@@ -5447,8 +5447,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1237411416}
   m_HandleRect: {fileID: 1237411415}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.99999994
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -10481,7 +10481,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &904193950
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10579,9 +10579,9 @@ RectTransform:
   - {fileID: 1692738022}
   m_Father: {fileID: 821248281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 196.5, y: -345}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &922012797
@@ -13115,7 +13115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1139135439
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13131,9 +13131,9 @@ RectTransform:
   - {fileID: 1010372037}
   m_Father: {fileID: 821248281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 196.5, y: -165}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1139135440
@@ -17812,17 +17812,13 @@ MonoBehaviour:
   hintButtons:
   - {fileID: 1226121307}
   - {fileID: 1344314443}
-  - {fileID: 1139135442}
   - {fileID: 922012801}
   - {fileID: 2100314747}
-  - {fileID: 904193950}
   hintTexts:
-  - "\u3053\u308C\u306F\u30D2\u30F3\u30C8\uFF11\u3067\u3059"
-  - "\u3053\u308C\u306F\u30D2\u30F3\u30C8\uFF12\u3067\u3059"
-  - "\u3053\u308C\u306F\u30D2\u30F3\u30C8\uFF13\u3067\u3059"
-  - "\u3053\u308C\u306F\uFF11\u624B\u76EE\u306E\u7B54\u3048\u3067\u3059"
-  - "\u3053\u308C\u306F\uFF12\u624B\u76EE\u306E\u7B54\u3048\u3067\u3059"
-  - "\u3053\u308C\u306F\uFF13\u624B\u76EE\u306E\u7B54\u3048\u3067\u3059"
+  - "\u521D\u3081\u306F\u4F55\u306B\u3082\u89E6\u308C\u307E\u305B\u3093"
+  - "\u624B\u7403\u306F\u4E0A\u534A\u5206\u306B\u306F\u884C\u304D\u307E\u305B\u3093"
+  - "\u6C34\u9B54\u6CD5\n\u5A01\u529B\u5C0F\u3067\u53F3\u306B\u6253\u3061\u307E\u3057\u3087\u3046"
+  - "\u5A01\u529B\u4E2D\u4EE5\u4E0A\u3067\u53F3\u306B\u6253\u3061\u307E\u3057\u3087\u3046"
 --- !u!1 &1527495333
 GameObject:
   m_ObjectHideFlags: 0
@@ -17905,8 +17901,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2039978283}
   m_HandleRect: {fileID: 2039978282}
   m_Direction: 2
-  m_Value: 0.99999964
-  m_Size: 0.7648648
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
