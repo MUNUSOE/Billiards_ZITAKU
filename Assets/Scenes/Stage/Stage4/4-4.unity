@@ -12205,7 +12205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0ce02c8cc392940b4105f4bcac09b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 4-2
+  sceneName: 4-5
   cooldownTime: 1
 --- !u!114 &1128205117
 MonoBehaviour:
@@ -24245,7 +24245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b122a19f5e8795847b352529ec2ef7ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxMoves: 6
+  maxMoves: 8
   showShotPreview: 1
   GameOverUI: {fileID: 1502197152}
   gameOverDelay: 1
@@ -25033,7 +25033,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 4 - 1
+  m_Text: 4 - 4
 --- !u!222 &2132957626
 CanvasRenderer:
   m_ObjectHideFlags: 0

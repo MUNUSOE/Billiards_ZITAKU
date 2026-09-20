@@ -2323,7 +2323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0ce02c8cc392940b4105f4bcac09b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: 4-3
+  sceneName: 4-6
   cooldownTime: 1
 --- !u!114 &224063269
 MonoBehaviour:
@@ -8565,8 +8565,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1671266965}
   m_HandleRect: {fileID: 1671266964}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.99999994
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -21286,7 +21286,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 4 - 2
+  m_Text: 4 - 5
 --- !u!222 &1803023369
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -24375,7 +24375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b122a19f5e8795847b352529ec2ef7ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxMoves: 7
+  maxMoves: 8
   showShotPreview: 1
   GameOverUI: {fileID: 471728247}
   gameOverDelay: 1
@@ -24927,8 +24927,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 503771727}
   m_HandleRect: {fileID: 503771726}
   m_Direction: 2
-  m_Value: 0.99999964
-  m_Size: 0.7648648
+  m_Value: 1
+  m_Size: 0.76486486
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
