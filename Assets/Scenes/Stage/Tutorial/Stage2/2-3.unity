@@ -12145,7 +12145,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 2034996026}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
