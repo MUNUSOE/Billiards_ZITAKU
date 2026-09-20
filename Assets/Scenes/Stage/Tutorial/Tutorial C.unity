@@ -7179,7 +7179,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 158040533}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
@@ -7217,7 +7217,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 1901407242}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
@@ -7236,7 +7236,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 237286628}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
@@ -7255,7 +7255,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 1138968404}
     inputMode: 0
-    advanceMode: 17
+    advanceMode: 19
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
