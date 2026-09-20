@@ -8978,7 +8978,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 1494097695}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
@@ -8997,7 +8997,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 821193290}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: 0, y: 0, z: 0}
     useForcedPower: 0
@@ -9054,7 +9054,7 @@ MonoBehaviour:
   - pageName: 
     displayObject: {fileID: 1674780318}
     inputMode: 0
-    advanceMode: 1
+    advanceMode: 3
     useForcedDirection: 0
     forcedDirection: {x: -1, y: 0, z: 0}
     useForcedPower: 0
