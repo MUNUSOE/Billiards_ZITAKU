@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public enum BGMType
 {
     MainTheme,
+    SelectTheme,
     Stage,
     Clear,
     GameOver,
@@ -135,9 +136,13 @@ public class SoundManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "Title" || scene.name == "StageSelect")
+        if (scene.name == "Title")
         {
             PlayBGM(BGMType.MainTheme);
+        }
+        else if (scene.name == "StageSelect")
+        {
+            PlayBGM(BGMType.SelectTheme);
         }
         else
         {
