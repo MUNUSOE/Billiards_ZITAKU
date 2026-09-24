@@ -24376,7 +24376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMoves: 8
-  showShotPreview: 1
+  showShotPreview: 0
   GameOverUI: {fileID: 471728247}
   gameOverDelay: 1
 --- !u!114 &2071874470
@@ -24927,8 +24927,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 503771727}
   m_HandleRect: {fileID: 503771726}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.76486486
+  m_Value: 1.0000004
+  m_Size: 0.7648649
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

@@ -24569,7 +24569,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMoves: 8
-  showShotPreview: 1
+  showShotPreview: 0
   GameOverUI: {fileID: 1502197152}
   gameOverDelay: 1
 --- !u!114 &2071874470
