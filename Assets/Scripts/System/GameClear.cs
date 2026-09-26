@@ -48,6 +48,8 @@ public class GameClear : MonoBehaviour
 
     private void Awake()
     {
+        Time.timeScale = 1f;
+
         Instance = this;
 
         if (ClearUI != null)

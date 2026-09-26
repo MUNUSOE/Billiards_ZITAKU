@@ -54,6 +54,8 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        Time.timeScale = 1f;
+
         if (Instance == null)
         {
             // オプション画面を開いたままのシーン再読み込み・開始後も、ゲーム開始時は必ず通常速度に戻す。
