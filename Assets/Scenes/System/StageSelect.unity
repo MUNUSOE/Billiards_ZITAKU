@@ -1940,6 +1940,9 @@ MonoBehaviour:
   - {fileID: 1617075655}
   - {fileID: 434862478}
   - {fileID: 22120305}
+  firstBookmarkPageSize: 0
+  previousBookmarkLabel: <
+  nextBookmarkLabel: '>'
   leftPageRect: {fileID: 536816117}
   leftPageTitleText: {fileID: 336418343}
   leftPlayButton: {fileID: 1662520821}
@@ -1962,7 +1965,7 @@ MonoBehaviour:
     - stageId: Tutorial A
       stageName: Tutorial
       sceneToLoad: Tutorial A
-      isUnlocked: 1
+      isUnlocked: 0
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
@@ -1979,7 +1982,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 0e0e2bf34d99dcd47b0466c3e71119d8, type: 3}
       showStarRating: 1
     - stageId: 0-2
       stageName: 0-2
@@ -1988,7 +1991,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 357b3a2327a422e499469ec95c5dda2b, type: 3}
       showStarRating: 1
     - stageId: 0-3
       stageName: 0-3
@@ -1997,7 +2000,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 64cef2fe573b8b14881fd65a7f7e31bd, type: 3}
       showStarRating: 1
     - stageId: 0-4
       stageName: 0-4
@@ -2006,7 +2009,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 5db10aecf09ad2547a29091d17d74494, type: 3}
       showStarRating: 1
   - bookId: 2
     bookTitle: "1 \u306E\u7AE0"
@@ -2019,7 +2022,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 2f14ace601f1cea4991ddb8627bf5c0f, type: 3}
       showStarRating: 1
     - stageId: 1-2
       stageName: 1-2
@@ -2028,7 +2031,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: befcce7d408f6dc4d9f367651538974a, type: 3}
       showStarRating: 1
     - stageId: 1-3
       stageName: 1-3
@@ -2037,7 +2040,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: f2a9d8f614294ac468877f0c9e6d916b, type: 3}
       showStarRating: 1
     - stageId: 1-4
       stageName: 1-4
@@ -2046,7 +2049,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: d6d1ffa2cbd75c34382992ef89c3df01, type: 3}
       showStarRating: 1
   - bookId: 3
     bookTitle: "2 \u306E\u7AE0"
@@ -2059,7 +2062,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 12a84b8c56f0afa448d21579e7c93438, type: 3}
       showStarRating: 1
     - stageId: 2-2
       stageName: 2-2
@@ -2068,7 +2071,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 9abd94bbf5421a341b485f1276885954, type: 3}
       showStarRating: 1
     - stageId: 2-3
       stageName: 2-3
@@ -2077,7 +2080,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 4a90235a7a7004e4c9e83d1d698529a5, type: 3}
       showStarRating: 1
     - stageId: 2-4
       stageName: 2-4
@@ -2086,7 +2089,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: efadcadb639e16244bd3b9918013a2ea, type: 3}
       showStarRating: 1
   - bookId: 4
     bookTitle: "3 \u306E\u7AE0"
@@ -2099,7 +2102,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 48f1bce2d1dd3c84497776780547831e, type: 3}
       showStarRating: 1
     - stageId: 3-2
       stageName: 3-2
@@ -2108,7 +2111,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 82fbed842c3f4ea4fb4c46f616cdb51d, type: 3}
       showStarRating: 1
     - stageId: 3-3
       stageName: 3-3
@@ -2117,7 +2120,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 7156c132d5101bd428d5f98794e4c171, type: 3}
       showStarRating: 1
     - stageId: 3-4
       stageName: 3-4
@@ -2126,7 +2129,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 64aee2e053bc63c4587b8226b6b6b197, type: 3}
       showStarRating: 1
   - bookId: 5
     bookTitle: "4 \u306E\u7AE0"
@@ -2139,7 +2142,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: a91ab62be3cff534fbbcdecca387ff95, type: 3}
       showStarRating: 1
     - stageId: 4-2
       stageName: 4-2
@@ -2148,7 +2151,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: ae364a8f2ac852648a22ff39ea09bdb5, type: 3}
       showStarRating: 1
     - stageId: 4-3
       stageName: 4-3
@@ -2157,7 +2160,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 36fed5cfc829ec34b8c4ad1c79887fda, type: 3}
       showStarRating: 1
     - stageId: 4-4
       stageName: 4-4
@@ -2166,7 +2169,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 15d6b194639530c4fb139b5687ba1309, type: 3}
       showStarRating: 1
     - stageId: 4-5
       stageName: 4-5
@@ -2175,7 +2178,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: a5cf44afa6113eb4d90d0b044dd79c48, type: 3}
       showStarRating: 1
     - stageId: 4-6
       stageName: 4-6
@@ -2184,7 +2187,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: d2b437d298479a44995e51d38efbabdd, type: 3}
       showStarRating: 1
   - bookId: 6
     bookTitle: "5 \u306E\u7AE0"
@@ -2197,7 +2200,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 3d5e9bf109a41bf4787caadd88c01406, type: 3}
       showStarRating: 1
     - stageId: 5-2
       stageName: 5-2
@@ -2206,7 +2209,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: b2b8db93ece698548a1f4ae89044c966, type: 3}
       showStarRating: 1
     - stageId: 5-3
       stageName: 5-3
@@ -2215,7 +2218,7 @@ MonoBehaviour:
       parMoves: 3
       twoStarMoves: 5
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: eadea1b1ea479bc42816d07c46a62985, type: 3}
       showStarRating: 1
     - stageId: 5-4
       stageName: 5-4
@@ -2224,7 +2227,7 @@ MonoBehaviour:
       parMoves: 4
       twoStarMoves: 6
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: cab673d165bef7947abd717664bbd263, type: 3}
       showStarRating: 1
     - stageId: 5-5
       stageName: 5-5
@@ -2233,7 +2236,7 @@ MonoBehaviour:
       parMoves: 4
       twoStarMoves: 6
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 2ad5dfa145e0fde47bff95546af2b1e5, type: 3}
       showStarRating: 1
     - stageId: 5-6
       stageName: 5-6
@@ -2242,7 +2245,7 @@ MonoBehaviour:
       parMoves: 4
       twoStarMoves: 6
       starCount: 0
-      stageImage: {fileID: 0}
+      stageImage: {fileID: 21300000, guid: 04488f2c6228a9442b2b0c99c67a092e, type: 3}
       showStarRating: 1
 --- !u!4 &317337712
 Transform:
@@ -12593,9 +12596,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
+    y: 0.00013920665
     width: 1
-    height: 1
+    height: 0.9997216
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
