@@ -1955,6 +1955,8 @@ MonoBehaviour:
   rightStarRating: {fileID: 1589087385}
   rightStageImage: {fileID: 459013178}
   rightFastestClearText: {fileID: 0}
+  fastestSparkleColor: {r: 1, g: 0.88, b: 0.45, a: 1}
+  fastestSparkleCount: 30
   nextBookPageButton: {fileID: 1525638536}
   prevBookPageButton: {fileID: 1529810084}
   booksData:
@@ -12595,10 +12597,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0
-    y: 0.00013920665
-    width: 1
-    height: 0.9997216
+    x: 0.00037623922
+    y: 0
+    width: 0.99924755
+    height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
