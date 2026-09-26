@@ -29,6 +29,22 @@ public class EndingSettings : ScriptableObject
     public string trueEndingScene = "TrueEnding";
     public string stageSelectScene = "StageSelect";
     public List<string> extraStageScenes = new List<string>();
+    [Tooltip("常時選択可能・画像を最初からカラー表示にするチュートリアルのシーン名。名前にTutorialまたはチュートリアルを含むシーンは登録不要です。通常ステージ・エンディングは登録しないでください。")]
+    public List<string> tutorialStageScenes = new List<string>();
+
+    public static bool HasTutorialName(string sceneName)
+    {
+        return !string.IsNullOrWhiteSpace(sceneName)
+            && (sceneName.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0
+                || sceneName.Contains("チュートリアル"));
+    }
+
+    public bool IsTutorial(string sceneName)
+    {
+        return HasTutorialName(sceneName)
+            || (!string.IsNullOrWhiteSpace(sceneName)
+                && tutorialStageScenes != null && tutorialStageScenes.Contains(sceneName));
+    }
 
     [Header("Build Profile Import")]
     [Tooltip("自動取り込みから除外するシーン名。数字-数字形式のチュートリアル等を指定します。Extra Stage Scenesにあるシーンは自動で除外されます。")]
@@ -95,7 +111,7 @@ public class EndingSettings : ScriptableObject
         {
             if (!scene.enabled) continue;
             string name = System.IO.Path.GetFileNameWithoutExtension(scene.path);
-            if (name == normalEndingScene || name == trueEndingScene || name == stageSelectScene
+            if (IsTutorial(name) || name == normalEndingScene || name == trueEndingScene || name == stageSelectScene
                 || (extraStageScenes != null && extraStageScenes.Contains(name))
                 || (autoImportExcludedScenes != null && autoImportExcludedScenes.Contains(name))) continue;
 

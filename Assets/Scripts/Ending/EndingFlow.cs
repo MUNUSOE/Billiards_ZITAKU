@@ -24,8 +24,17 @@ public static class EndingFlow
         return true;
     }
 
+    public static bool IsTutorialScene(string sceneName)
+    {
+        if (EndingSettings.HasTutorialName(sceneName)) return true;
+        var settings = Settings;
+        return settings != null && settings.IsTutorial(sceneName);
+    }
+
     public static bool CanEnterScene(string sceneName)
     {
+        // チュートリアルは進行・手動ロック・ストーリー設定の検証と独立。
+        if (IsTutorialScene(sceneName)) return true;
         if (!TryGetSettings(out var settings)) return false;
         return CanEnterScene(settings, sceneName);
     }
@@ -50,6 +59,7 @@ public static class EndingFlow
 
     public static bool CanSelectStage(string sceneName, bool manuallyUnlocked)
     {
+        if (IsTutorialScene(sceneName)) return true;
         if (!TryGetSettings(out var settings)) return false;
         if (!CanEnterScene(settings, sceneName)) return false;
         if (!settings.enableStoryMode) return true;
