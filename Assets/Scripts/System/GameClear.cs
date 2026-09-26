@@ -35,6 +35,9 @@ public class GameClear : MonoBehaviour
 
     private bool clearTriggered;
     private bool clearPending;
+    private bool finalizing;
+    private ShotBall shotBall;
+    private bool hadShotBallAtStart;
 
     /// <summary>クリアが確定済み、または確定待ちの状態か。</summary>
     public bool IsClearPendingOrTriggered => clearPending || clearTriggered;
@@ -63,6 +66,8 @@ public class GameClear : MonoBehaviour
             return;
         }
 
+        shotBall = FindObjectOfType<ShotBall>();
+        hadShotBallAtStart = shotBall != null;
         StartCoroutine(WatchTargetsRoutine());
     }
 
@@ -77,13 +82,7 @@ public class GameClear : MonoBehaviour
 
             if (AreAllTargetsDestroyed())
             {
-                clearPending = true;
-                yield return new WaitForSeconds(clearDelay);
-
-                if (GameManager.Instance == null || !GameManager.Instance.HasLostBallToHazard)
-                {
-                    OpenClearUI();
-                }
+                OpenClearUI();
                 yield break;
             }
 
@@ -96,10 +95,10 @@ public class GameClear : MonoBehaviour
         }
     }
 
-    private void RecordStageResult()
+    private EndingKind RecordStageResult()
     {
-        if (StageInfo.Instance == null) return;
-        if (GameManager.Instance == null) return;
+        if (StageInfo.Instance == null) return EndingKind.None;
+        if (GameManager.Instance == null) return EndingKind.None;
 
         string stageId = StageInfo.Instance.StageId;
         int movesUsed = GameManager.Instance.MovesUsed;
@@ -109,6 +108,7 @@ public class GameClear : MonoBehaviour
         int stars = StageInfo.Instance.StarCount;
         Debug.Log($"[GameClear] {stageId} 獲得星={stars} / 3"
                 + $"（最速手={StageInfo.Instance.ParMoves} 星2つの条件={StageInfo.Instance.TwoStarMoves}）");
+        return EndingFlow.RecordClear(StageInfo.Instance, movesUsed);
     }
 
     private bool AreAllTargetsDestroyed()
@@ -118,10 +118,47 @@ public class GameClear : MonoBehaviour
 
     public void OpenClearUI()
     {
+        if (clearTriggered || finalizing) return;
+        clearPending = true;
+        finalizing = true;
+        StartCoroutine(FinalizeClearRoutine());
+    }
+
+    private IEnumerator FinalizeClearRoutine()
+    {
+        // 球の消滅だけでは、最後のショットの手数消費が完了したとは限らない。
+        bool hadShotBall = hadShotBallAtStart;
+        while ((shotBall != null && shotBall.IsShotSequenceRunning) || Pocket.IsAnyBallBeingPocketed)
+        {
+            if ((GameManager.Instance != null && GameManager.Instance.HasLostBallToHazard)
+                || (hadShotBall && shotBall == null))
+            {
+                clearPending = false;
+                finalizing = false;
+                yield break;
+            }
+            yield return null;
+        }
+        yield return null;
+        if (clearDelay > 0f) yield return new WaitForSecondsRealtime(clearDelay);
+        if ((hadShotBall && shotBall == null)
+            || (GameManager.Instance != null && GameManager.Instance.HasLostBallToHazard)
+            || !AreAllTargetsDestroyed())
+        {
+            clearPending = false;
+            finalizing = false;
+            yield break;
+        }
+        ShowClearUI();
+    }
+
+    private void ShowClearUI()
+    {
         if (clearTriggered) return;
         clearTriggered = true;
 
-        RecordStageResult();
+        EndingKind ending = RecordStageResult();
+        if (ending != EndingKind.None && EndingFlow.TryResumePendingEnding()) return;
 
         if (ClearUI == null)
         {

@@ -2221,8 +2221,8 @@ MonoBehaviour:
       stageName: 5-4
       sceneToLoad: 5-4
       isUnlocked: 1
-      parMoves: 3
-      twoStarMoves: 5
+      parMoves: 4
+      twoStarMoves: 6
       starCount: 0
       stageImage: {fileID: 0}
       showStarRating: 1
@@ -2230,8 +2230,8 @@ MonoBehaviour:
       stageName: 5-5
       sceneToLoad: 5-5
       isUnlocked: 1
-      parMoves: 3
-      twoStarMoves: 5
+      parMoves: 4
+      twoStarMoves: 6
       starCount: 0
       stageImage: {fileID: 0}
       showStarRating: 1
@@ -2239,8 +2239,8 @@ MonoBehaviour:
       stageName: 5-6
       sceneToLoad: 5-6
       isUnlocked: 1
-      parMoves: 3
-      twoStarMoves: 5
+      parMoves: 4
+      twoStarMoves: 6
       starCount: 0
       stageImage: {fileID: 0}
       showStarRating: 1
@@ -12593,9 +12593,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0.0002745986
+    y: 0
     width: 1
-    height: 0.9994508
+    height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60

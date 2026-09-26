@@ -62,6 +62,12 @@ public class ScenesManager : MonoBehaviour
             return;
         }
 
+        if (EndingFlow.TryResumePendingEnding()) return;
+        if (!EndingFlow.CanEnterScene(sceneName))
+        {
+            Debug.LogWarning("[Ending] このステージはまだ解放されていません: " + sceneName);
+            return;
+        }
         StartCoroutine(ChangeSceneRoutine());
     }
 

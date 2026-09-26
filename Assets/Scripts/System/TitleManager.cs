@@ -50,6 +50,7 @@ public class TitleManager : MonoBehaviour
     /// </summary>
     public void OnClickStartButton()
     {
+        if (EndingFlow.TryResumePendingEnding()) return;
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySE(SEType.DecideButton);
@@ -74,6 +75,7 @@ public class TitleManager : MonoBehaviour
     /// </summary>
     public void GoToStageSelect()
     {
+        if (EndingFlow.TryResumePendingEnding()) return;
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySE(SEType.DecideButton);
