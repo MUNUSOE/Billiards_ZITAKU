@@ -49,6 +49,10 @@ public class StageSelectManager : MonoBehaviour
     [SerializeField] private Image rightStageImage;
     [SerializeField] private Text rightFastestClearText;
 
+    [Header("Stage Image Effects")]
+    [SerializeField] private Color fastestSparkleColor = new Color(1f, 0.88f, 0.45f, 1f);
+    [SerializeField, Range(1, 40)] private int fastestSparkleCount = 12;
+
     [Header("Book Controls")]
     [SerializeField] private Button nextBookPageButton;
     [SerializeField] private Button prevBookPageButton;
@@ -283,6 +287,13 @@ public class StageSelectManager : MonoBehaviour
         if (hasStage)
         {
             StageData stage = book.stages[stageIndex];
+            // 通常ステージの上書きID・Par Movesは取り込み済み設定を優先する。
+            var settings = EndingFlow.Settings;
+            var story = settings != null ? settings.FindScene(stage.sceneToLoad) : null;
+            string resultId = story != null ? story.Id : stage.stageId;
+            int parMoves = story != null ? story.parMoves : stage.parMoves;
+            bool cleared = StageResult.IsCleared(resultId);
+            bool fastest = cleared && StageResult.IsFastestAchieved(resultId, parMoves);
 
             if (titleText != null) { titleText.gameObject.SetActive(true); titleText.text = stage.stageName; }
 
@@ -299,7 +310,7 @@ public class StageSelectManager : MonoBehaviour
                 if (stage.showStarRating)
                 {
                     starRating.gameObject.SetActive(true);
-                    int stars = StageResult.GetStarCount(stage.stageId, stage.parMoves, stage.twoStarMoves);
+                    int stars = StageResult.GetStarCount(resultId, parMoves, stage.twoStarMoves);
                     starRating.SetStarCount(stars);
                 }
                 else
@@ -314,12 +325,14 @@ public class StageSelectManager : MonoBehaviour
                 stageImage.enabled = true;
                 if (stage.stageImage != null) { stageImage.sprite = stage.stageImage; stageImage.color = Color.white; }
                 else { stageImage.sprite = null; }
+                var effects = stageImage.GetComponent<StageImageEffects>();
+                if (effects == null) effects = stageImage.gameObject.AddComponent<StageImageEffects>();
+                effects.Apply(cleared, fastest, fastestSparkleColor, fastestSparkleCount);
             }
 
             if (fastestClearText != null)
             {
-                bool isFastest = StageResult.IsFastestAchieved(stage.stageId, stage.parMoves);
-                fastestClearText.gameObject.SetActive(isFastest);
+                fastestClearText.gameObject.SetActive(fastest);
             }
         }
         else
