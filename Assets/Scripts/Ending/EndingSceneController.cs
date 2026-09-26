@@ -25,7 +25,7 @@ public class EndingSceneController : MonoBehaviour
             return;
         }
         // 入場時にPendingが解除済みでも戻れる。再記録は安全に何度でも呼べる。
-        if (!EndingProgress.RecordEndingEntered(endingKind)) return;
+        if (settings.enableStoryMode && !EndingProgress.RecordEndingEntered(endingKind)) return;
         completed = true;
         Time.timeScale = 1f;
         SceneManager.LoadScene(settings.stageSelectScene);
