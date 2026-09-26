@@ -49,6 +49,12 @@ public class StageSelectManager : MonoBehaviour
     [SerializeField] private Image rightStageImage;
     [SerializeField] private Text rightFastestClearText;
 
+    [Header("Tutorial Page Objects")]
+    [Tooltip("左ページがチュートリアルのときだけ表示するシーン内オブジェクト。左ページ内に配置し、通常のStage Imageとは別オブジェクトにしてください。サイズ・位置は変更しません。")]
+    [SerializeField] private GameObject leftTutorialPageObject;
+    [Tooltip("右ページがチュートリアルのときだけ表示するシーン内オブジェクト。左右に同じオブジェクトを登録しないでください。右にチュートリアルがなければ空欄で構いません。")]
+    [SerializeField] private GameObject rightTutorialPageObject;
+
     [Header("Stage Image Effects")]
     [SerializeField] private Color fastestSparkleColor = new Color(1f, 0.88f, 0.45f, 1f);
     [SerializeField, Range(1, 40)] private int fastestSparkleCount = 12;
@@ -81,6 +87,8 @@ public class StageSelectManager : MonoBehaviour
     {
         Time.timeScale = 1f;
 
+        if (leftTutorialPageObject != null) leftTutorialPageObject.SetActive(false);
+        if (rightTutorialPageObject != null) rightTutorialPageObject.SetActive(false);
         BuildPagePairs();
         SetupBookmarks();
 
@@ -273,15 +281,16 @@ public class StageSelectManager : MonoBehaviour
         PagePair currentPair = allPagePairs[currentPairIndex];
         SyncBookmarksToChapter(currentPair.BookIndex);
 
-        UpdateSinglePage(currentPair.LeftStageIndex, currentPair.Book, leftPageTitleText, leftPlayButton, leftStarRating, leftStageImage, leftFastestClearText);
-        UpdateSinglePage(currentPair.RightStageIndex, currentPair.Book, rightPageTitleText, rightPlayButton, rightStarRating, rightStageImage, rightFastestClearText);
+        UpdateSinglePage(currentPair.LeftStageIndex, currentPair.Book, leftPageTitleText, leftPlayButton, leftStarRating, leftStageImage, leftFastestClearText, leftTutorialPageObject);
+        UpdateSinglePage(currentPair.RightStageIndex, currentPair.Book, rightPageTitleText, rightPlayButton, rightStarRating, rightStageImage, rightFastestClearText, rightTutorialPageObject);
 
         if (prevBookPageButton != null) prevBookPageButton.interactable = (currentPairIndex > 0);
         if (nextBookPageButton != null) nextBookPageButton.interactable = (currentPairIndex < allPagePairs.Count - 1);
     }
 
-    private void UpdateSinglePage(int stageIndex, BookData book, Text titleText, Button playBtn, StarRatingView starRating, Image stageImage, Text fastestClearText)
+    private void UpdateSinglePage(int stageIndex, BookData book, Text titleText, Button playBtn, StarRatingView starRating, Image stageImage, Text fastestClearText, GameObject tutorialPageObject)
     {
+        if (tutorialPageObject != null) tutorialPageObject.SetActive(false);
         bool hasStage = book != null && stageIndex >= 0 && stageIndex < book.stages.Count;
 
         if (hasStage)
@@ -292,8 +301,11 @@ public class StageSelectManager : MonoBehaviour
             var story = settings != null ? settings.FindScene(stage.sceneToLoad) : null;
             string resultId = story != null ? story.Id : stage.stageId;
             int parMoves = story != null ? story.parMoves : stage.parMoves;
+            bool tutorial = EndingFlow.IsTutorialScene(stage.sceneToLoad);
+            if (tutorialPageObject != null) tutorialPageObject.SetActive(tutorial);
             bool cleared = StageResult.IsCleared(resultId);
-            bool fastest = cleared && StageResult.IsFastestAchieved(resultId, parMoves);
+            // チュートリアルは履修履歴のみ。最短・星による評価は行わない。
+            bool fastest = !tutorial && cleared && StageResult.IsFastestAchieved(resultId, parMoves);
 
             if (titleText != null) { titleText.gameObject.SetActive(true); titleText.text = stage.stageName; }
 
@@ -307,7 +319,7 @@ public class StageSelectManager : MonoBehaviour
 
             if (starRating != null)
             {
-                if (stage.showStarRating)
+                if (!tutorial && stage.showStarRating)
                 {
                     starRating.gameObject.SetActive(true);
                     int stars = StageResult.GetStarCount(resultId, parMoves, stage.twoStarMoves);
@@ -321,13 +333,17 @@ public class StageSelectManager : MonoBehaviour
 
             if (stageImage != null)
             {
-                stageImage.gameObject.SetActive(true);
-                stageImage.enabled = true;
-                if (stage.stageImage != null) { stageImage.sprite = stage.stageImage; stageImage.color = Color.white; }
-                else { stageImage.sprite = null; }
-                var effects = stageImage.GetComponent<StageImageEffects>();
-                if (effects == null) effects = stageImage.gameObject.AddComponent<StageImageEffects>();
-                effects.Apply(cleared, fastest, fastestSparkleColor, fastestSparkleCount);
+                // チュートリアルは専用オブジェクトを使用。通常画像や演出を引き継がない。
+                stageImage.gameObject.SetActive(!tutorial);
+                if (!tutorial)
+                {
+                    stageImage.enabled = true;
+                    stageImage.sprite = stage.stageImage;
+                    stageImage.color = Color.white;
+                    var effects = stageImage.GetComponent<StageImageEffects>();
+                    if (effects == null) effects = stageImage.gameObject.AddComponent<StageImageEffects>();
+                    effects.Apply(cleared, fastest, fastestSparkleColor, fastestSparkleCount);
+                }
             }
 
             if (fastestClearText != null)
