@@ -19,8 +19,19 @@ public class StageSelectManager : MonoBehaviour
     [SerializeField] private GameObject bookViewPanel;
 
     [Header("Bookmarks (Tabs)")]
-    [Tooltip("右ページの上などに配置する栞（タブ）ボタンのリスト。")]
+    [Tooltip("左から順に6個以上登録。先頭6個を栞の表示枠として再利用します。On ClickはこのManagerが管理します。")]
     [SerializeField] private List<Button> bookmarkButtons;
+
+    [Tooltip("最初の栞ページの章数。0なら自動（通常4個、0章ありなら5個）。Tも1個として数えます。")]
+    [SerializeField, Range(0, 5)] private int firstBookmarkPageSize = 0;
+    [SerializeField] private string previousBookmarkLabel = "<";
+    [SerializeField] private string nextBookmarkLabel = ">";
+
+    private const int BookmarkSlotCount = 6;
+    private const int LaterBookmarkPageSize = 4;
+    private readonly List<List<int>> bookmarkPages = new List<List<int>>();
+    private int currentBookmarkPage;
+    private bool bookmarksReady;
 
     [Header("Opened Book UI (Left Page)")]
     [SerializeField] private RectTransform leftPageRect;
@@ -87,6 +98,7 @@ public class StageSelectManager : MonoBehaviour
         for (int b = 0; b < booksData.Count; b++)
         {
             BookData book = booksData[b];
+            if (book == null || book.stages == null) continue;
             int stageCount = book.stages.Count;
 
             for (int s = 0; s < stageCount; s += 2)
@@ -105,13 +117,131 @@ public class StageSelectManager : MonoBehaviour
 
     private void SetupBookmarks()
     {
+        bookmarkPages.Clear();
+        bookmarksReady = false;
+        currentBookmarkPage = 0;
+        if (bookmarkButtons == null || bookmarkButtons.Count < BookmarkSlotCount)
+        {
+            Debug.LogError("[StageSelect] Bookmark Buttonsに左から順に6個のButtonを登録してください。", this);
+            return;
+        }
+        var unique = new HashSet<Button>();
+        for (int i = 0; i < BookmarkSlotCount; i++)
+        {
+            if (bookmarkButtons[i] == null || !unique.Add(bookmarkButtons[i]))
+            {
+                Debug.LogError("[StageSelect] 栞の先頭6枠に未設定または重複があります。", this);
+                return;
+            }
+        }
+        // 空の章は栞に出さない。本の実インデックスを保持する。
+        var chapterIndices = new List<int>();
+        bool hasZeroChapter = false;
+        for (int i = 0; i < booksData.Count; i++)
+        {
+            var book = booksData[i];
+            if (book == null || book.stages == null || book.stages.Count == 0) continue;
+            chapterIndices.Add(i);
+            if (GetBookmarkLabel(i) == "0") hasZeroChapter = true;
+        }
+        int firstSize = firstBookmarkPageSize == 0
+            ? (hasZeroChapter ? 5 : 4) : Mathf.Clamp(firstBookmarkPageSize, 1, 5);
+        for (int offset = 0; offset < chapterIndices.Count;)
+        {
+            int size = bookmarkPages.Count == 0 ? firstSize : LaterBookmarkPageSize;
+            int count = Mathf.Min(size, chapterIndices.Count - offset);
+            bookmarkPages.Add(chapterIndices.GetRange(offset, count));
+            offset += count;
+        }
+        // Inspectorに残った旧JumpToChapterイベントも二重発火させない。
         for (int i = 0; i < bookmarkButtons.Count; i++)
         {
-            if (bookmarkButtons[i] != null)
+            var button = bookmarkButtons[i];
+            if (button == null) continue;
+            if (i >= BookmarkSlotCount && unique.Contains(button)) continue;
+            button.onClick = new Button.ButtonClickedEvent();
+            button.gameObject.SetActive(false);
+        }
+        bookmarksReady = true;
+        RefreshBookmarks();
+    }
+
+    private string GetBookmarkLabel(int bookIndex)
+    {
+        var book = booksData[bookIndex];
+        string title = book.bookTitle ?? "";
+        if (title.Contains("チュートリアル")
+            || title.IndexOf("Tutorial", System.StringComparison.OrdinalIgnoreCase) >= 0)
+            return "T";
+        foreach (var stage in book.stages)
+        {
+            if (stage == null) continue;
+            string scene = stage.sceneToLoad ?? "";
+            if (scene.IndexOf("Tutorial", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                return "T";
+            var match = Regex.Match(scene, @"^(\d+)-\d+$");
+            if (match.Success) return match.Groups[1].Value;
+        }
+        return string.IsNullOrWhiteSpace(title) ? (bookIndex + 1).ToString() : title;
+    }
+
+    private void RefreshBookmarks()
+    {
+        if (!bookmarksReady) return;
+        for (int i = 0; i < BookmarkSlotCount; i++)
+        {
+            bookmarkButtons[i].onClick = new Button.ButtonClickedEvent();
+            bookmarkButtons[i].gameObject.SetActive(false);
+        }
+        if (bookmarkPages.Count == 0) return;
+        currentBookmarkPage = Mathf.Clamp(currentBookmarkPage, 0, bookmarkPages.Count - 1);
+        int slot = 0;
+        if (currentBookmarkPage > 0)
+            BindBookmark(slot++, previousBookmarkLabel, () => ChangeBookmarkPage(-1));
+        foreach (int index in bookmarkPages[currentBookmarkPage])
+        {
+            int bookIndex = index;
+            BindBookmark(slot++, GetBookmarkLabel(bookIndex), () => JumpToChapter(bookIndex));
+        }
+        if (currentBookmarkPage + 1 < bookmarkPages.Count)
+            BindBookmark(slot, nextBookmarkLabel, () => ChangeBookmarkPage(1));
+    }
+
+    private void BindBookmark(int slot, string label, UnityEngine.Events.UnityAction action)
+    {
+        var button = bookmarkButtons[slot];
+        var tmp = button.GetComponentInChildren<TMP_Text>(true);
+        var legacy = button.GetComponentInChildren<Text>(true);
+        if (tmp != null) tmp.text = label;
+        else if (legacy != null) legacy.text = label;
+        else Debug.LogWarning("[StageSelect] 栞にTMP_TextまたはTextを追加してください: " + button.name, button);
+        button.interactable = true;
+        button.onClick.AddListener(action);
+        button.gameObject.SetActive(true);
+    }
+
+    private void ChangeBookmarkPage(int direction)
+    {
+        if (!bookmarksReady || isAnimating) return;
+        int target = currentBookmarkPage + direction;
+        if (target < 0 || target >= bookmarkPages.Count) return;
+        currentBookmarkPage = target;
+        RefreshBookmarks(); // 開いている本のページは変えない。
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+    }
+
+    private void SyncBookmarksToChapter(int bookIndex)
+    {
+        if (!bookmarksReady) return;
+        for (int i = 0; i < bookmarkPages.Count; i++)
+        {
+            if (!bookmarkPages[i].Contains(bookIndex)) continue;
+            if (currentBookmarkPage != i)
             {
-                int bookIndex = i;
-                bookmarkButtons[i].onClick.AddListener(() => JumpToChapter(bookIndex));
+                currentBookmarkPage = i;
+                RefreshBookmarks();
             }
+            return;
         }
     }
 
@@ -137,6 +267,7 @@ public class StageSelectManager : MonoBehaviour
         if (allPagePairs.Count == 0) return;
 
         PagePair currentPair = allPagePairs[currentPairIndex];
+        SyncBookmarksToChapter(currentPair.BookIndex);
 
         UpdateSinglePage(currentPair.LeftStageIndex, currentPair.Book, leftPageTitleText, leftPlayButton, leftStarRating, leftStageImage, leftFastestClearText);
         UpdateSinglePage(currentPair.RightStageIndex, currentPair.Book, rightPageTitleText, rightPlayButton, rightStarRating, rightStageImage, rightFastestClearText);
@@ -158,7 +289,7 @@ public class StageSelectManager : MonoBehaviour
             if (playBtn != null)
             {
                 playBtn.gameObject.SetActive(true);
-                playBtn.interactable = stage.isUnlocked && EndingFlow.CanEnterScene(stage.sceneToLoad);
+                playBtn.interactable = EndingFlow.CanSelectStage(stage.sceneToLoad, stage.isUnlocked);
                 playBtn.onClick.RemoveAllListeners();
                 playBtn.onClick.AddListener(() => OnSelectStage(stage));
             }
@@ -268,7 +399,7 @@ public class StageSelectManager : MonoBehaviour
 
     private void OnSelectStage(StageData stage)
     {
-        if (stage == null || !stage.isUnlocked || !EndingFlow.CanEnterScene(stage.sceneToLoad)) return;
+        if (stage == null || !EndingFlow.CanSelectStage(stage.sceneToLoad, stage.isUnlocked)) return;
         if (!string.IsNullOrEmpty(stage.sceneToLoad))
         {
             SceneManager.LoadScene(stage.sceneToLoad);

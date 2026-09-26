@@ -29,6 +29,7 @@ public class EndingRuntime : MonoBehaviour
     private void OnLoaded(Scene scene, LoadSceneMode mode)
     {
         if (!EndingFlow.TryGetSettings(out var settings)) return;
+        if (!settings.enableStoryMode) return;
         // 完了ボタンやEndingSceneControllerがない空シーンでも入場だけで記録する。
         if (scene.name == settings.normalEndingScene)
         {

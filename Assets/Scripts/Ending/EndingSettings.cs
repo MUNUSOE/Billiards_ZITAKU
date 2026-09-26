@@ -17,7 +17,12 @@ public class EndingSettings : ScriptableObject
         public string Id => string.IsNullOrWhiteSpace(stageId) ? sceneName : stageId;
     }
 
-    [Tooltip("通常ステージだけを全件登録。チュートリアル・エクストラは除外。")]
+    [Header("Story Mode")]
+    [Tooltip("ON: 順次解放とエンディング機能が有効。OFF: 全ステージ解放、エンディング判定・自動遷移・挑戦回数等のストーリー記録を停止。通常のクリア記録・星は保存します。")]
+    [UnityEngine.Serialization.FormerlySerializedAs("enableStageLocks")]
+    public bool enableStoryMode = true;
+
+    [Tooltip("通常ステージだけを解放順に全件登録。チュートリアル・エクストラは除外。先頭は最初からプレイ可能。")]
     public List<StoryStage> storyStages = new List<StoryStage>();
     public string finalStageId;
     public string normalEndingScene = "NormalEnding";
