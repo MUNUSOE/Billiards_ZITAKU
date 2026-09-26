@@ -22,6 +22,9 @@ public class GameClear : MonoBehaviour
     [Tooltip("全ターゲット球が消滅してからクリアUIを表示するまでの秒数。")]
     [SerializeField, Min(0f)] private float clearDelay = 0.5f;
 
+    [Tooltip("クリアUIのフェードインにかかる秒数。")]
+    [SerializeField, Min(0f)] private float fadeInDuration = 0.5f;
+
     [Header("Result UI (Optional)")]
     [Tooltip("クリア画面に表示する獲得した星のUI")]
     [SerializeField] private StarRatingView starRatingView;
@@ -38,6 +41,7 @@ public class GameClear : MonoBehaviour
     private bool finalizing;
     private ShotBall shotBall;
     private bool hadShotBallAtStart;
+    private CanvasGroup clearCanvasGroup;
 
     /// <summary>クリアが確定済み、または確定待ちの状態か。</summary>
     public bool IsClearPendingOrTriggered => clearPending || clearTriggered;
@@ -45,6 +49,15 @@ public class GameClear : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+
+        if (ClearUI != null)
+        {
+            clearCanvasGroup = ClearUI.GetComponent<CanvasGroup>();
+            if (clearCanvasGroup == null)
+            {
+                clearCanvasGroup = ClearUI.AddComponent<CanvasGroup>();
+            }
+        }
     }
 
     private void OnDestroy()
@@ -56,6 +69,10 @@ public class GameClear : MonoBehaviour
     {
         if (ClearUI != null)
         {
+            if (clearCanvasGroup != null)
+            {
+                clearCanvasGroup.alpha = 0f;
+            }
             ClearUI.SetActive(false);
         }
 
@@ -166,7 +183,7 @@ public class GameClear : MonoBehaviour
             return;
         }
 
-        // ★追加・修正: 3つの星それぞれの条件を個別のテキストに書き込む
+        // 3つの星それぞれの条件を個別のテキストに書き込む
         if (StageInfo.Instance != null)
         {
             if (starRatingView != null)
@@ -196,12 +213,34 @@ public class GameClear : MonoBehaviour
             }
         }
 
-        Time.timeScale = 0f;
-        ClearUI.SetActive(true);
-
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySE(SEType.DecideButton);
         }
+
+        StartCoroutine(FadeInClearUIRoutine());
+    }
+
+    private IEnumerator FadeInClearUIRoutine()
+    {
+        ClearUI.SetActive(true);
+
+        if (clearCanvasGroup != null)
+        {
+            clearCanvasGroup.alpha = 0f;
+            float elapsedTime = 0f;
+
+            // フェードイン完了後に Time.timeScale を 0 にするため Realtime を使用
+            while (elapsedTime < fadeInDuration)
+            {
+                elapsedTime += Time.unscaledDeltaTime;
+                clearCanvasGroup.alpha = Mathf.Clamp01(elapsedTime / fadeInDuration);
+                yield return null;
+            }
+
+            clearCanvasGroup.alpha = 1f;
+        }
+
+        Time.timeScale = 0f;
     }
 }
