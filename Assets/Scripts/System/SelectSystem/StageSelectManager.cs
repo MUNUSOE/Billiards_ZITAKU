@@ -99,8 +99,27 @@ public class StageSelectManager : MonoBehaviour
         if (nextBookPageButton != null) nextBookPageButton.onClick.AddListener(() => OnClickPageChange(true));
         if (prevBookPageButton != null) prevBookPageButton.onClick.AddListener(() => OnClickPageChange(false));
 
-        currentPairIndex = 0;
+        currentPairIndex = FindReturnPage(StageSelectReturnPosition.ConsumeSceneName());
         UpdatePageUI();
+    }
+
+    private int FindReturnPage(string sceneName)
+    {
+        if (string.IsNullOrWhiteSpace(sceneName)) return 0;
+        for (int i = 0; i < allPagePairs.Count; i++)
+        {
+            var pair = allPagePairs[i];
+            if (PageContainsScene(pair.Book, pair.LeftStageIndex, sceneName)
+                || PageContainsScene(pair.Book, pair.RightStageIndex, sceneName)) return i;
+        }
+        // 削除・未登録のステージでも有効な先頭ページへフォールバックする。
+        return 0;
+    }
+
+    private static bool PageContainsScene(BookData book, int index, string sceneName)
+    {
+        return book != null && book.stages != null && index >= 0 && index < book.stages.Count
+            && book.stages[index] != null && book.stages[index].sceneToLoad == sceneName;
     }
 
     private void BuildPagePairs()
