@@ -1317,12 +1317,75 @@ public static class BallPath
     public static IEnumerator AnimateStep(ChainStep step)
     {
         if (step == null || step.ball == null) yield break;
+        Rigidbody body = step.ball.GetComponent<Rigidbody>();
+        bool wasKinematic = body != null && body.isKinematic;
+        RigidbodyInterpolation oldInterpolation = body != null ? body.interpolation : RigidbodyInterpolation.None;
+        Vector3 oldVelocity = Vector3.zero;
+        Vector3 oldAngularVelocity = Vector3.zero;
+        if (body != null && !wasKinematic)
+        {
+#if UNITY_6000_0_OR_NEWER
+            oldVelocity = body.linearVelocity;
+#else
+            oldVelocity = body.velocity;
+#endif
+            oldAngularVelocity = body.angularVelocity;
+        }
+        try
+        {
+            // 事前計算された移動中だけPhysicsの押し戻し・補間との競合を止める。
+            // Collider、Is Trigger、detectCollisionsには触れない。
+            if (body != null)
+            {
+                body.interpolation = RigidbodyInterpolation.None;
+                body.isKinematic = true;
+            }
+            yield return AnimateStepCore(step, body);
+        }
+        finally
+        {
+            if (body != null)
+            {
+                body.isKinematic = wasKinematic;
+                body.interpolation = oldInterpolation;
+                if (!wasKinematic)
+                {
+#if UNITY_6000_0_OR_NEWER
+                    body.linearVelocity = oldVelocity;
+#else
+                    body.velocity = oldVelocity;
+#endif
+                    body.angularVelocity = oldAngularVelocity;
+                }
+            }
+        }
+    }
+
+    private static void SetPlaybackPosition(Transform tr, Rigidbody body, Vector3 position)
+    {
+        tr.position = position;
+        if (body != null) body.position = position;
+    }
+
+    private static IEnumerator AnimateStepCore(ChainStep step, Rigidbody body)
+    {
+        if (step == null || step.ball == null || step.path == null) yield break;
 
         Transform tr = step.ball.transform;
         List<PathPoint> path = step.path;
 
         GetBallSettings(step.ball, out float panelSize, out _, out float shotSpeed, out float shotDuration);
 
+        if (float.IsNaN(shotSpeed) || float.IsInfinity(shotSpeed) || shotSpeed <= 0f)
+        {
+            Debug.LogWarning("[BallPath] Invalid animation speed; using 5 to prevent a stalled shot.", step.ball);
+            shotSpeed = 5f;
+        }
+        if (float.IsNaN(shotDuration) || float.IsInfinity(shotDuration)) shotDuration = 1.5f;
+        shotDuration = Mathf.Max(0.0001f, shotDuration);
+        // 実座標が物理処理などで押し戻されても、経路の進行は巻き戻さない。
+        Vector3 playbackPosition = tr.position;
+        bool warnedAboutPosition = false;
         bool[] sePlayed = new bool[path.Count];
 
         float totalPhysicalDistance = 0f;
@@ -1334,12 +1397,27 @@ public static class BallPath
             prev = p.position;
         }
 
+        // 元の距離予算による終了条件を復元。無限待ちにしない。
+        float maxPlaybackTime = Mathf.Max(2f, totalPhysicalDistance / Mathf.Max(0.0001f, shotSpeed * 0.2f) + 2f);
         float traveled = 0f;
         float t = 0f;
         int pathIndex = 0;
 
         while (traveled < totalPhysicalDistance && pathIndex < path.Count)
         {
+            if (step.ball == null || tr == null) yield break;
+            if (Time.deltaTime <= 0f) { yield return null; continue; }
+            if (t >= maxPlaybackTime)
+            {
+                Debug.LogWarning("[BallPath] Animation time limit reached; restoring the calculated end position.", step.ball);
+                break;
+            }
+            if (!warnedAboutPosition && (tr.position - playbackPosition).sqrMagnitude > panelSize * panelSize * 0.0001f)
+            {
+                Debug.LogWarning("[BallPath] Playback position was overwritten externally. Ball=" + step.ball.name
+                    + " point=" + pathIndex + " actual=" + tr.position + " expected=" + playbackPosition, step.ball);
+                warnedAboutPosition = true;
+            }
             float ratio = Mathf.Clamp01(t / shotDuration);
             float factor = 1f - ratio;
             factor = factor * factor;
@@ -1348,7 +1426,7 @@ public static class BallPath
             float frameSpeed = shotSpeed * factor * Time.deltaTime;
             float remainingFrameSpeed = frameSpeed;
 
-            while (remainingFrameSpeed > 0.0001f && pathIndex < path.Count)
+            while (remainingFrameSpeed > 0f && pathIndex < path.Count)
             {
                 PathPoint segment = path[pathIndex];
                 if (segment.skipAnimation)
@@ -1359,7 +1437,7 @@ public static class BallPath
                     continue;
                 }
                 Vector3 segmentEnd = segment.position;
-                float distToNext = Vector3.Distance(tr.position, segmentEnd);
+                float distToNext = Vector3.Distance(playbackPosition, segmentEnd);
 
                 if (segment.isWallHit &&
                     (distToNext <= WallHitSELeadDistance || remainingFrameSpeed >= distToNext))
@@ -1369,7 +1447,8 @@ public static class BallPath
 
                 if (distToNext <= 0.0001f)
                 {
-                    tr.position = segmentEnd;
+                    playbackPosition = segmentEnd;
+                    SetPlaybackPosition(tr, body, playbackPosition);
                     segment.ApplyPendingEffects();
                     PlayHitSE(segment, sePlayed, pathIndex);
                     if (HandlePocketArrival(step.ball, segment)) yield break;
@@ -1381,7 +1460,8 @@ public static class BallPath
 
                 if (remainingFrameSpeed >= distToNext)
                 {
-                    tr.position = segmentEnd;
+                    playbackPosition = segmentEnd;
+                    SetPlaybackPosition(tr, body, playbackPosition);
                     segment.ApplyPendingEffects();
                     PlayHitSE(segment, sePlayed, pathIndex);
                     if (HandlePocketArrival(step.ball, segment)) yield break;
@@ -1392,7 +1472,8 @@ public static class BallPath
                 }
                 else
                 {
-                    tr.position = Vector3.MoveTowards(tr.position, segmentEnd, remainingFrameSpeed);
+                    playbackPosition = Vector3.MoveTowards(playbackPosition, segmentEnd, remainingFrameSpeed);
+                    SetPlaybackPosition(tr, body, playbackPosition);
                     remainingFrameSpeed = 0f;
                 }
             }
@@ -1406,7 +1487,7 @@ public static class BallPath
 
         if (path.Count > 0)
         {
-            tr.position = SnapToGrid(path[path.Count - 1].position, panelSize);
+            SetPlaybackPosition(tr, body, SnapToGrid(path[path.Count - 1].position, panelSize));
             path[path.Count - 1].ApplyPendingEffects();
             if (HandlePocketArrival(step.ball, path[path.Count - 1])) yield break;
             if (HandleHazardArrival(step.ball, path[path.Count - 1])) yield break;
@@ -1414,7 +1495,7 @@ public static class BallPath
         }
         else
         {
-            tr.position = SnapToGrid(tr.position, panelSize);
+            SetPlaybackPosition(tr, body, SnapToGrid(playbackPosition, panelSize));
         }
 
         for (int i = 0; i < path.Count; i++)
