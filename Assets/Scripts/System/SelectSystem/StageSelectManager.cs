@@ -81,7 +81,7 @@ public class StageSelectManager : MonoBehaviour
 
     // ▼ アニメーション状態の管理 ▼
     private bool isAnimating = false;
-    private float turnDuration = 0.4f; // めくるスピード（秒）
+    private float turnDuration = 0.6f; // めくるスピード（秒）
 
     private void Start()
     {
@@ -258,7 +258,7 @@ public class StageSelectManager : MonoBehaviour
         if (target < 0 || target >= bookmarkPages.Count) return;
         currentBookmarkPage = target;
         RefreshBookmarks(); // 開いている本のページは変えない。
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.SHIORI);
     }
 
     private void SyncBookmarksToChapter(int bookIndex)
@@ -287,7 +287,7 @@ public class StageSelectManager : MonoBehaviour
                 currentPairIndex = i;
                 UpdatePageUI();
 
-                if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.DecideButton);
+                if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.SHIORI);
                 break;
             }
         }
@@ -384,6 +384,7 @@ public class StageSelectManager : MonoBehaviour
     {
         if (isAnimating) return;
         StartCoroutine(PageChangeRoutine(isNext));
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySE(SEType.Page);
     }
 
     private void SetPivotPreservingPosition(RectTransform rectTransform, Vector2 newPivot)
