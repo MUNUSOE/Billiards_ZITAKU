@@ -30,6 +30,8 @@ public enum SEType
     UseWind,
     FireExtinguishing,
     DestroyBox,
+    Page,
+    SHIORI,
 }
 
 public class SoundManager : MonoBehaviour

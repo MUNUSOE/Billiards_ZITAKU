@@ -2274,6 +2274,12 @@ MonoBehaviour:
   - type: 16
     clip: {fileID: 8300000, guid: c62e57fd4acdea049b7af9f4b91d1688, type: 3}
     volume: 0.06
+  - type: 17
+    clip: {fileID: 8300000, guid: 52d52df40f8732749a9d5d80e4e0caef, type: 3}
+    volume: 0.2
+  - type: 18
+    clip: {fileID: 8300000, guid: 41fb6a2e447c1dc47b103d7e2ce6a958, type: 3}
+    volume: 0.35
   userBGMVolume: 1
   userSEVolume: 1
   masterVolumeBoost: 2.5
@@ -4878,9 +4884,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0.0006044507
+    y: 0.00029316545
     width: 1
-    height: 0.9987911
+    height: 0.99941367
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
